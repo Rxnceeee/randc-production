@@ -28,7 +28,8 @@ const server = http.createServer(app);
 // Socket.IO
 const io = initializeSocketIO(server);
 
-
+// Trust Railway's reverse proxy
+app.set("trust proxy", 1);
 
 
 
