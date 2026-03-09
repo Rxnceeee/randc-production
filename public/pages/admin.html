@@ -1,0 +1,3607 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard — RandC</title>
+
+    <!-- Styles -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/randclogo.png" />
+    <link rel="stylesheet" href="../css/admin.css" />
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="../js/global.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/inactivityLogout.js"></script>
+  </head>
+
+  <style id="chat-menu-styles">
+    /* ── 3-Dot Menu ─────────────────────────────────────── */
+    .chat-message {
+      position: relative;
+    }
+    .msg-menu-trigger {
+      position: absolute;
+      top: 4px;
+      opacity: 1;
+      pointer-events: auto;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      transition: var(--transition);
+      z-index: 10;
+      line-height: 1;
+    }
+    .msg-menu-trigger:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .own-message   .msg-menu-trigger { right: calc(100% + 6px); }
+    .other-message .msg-menu-trigger { left:  calc(100% + 6px); }
+
+    /* Dropdown */
+    .msg-menu-dropdown {
+      position: absolute;
+      top: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      min-width: 130px;
+      z-index: 200;
+      overflow: hidden;
+      animation: menuIn .12s ease;
+    }
+    @keyframes menuIn {
+      from { opacity: 0; transform: scale(.92) translateY(-4px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .own-message   .msg-menu-dropdown { right: calc(100% + 6px); }
+    .other-message .msg-menu-dropdown { left:  calc(100% + 6px); }
+
+    .msg-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      transition: background .15s;
+    }
+    .msg-menu-item:hover { background: var(--bg-hover); }
+    .msg-menu-item.danger { color: var(--danger); }
+    .msg-menu-item.danger:hover { background: rgba(244, 63, 94, .1); }
+    .msg-menu-item i { font-size: 0.85rem; width: 14px; }
+
+    /* Edited label */
+    .msg-edited-label {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 0 0.3rem;
+      margin-top: 1px;
+    }
+
+    /* Inline edit textarea */
+    .msg-edit-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 200px;
+      max-width: 340px;
+    }
+    .msg-edit-textarea {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1.5px solid var(--primary);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      padding: 0.45rem 0.7rem;
+      font-size: 0.83rem;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+    }
+    .msg-edit-actions {
+      display: flex;
+      gap: 0.35rem;
+      justify-content: flex-end;
+    }
+    .msg-edit-btn {
+      padding: 0.25rem 0.7rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .msg-edit-btn.save          { background: var(--primary); color: #fff; }
+    .msg-edit-btn.save:hover    { background: var(--primary-dark); }
+    .msg-edit-btn.cancel        { background: var(--bg-hover); color: var(--text-secondary); }
+    .msg-edit-btn.cancel:hover  { background: var(--border); }
+
+    /* ── Schedule Forecast: Closed days ── */
+    .sf-day-hdr.sf-day-closed {
+      opacity: 0.45;
+      background: repeating-linear-gradient(
+        -45deg, transparent, transparent 4px,
+        rgba(100, 116, 139, .06) 4px, rgba(100, 116, 139, .06) 8px
+      );
+    }
+    .sf-closed-hdr-badge {
+      display: inline-block;
+      font-size: 0.55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(100, 116, 139, .18);
+      color: #94a3b8;
+      border-radius: 99px;
+      padding: 0.05rem 0.35rem;
+      margin-left: 0.3rem;
+      vertical-align: middle;
+    }
+    .sf-cell.sf-closed {
+      background: repeating-linear-gradient(
+        -45deg, transparent, transparent 4px,
+        rgba(100, 116, 139, .04) 4px, rgba(100, 116, 139, .04) 8px
+      );
+      cursor: default !important;
+      pointer-events: none;
+    }
+    .sf-closed-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      opacity: 0.6;
+    }
+  </style>
+
+  <body>
+
+    <!-- ══ GLOBAL TOAST ══════════════════════════════════════════════ -->
+    <div id="global-toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+
+    <!-- ══ CUSTOM CONFIRM OVERLAY ════════════════════════════════════ -->
+    <div class="confirm-overlay" id="confirmModalOverlay" style="display: none" role="dialog" aria-modal="true">
+      <div class="confirm-box">
+
+        <div class="confirm-icon-wrap" id="confirmModalIcon">
+          <i class="bi bi-question-circle-fill" id="confirmModalIconInner"></i>
+        </div>
+
+        <h5 class="confirm-title" id="confirmModalTitle">Are you sure?</h5>
+
+        <p class="confirm-msg" id="confirmModalMessage">
+          This action cannot be undone.
+        </p>
+
+        <div class="confirm-actions">
+          <button class="confirm-btn-cancel" onclick="confirmModalResolve(false)">Cancel</button>
+          <button class="confirm-btn-ok" id="confirmModalBtn" onclick="confirmModalResolve(true)">Confirm</button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ══ LOGOUT MODAL ══════════════════════════════════════════════ -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 380px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.25);">
+            <div class="modal-header-icon" style="background: rgba(244, 63, 94, 0.2); color: var(--danger)">
+              <i class="bi bi-box-arrow-right"></i>
+            </div>
+            <div>
+              <div class="modal-title">Confirm Logout</div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body" style="text-align: center; padding: 1.5rem">
+            <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;">
+              You will need to sign in again to access the admin panel.
+            </p>
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn-submit" onclick="Logout()"
+              style="max-width: 140px; background: linear-gradient(135deg, #f43f5e, #be123c);">
+              <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ CHANGE PASSWORD MODAL ═════════════════════════════════════ -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header">
+            <div class="modal-header-icon">
+              <i class="bi bi-key-fill"></i>
+            </div>
+            <div>
+              <div class="modal-title">Change Password</div>
+              <div class="modal-subtitle">Admin account security</div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <div id="changePasswordMessage" class="rnc-alert mb-3" style="display: none">
+              <span id="changePasswordMsgText"></span>
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">Current Password</label>
+              <input type="password" id="currentPassword" class="rnc-input" placeholder="Current password" />
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">New Password</label>
+              <input type="password" id="newPassword" class="rnc-input" placeholder="12–24 characters" />
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">Confirm New Password</label>
+              <input type="password" id="confirmNewPassword" class="rnc-input" placeholder="Confirm new password" />
+            </div>
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+            <button onclick="changePassword()" class="btn-submit" style="max-width: 160px">
+              <i class="bi bi-check-circle"></i> Update
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ ADD / EDIT SERVICE MODAL ══════════════════════════════════ -->
+    <div class="modal fade" id="serviceModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 440px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header">
+            <div class="modal-header-icon" id="serviceModalIconEl">
+              <i class="bi bi-plus-circle"></i>
+            </div>
+            <div>
+              <div class="modal-title" id="serviceModalTitle">Add New Service</div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <div id="serviceMessage" class="rnc-alert mb-3" style="display: none">
+              <span id="serviceMsgText"></span>
+            </div>
+            <input type="hidden" id="serviceID" />
+            <div class="rnc-form-group">
+              <label class="rnc-label">Service Name <span class="req">*</span></label>
+              <input type="text" id="serviceName" class="rnc-input" placeholder="e.g., Land Title Transfer" />
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">Description <span class="req">*</span></label>
+              <textarea id="serviceDescription" class="rnc-input" rows="3" placeholder="Describe the service…"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+            <button onclick="saveService()" class="btn-submit" style="max-width: 140px">
+              <i class="bi bi-check-circle"></i> Save
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ REMARKS MODAL ═════════════════════════════════════════════ -->
+    <div class="modal fade" id="remarksModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header">
+            <div class="modal-header-icon">
+              <i class="bi bi-chat-left-text"></i>
+            </div>
+            <div>
+              <div class="modal-title">Add Remarks</div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <div class="rnc-form-group">
+              <label class="rnc-label">Transaction ID</label>
+              <input type="text" id="remarksTransactionId" class="rnc-input" readonly />
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">Remarks <span class="req">*</span></label>
+              <textarea id="remarksText" class="rnc-input" rows="4" placeholder="Enter your remarks…"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+            <button onclick="saveRemarks()" class="btn-submit" style="max-width: 140px">
+              <i class="bi bi-check-circle"></i> Save
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ MESSAGE USER MODAL ════════════════════════════════════════ -->
+    <div class="modal fade" id="messageUserModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 440px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header">
+            <div class="modal-header-icon">
+              <i class="bi bi-envelope"></i>
+            </div>
+            <div>
+              <div class="modal-title">Send Message</div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <div class="rnc-form-group">
+              <label class="rnc-label">To</label>
+              <input type="email" id="messageUserEmail" class="rnc-input" readonly />
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">Subject <span class="req">*</span></label>
+              <input type="text" id="messageSubject" class="rnc-input" placeholder="Email subject" />
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">Message <span class="req">*</span></label>
+              <textarea id="messageBody" class="rnc-input" rows="4" placeholder="Type your message…"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+            <button onclick="sendMessage()" class="btn-submit" style="max-width: 140px">
+              <i class="bi bi-send"></i> Send
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ TRANSACTION TIMELINE MODAL ════════════════════════════════ -->
+    <div class="modal fade" id="timelineModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 540px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header">
+            <div class="modal-header-icon">
+              <i class="bi bi-clock-history"></i>
+            </div>
+            <div>
+              <div class="modal-title">Transaction Timeline</div>
+              <div class="modal-subtitle">Full status history</div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body" id="timelineContent"></div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ CANCEL APPOINTMENT MODAL ══════════════════════════════════ -->
+    <div class="modal fade" id="appointmentReasonModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.25);">
+            <div class="modal-header-icon" style="background: rgba(244, 63, 94, 0.2); color: var(--danger)">
+              <i class="bi bi-x-circle-fill"></i>
+            </div>
+            <div>
+              <div class="modal-title">Cancel Appointment</div>
+              <p id="appointmentID" style="display: none"></p>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <div class="rnc-alert rnc-alert-warning mb-3">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              Please provide a reason for cancelling this appointment.
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">Reason <span class="req">*</span></label>
+              <textarea id="cancelReason" class="rnc-input" rows="3" placeholder="Minimum 10 characters…"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal">Back</button>
+            <button onclick="submitCancellationReason()" class="btn-submit"
+              style="max-width: 180px; background: linear-gradient(135deg, #f43f5e, #be123c);">
+              <i class="bi bi-check-circle"></i> Confirm Cancel
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ COMPLETE APPOINTMENT MODAL ════════════════════════════════ -->
+    <div class="modal fade" id="completeAppointmentModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 560px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header" style="background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.3);">
+            <div class="modal-header-icon" style="background: rgba(52, 211, 153, 0.2); color: var(--success)">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div>
+              <div class="modal-title">Complete Appointment</div>
+              <div class="modal-subtitle">Select services to process</div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" id="completeAppointmentID" />
+            <input type="hidden" id="completeClientID" />
+
+            <div class="rnc-alert rnc-alert-info mb-3">
+              <i class="bi bi-info-circle-fill"></i>
+              Transactions will be created automatically for each selected service.
+            </div>
+
+            <!-- Appointment Summary -->
+            <div class="appt-detail-card mb-3">
+              <div class="appt-detail-row"><span>Client</span><strong id="clientName">—</strong></div>
+              <div class="appt-detail-row"><span>Email</span><strong id="clientEmail">—</strong></div>
+              <div class="appt-detail-row"><span>Date</span><strong id="appointmentDate">—</strong></div>
+              <div class="appt-detail-row"><span>Time</span><strong id="appointmentTime">—</strong></div>
+            </div>
+
+            <!-- Services -->
+            <div class="rnc-form-group">
+              <label class="rnc-label">Originally Booked Services</label>
+              <div id="originalServices" class="services-check-grid mt-1"></div>
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label" style="color: var(--text-muted)">Additional Services</label>
+              <div id="additionalServices" class="services-check-grid mt-1"></div>
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">Completion Remarks</label>
+              <textarea id="completionRemarks" class="rnc-input" rows="2" placeholder="Optional notes…"></textarea>
+            </div>
+            <div id="selectionSummary" class="rnc-alert rnc-alert-success" style="display: none">
+              <i class="bi bi-check2-square"></i>
+              <span><strong id="selectedCount">0</strong> service(s) selected</span>
+            </div>
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+            <button onclick="submitCompleteAppointment()" class="btn-submit"
+              style="max-width: 220px; background: linear-gradient(135deg, #34d399, #22d3ee); color: #0f172a;">
+              <i class="bi bi-check-circle"></i> Complete &amp; Create Transactions
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ UPDATE TRANSACTION STATUS MODAL ═══════════════════════════ -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 480px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header">
+            <div class="modal-header-icon"><i class="bi bi-pencil-square"></i></div>
+            <div>
+              <div class="modal-title">Update Transaction Status</div>
+              <div class="modal-subtitle">Notify the client automatically</div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <div id="statusMessage" class="rnc-alert mb-3" style="display: none">
+              <span id="statusMsgText"></span>
+            </div>
+            <input type="hidden" id="updateTransactionId" />
+            <div class="rnc-form-group">
+              <label class="rnc-label">New Status <span class="req">*</span></label>
+              <select id="newTransactionStatus" class="rnc-input">
+                <option value="">— Select Status —</option>
+              </select>
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">Remarks</label>
+              <textarea id="statusRemarks" class="rnc-input" rows="3" placeholder="Notes about this status update…"></textarea>
+            </div>
+            <div class="rnc-form-group">
+              <label class="rnc-label">
+                <i class="bi bi-image me-1" aria-hidden="true"></i> Attach Images
+                <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 400">(Optional · max 5 · 5 MB each)</span>
+              </label>
+              <input type="file" id="statusImages" class="rnc-input" accept="image/*" multiple
+                onchange="handleImagePreview(this)" />
+            </div>
+            <div id="imagePreviewContainer" class="img-preview-grid"></div>
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+            <button onclick="saveTransactionStatus()" class="btn-submit" style="max-width: 220px">
+              <i class="bi bi-check-circle"></i> Update &amp; Notify Client
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ WALK-IN MODAL ═════════════════════════════════════════════ -->
+    <div class="confirm-overlay" id="walkInModalOverlay" style="display: none;" role="dialog" aria-modal="true">
+      <div class="confirm-box" style="max-width: 520px; width: 100%;">
+
+        <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div class="confirm-icon-wrap" style="width: 36px; height: 36px;">
+              <i class="bi bi-person-walking" style="font-size: 1.1rem;"></i>
+            </div>
+            <h5 style="margin: 0; font-size: 1rem; font-weight: 700;">New Walk-In Transaction</h5>
+          </div>
+          <button class="confirm-btn-cancel" style="padding: 0.3rem 0.7rem;" onclick="closeWalkInModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <!-- Step 1: Search Client -->
+        <div id="walkInStep1">
+          <label class="wi-label">Search Client Account</label>
+          <div class="wi-search-row">
+            <div class="search-wrap" style="flex: 1;">
+              <i class="bi bi-search search-ico"></i>
+              <input type="text" class="search-rnc" id="wiClientSearch"
+                placeholder="Name, email, username, or phone…"
+                oninput="searchWalkInClient()" autocomplete="off" />
+            </div>
+          </div>
+          <div id="wiSearchResults" class="wi-search-results" style="display: none;"></div>
+          <div id="wiSelectedClient" class="wi-selected-client" style="display: none;"></div>
+          <div id="wiNoAccountNote" class="wi-alert" style="display: none;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Client not found. A registered account is required before creating a walk-in transaction.
+            Please have the client register first.
+          </div>
+        </div>
+
+        <!-- Step 2: Transaction Details -->
+        <div id="walkInStep2" style="display: none;">
+          <div style="border-top: 1px solid var(--border); margin: 0.85rem 0 0.75rem;"></div>
+          <label class="wi-label">Document / Service</label>
+          <select id="wiServiceSelect" class="wi-select">
+            <option value="">— Select a service —</option>
+          </select>
+          <label class="wi-label" style="margin-top: 0.75rem;">Notes (optional)</label>
+          <textarea id="wiNotes" class="wi-textarea" rows="2" placeholder="Additional notes…"></textarea>
+        </div>
+
+        <div id="wiErrMsg" class="wi-err" style="display: none;"></div>
+
+        <!-- Actions -->
+        <div class="confirm-actions" style="margin-top: 1.2rem;">
+          <button class="confirm-btn-cancel" onclick="closeWalkInModal()">Cancel</button>
+          <button class="confirm-btn-ok" id="wiSubmitBtn" onclick="submitWalkIn()" style="display: none;">
+            <i class="bi bi-plus-circle-fill"></i> Create Transaction
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ══ BAN ACCOUNT MODAL ═════════════════════════════════════════ -->
+    <div class="modal fade" id="banModal" tabindex="-1"
+      aria-labelledby="banModalLabel" aria-modal="true" role="dialog">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+            <div class="modal-header-icon" style="background: rgba(244, 63, 94, .15);">
+              <i class="bi bi-slash-circle-fill" style="color: var(--danger);"></i>
+            </div>
+            <div>
+              <div class="modal-title" id="banModalLabel" style="color: var(--danger);">Ban Account</div>
+              <div class="modal-subtitle" id="banModalClientName"
+                style="font-size: 0.78rem; color: var(--text-muted);"></div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal" aria-label="Close">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body" style="padding: 1.1rem 1.25rem;">
+            <div class="ban-warning-banner">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>Banning will immediately lock this client out and notify them in real-time.</span>
+            </div>
+            <div class="mb-3 mt-3">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 600;">Ban Duration</label>
+              <select class="form-select" id="banType"
+                style="background: var(--bg-elevated); color: var(--text-primary); border-color: var(--border); font-size: 0.84rem;">
+                <option value="3_days">3 Days</option>
+                <option value="30_days">30 Days</option>
+                <option value="permanent">Permanent</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 600;">
+                Reason <span style="color: var(--text-muted); font-weight: 400;">(optional)</span>
+              </label>
+              <textarea id="banReason" class="form-control" rows="3" maxlength="300"
+                placeholder="State the reason for this ban…"
+                style="background: var(--bg-elevated); color: var(--text-primary); border-color: var(--border); font-size: 0.83rem; resize: none;"></textarea>
+            </div>
+            <div id="banModalErr" class="delete-error-msg" style="display: none;"></div>
+          </div>
+
+          <div class="modal-footer" style="border-top: 1px solid var(--border); gap: 0.5rem; justify-content: flex-end;">
+            <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn-ban-confirm" id="banSubmitBtn" onclick="submitBanUser()">
+              <i class="bi bi-slash-circle-fill"></i> Ban Account
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ CLIENT HISTORY MODAL ══════════════════════════════════════ -->
+    <div class="confirm-overlay" id="clientHistoryOverlay" style="display: none;" role="dialog" aria-modal="true">
+      <div class="confirm-box" style="max-width: 680px; width: 100%; max-height: 85vh; overflow-y: auto;">
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div class="confirm-icon-wrap"
+              style="width: 36px; height: 36px; background: rgba(34, 211, 238, .15); color: var(--accent);">
+              <i class="bi bi-person-lines-fill" style="font-size: 1rem;"></i>
+            </div>
+            <div>
+              <h5 style="margin: 0; font-size: 1rem; font-weight: 700;" id="histModalClientName">Client History</h5>
+              <small style="color: var(--text-muted);" id="histModalClientEmail"></small>
+            </div>
+          </div>
+          <button class="confirm-btn-cancel" style="padding: 0.3rem 0.7rem;" onclick="closeClientHistory()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="wi-tabs">
+          <button class="wi-tab active" onclick="switchHistTab('appointments', this)">
+            <i class="bi bi-calendar-check"></i> Appointments
+          </button>
+          <button class="wi-tab" onclick="switchHistTab('transactions', this)">
+            <i class="bi bi-file-earmark-text"></i> Transactions
+          </button>
+        </div>
+
+        <div id="histTabAppointments" class="hist-tab-content active">
+          <div id="histApptList" class="hist-list"></div>
+        </div>
+        <div id="histTabTransactions" class="hist-tab-content" style="display: none;">
+          <div id="histTxList" class="hist-list"></div>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn-ghost" id="histChatBtn" onclick="openHistChat()">
+              <i class="bi bi-chat-dots"></i> Open Chat
+            </button>
+            <button class="btn-ghost" id="histBanBtn"
+              style="color: var(--danger); border-color: rgba(244, 63, 94, .3);"
+              onclick="openBanFromHistory()">
+              <i class="bi bi-slash-circle"></i> Ban Account
+            </button>
+          </div>
+          <button class="confirm-btn-cancel" onclick="closeClientHistory()">Close</button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ══ APP SHELL ══════════════════════════════════════════════════ -->
+    <div class="app-shell">
+
+      <!-- SIDEBAR ════════════════════════════════════════════════════ -->
+      <aside class="app-sidebar" id="sidebar" aria-label="Admin navigation">
+
+        <!-- Brand -->
+        <div class="sidebar-brand">
+          <div>
+            <img src="../images/randclogo.png" alt="RandC" width="32" height="32" />
+          </div>
+          <div>
+            <div class="sidebar-brand-name">RandC</div>
+            <div class="sidebar-brand-sub">Admin Panel</div>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="sidebar-nav" aria-label="Admin navigation">
+          <a class="sidebar-nav-item active" onclick="showAdminSection('dashboard')"
+            data-section="dashboard" role="button" tabindex="0">
+            <i class="bi bi-speedometer2" aria-hidden="true"></i>
+            <span>Dashboard</span>
+          </a>
+          <a class="sidebar-nav-item" onclick="showAdminSection('appointments')"
+            data-section="appointments" role="button" tabindex="0">
+            <i class="bi bi-calendar-check" aria-hidden="true"></i>
+            <span>Appointments</span>
+          </a>
+          <a class="sidebar-nav-item" onclick="showAdminSection('transactions')"
+            data-section="transactions" role="button" tabindex="0">
+            <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+            <span>Transactions</span>
+          </a>
+          <a class="sidebar-nav-item" onclick="showAdminSection('services')"
+            data-section="services" role="button" tabindex="0">
+            <i class="bi bi-gear" aria-hidden="true"></i>
+            <span>Services</span>
+          </a>
+          <a class="sidebar-nav-item" onclick="showAdminSection('schedule')"
+            data-section="schedule" role="button" tabindex="0">
+            <i class="bi bi-calendar-event" aria-hidden="true"></i>
+            <span>Schedule</span>
+          </a>
+          <a class="sidebar-nav-item" onclick="showAdminSection('users')"
+            data-section="users" role="button" tabindex="0">
+            <i class="bi bi-people" aria-hidden="true"></i>
+            <span>Clients</span>
+          </a>
+          <a class="sidebar-nav-item" onclick="showAdminSection('walkin')"
+            data-section="walkin" role="button" tabindex="0">
+            <i class="bi bi-person-walking" aria-hidden="true"></i>
+            <span>Walk-In</span>
+          </a>
+        </nav>
+
+        <!-- Footer -->
+        <div class="sidebar-footer">
+          <button class="sidebar-theme-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="theme-icon-dark" aria-hidden="true"><i class="bi bi-sun-fill"></i></span>
+            <span class="theme-icon-light" aria-hidden="true"><i class="bi bi-moon-fill"></i></span>
+            <span class="theme-label-dark">Light Mode</span>
+            <span class="theme-label-light">Dark Mode</span>
+          </button>
+
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar">
+              <i class="bi bi-person-fill" aria-hidden="true"></i>
+            </div>
+            <div class="sidebar-user-info">
+              <p class="sidebar-user-name" id="user-name">Loading…</p>
+              <p class="sidebar-user-role" id="user-role">Admin</p>
+            </div>
+            <div style="display: flex; gap: 0.35rem">
+              <button class="sidebar-icon-btn" onclick="showChangePasswordModal()"
+                title="Change Password" aria-label="Change password">
+                <i class="bi bi-key-fill" aria-hidden="true"></i>
+              </button>
+              <button class="sidebar-icon-btn sidebar-icon-btn-danger" onclick="showLogoutModal()"
+                title="Logout" aria-label="Logout">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+              </button>
+              <button class="sidebar-icon-btn" onclick="toggleChatPanel()"
+                title="Show Chat" aria-label="Show Chat">
+                <i class="bi bi-chat-dots" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+
+      <!-- MAIN ═══════════════════════════════════════════════════════ -->
+      <main class="app-main" id="mainContent" role="main">
+
+        <!-- TOP BAR -->
+        <div class="app-topbar">
+          <button class="topbar-menu-btn" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+            <i class="bi bi-list" aria-hidden="true"></i>
+          </button>
+          <div class="topbar-title" id="topbarTitle">Dashboard</div>
+          <div class="topbar-right">
+            <span class="topbar-date" id="currentDate"></span>
+          </div>
+        </div>
+
+
+        <!-- ── DASHBOARD PANEL ────────────────────────────────────── -->
+        <div class="panel active" id="panel-dashboard">
+
+          <!-- Stats -->
+          <div class="stats-row stats-6">
+            <div class="stat-chip stat-primary">
+              <div class="stat-chip-icon"><i class="bi bi-calendar-check" aria-hidden="true"></i></div>
+              <div class="stat-chip-body">
+                <strong id="todayAppointments">0</strong>
+                <span>Today's Appts</span>
+              </div>
+            </div>
+            <div class="stat-chip stat-warning">
+              <div class="stat-chip-icon"><i class="bi bi-clock-history" aria-hidden="true"></i></div>
+              <div class="stat-chip-body">
+                <strong id="pendingAppointments">0</strong>
+                <span>Pending Appts</span>
+              </div>
+            </div>
+            <div class="stat-chip stat-info">
+              <div class="stat-chip-icon"><i class="bi bi-file-earmark-text" aria-hidden="true"></i></div>
+              <div class="stat-chip-body">
+                <strong id="activeTransactions">0</strong>
+                <span>Active Txns</span>
+              </div>
+            </div>
+            <div class="stat-chip stat-danger">
+              <div class="stat-chip-icon"><i class="bi bi-chat-dots" aria-hidden="true"></i></div>
+              <div class="stat-chip-body">
+                <strong id="unreadMessages">0</strong>
+                <span>Unread Msgs</span>
+              </div>
+            </div>
+            <div class="stat-chip stat-success">
+              <div class="stat-chip-icon"><i class="bi bi-people" aria-hidden="true"></i></div>
+              <div class="stat-chip-body">
+                <strong id="totalClients">0</strong>
+                <span>Total Clients</span>
+              </div>
+            </div>
+            <div class="stat-chip stat-secondary">
+              <div class="stat-chip-icon"><i class="bi bi-gear" aria-hidden="true"></i></div>
+              <div class="stat-chip-body">
+                <strong id="activeServices">0</strong>
+                <span>Active Services</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Processing Stats -->
+          <div class="processing-strip">
+            <div class="processing-item">
+              <div class="processing-icon">
+                <i class="bi bi-speedometer" aria-hidden="true"></i>
+              </div>
+              <div>
+                <strong id="avgProcessingTime">0</strong>
+                <span>Avg. Processing (days)</span>
+              </div>
+            </div>
+            <div class="processing-item">
+              <div class="processing-icon" style="background: rgba(52, 211, 153, 0.15); color: var(--success);">
+                <i class="bi bi-arrow-down-circle" aria-hidden="true"></i>
+              </div>
+              <div>
+                <strong id="minProcessingTime">0</strong>
+                <span>Fastest (days)</span>
+              </div>
+            </div>
+            <div class="processing-item">
+              <div class="processing-icon" style="background: rgba(244, 63, 94, 0.15); color: var(--danger);">
+                <i class="bi bi-arrow-up-circle" aria-hidden="true"></i>
+              </div>
+              <div>
+                <strong id="maxProcessingTime">0</strong>
+                <span>Longest (days)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <div class="dash-two-col">
+            <div class="section-block">
+              <div class="section-block-header">
+                <span class="section-block-title">
+                  <i class="bi bi-bar-chart-fill" aria-hidden="true"></i> Appointments Overview
+                </span>
+              </div>
+              <div class="chart-wrap">
+                <canvas id="appointmentsChart"></canvas>
+              </div>
+            </div>
+            <div class="section-block">
+              <div class="section-block-header">
+                <span class="section-block-title">
+                  <i class="bi bi-pie-chart-fill" aria-hidden="true"></i> Transaction Status
+                </span>
+              </div>
+              <div class="chart-wrap">
+                <canvas id="transactionsChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity + Top Services -->
+          <div class="dash-two-col">
+            <div class="section-block">
+              <div class="section-block-header">
+                <span class="section-block-title">
+                  <i class="bi bi-activity" aria-hidden="true"></i> Recent Activities
+                </span>
+              </div>
+              <div id="recentActivities" class="compact-list"></div>
+            </div>
+            <div class="section-block">
+              <div class="section-block-header">
+                <span class="section-block-title">
+                  <i class="bi bi-trophy-fill" aria-hidden="true"></i> Top Services
+                </span>
+              </div>
+              <div id="topServices" class="compact-list"></div>
+            </div>
+          </div>
+
+        </div>
+
+
+        <!-- ── WALK-IN PANEL ──────────────────────────────────────── -->
+        <div class="panel" id="panel-walkin">
+
+          <div class="panel-topbar">
+            <h2 class="panel-heading">
+              <i class="bi bi-person-walking" aria-hidden="true"></i> Walk-In Transaction
+            </h2>
+            <button class="btn-primary-rnc" onclick="openWalkInModal()">
+              <i class="bi bi-plus-lg"></i> New Walk-In
+            </button>
+          </div>
+
+          <div class="table-wrap" style="margin-top: 0.5rem;">
+            <table class="rnc-table">
+              <thead>
+                <tr>
+                  <th>Txn#</th>
+                  <th>Client</th>
+                  <th>Service</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Penalty</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="walkinTableBody">
+                <tr>
+                  <td colspan="8" class="text-center py-4" style="color: var(--text-muted);">
+                    <i class="bi bi-inbox" style="font-size: 1.5rem; display: block; margin-bottom: 0.4rem; opacity: 0.4;"></i>
+                    No walk-in transactions yet.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+
+        <!-- ── APPOINTMENTS PANEL ─────────────────────────────────── -->
+        <div class="panel" id="panel-appointments">
+
+          <div class="panel-topbar">
+            <h3 class="panel-heading">
+              <i class="bi bi-calendar-check" aria-hidden="true"></i> Manage Appointments
+            </h3>
+          </div>
+
+          <input type="hidden" id="active-filter-appointment-button" value="today" />
+
+          <div class="search-strip">
+            <div class="search-wrap">
+              <i class="bi bi-search search-ico" aria-hidden="true"></i>
+              <input type="text" class="search-rnc" id="appointmentSearch"
+                placeholder="Search by client, date (YYYY-MM-DD), or status…"
+                oninput="searchAppointments()" />
+            </div>
+          </div>
+
+          <div class="filter-strip">
+            <button class="filter-chip active" onclick="filterAppointments('today')">Today</button>
+            <button class="filter-chip" onclick="filterAppointments('approved')">Approved</button>
+            <button class="filter-chip" onclick="filterAppointments('completed')">Completed</button>
+            <button class="filter-chip" onclick="filterAppointments('cancelled')">Cancelled</button>
+            <button class="filter-chip" onclick="filterAppointments('all')">All</button>
+          </div>
+
+          <div id="appointmentsList" class="cards-grid"></div>
+
+        </div>
+
+
+        <!-- ── TRANSACTIONS PANEL ────────────────────────────────── -->
+        <div class="panel" id="panel-transactions">
+
+          <div class="panel-topbar">
+            <h3 class="panel-heading">
+              <i class="bi bi-file-earmark-text" aria-hidden="true"></i> Transactions
+            </h3>
+          </div>
+
+          <div class="search-strip">
+            <div class="search-wrap">
+              <i class="bi bi-search search-ico" aria-hidden="true"></i>
+              <input type="text" class="search-rnc" id="transactionSearch"
+                placeholder="Search by client, email, or transaction ID…"
+                oninput="searchDocumentTransaction()" />
+            </div>
+          </div>
+
+          <div class="filter-strip">
+            <input type="hidden" id="active-filter-transaction-button" value="pending" />
+            <button class="filter-chip active" onclick="filterTransactions('pending')">Pending</button>
+            <button class="filter-chip" onclick="filterTransactions('submitted')">Submitted</button>
+            <button class="filter-chip" onclick="filterTransactions('ongoing')">Ongoing</button>
+            <button class="filter-chip" onclick="filterTransactions('completed')">Completed</button>
+            <button class="filter-chip" onclick="filterTransactions('to_claim')">To Claim</button>
+            <button class="filter-chip" onclick="filterTransactions('claimed')">Claimed</button>
+            <button class="filter-chip" onclick="filterTransactions('cancelled')">Cancelled</button>
+            <button class="filter-chip" onclick="filterTransactions('all')">All</button>
+
+          </div>
+
+          <div id="transactionsList" class="cards-grid"></div>
+
+        </div>
+
+
+        <!-- ── SERVICES PANEL ────────────────────────────────────── -->
+        <div class="panel" id="panel-services">
+
+          <div class="panel-topbar">
+            <h3 class="panel-heading">
+              <i class="bi bi-gear" aria-hidden="true"></i> Manage Services
+            </h3>
+            <button class="btn-primary-rnc" onclick="showAddServiceModal()">
+              <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Service
+            </button>
+          </div>
+
+          <div class="search-strip">
+            <div class="search-wrap">
+              <i class="bi bi-search search-ico" aria-hidden="true"></i>
+              <input type="text" class="search-rnc" id="serviceSearch"
+                placeholder="Search services…"
+                oninput="searchService()" />
+            </div>
+          </div>
+
+          <div id="servicesList" class="services-grid"></div>
+
+        </div>
+
+
+        <!-- ── CLIENTS PANEL ─────────────────────────────────────── -->
+        <div class="panel" id="panel-users">
+
+          <div class="panel-topbar">
+            <h3 class="panel-heading">
+              <i class="bi bi-people" aria-hidden="true"></i> Client Accounts
+            </h3>
+          </div>
+
+          <div class="search-strip">
+            <div class="search-wrap">
+              <i class="bi bi-search search-ico" aria-hidden="true"></i>
+              <input type="text" class="search-rnc" id="userSearch"
+                placeholder="Search by name or email…"
+                oninput="searchUsers()" />
+            </div>
+          </div>
+
+          <div class="filter-strip">
+            <!-- <button class="filter-chip active" onclick="filterUsers('all')">All</button>
+            <button class="filter-chip" onclick="filterUsers('client')">Clients</button>
+            <button class="filter-chip" onclick="filterUsers('staff')">Staff</button>
+            <button class="filter-chip" onclick="filterUsers('admin')">Admins</button> -->
+          </div>
+
+          <div class="table-wrap">
+            <table class="rnc-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Verified</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+
+        </div>
+
+
+        <!-- ── SCHEDULE FORECAST PANEL ───────────────────────────── -->
+        <div class="panel" id="panel-schedule">
+
+          <div class="panel-topbar">
+            <h2 class="panel-heading">
+              <i class="bi bi-calendar3-week" aria-hidden="true"></i> Schedule Forecast
+            </h2>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn-ghost" onclick="sfNavigateWeek(-1)" aria-label="Previous week">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <span class="sf-week-label" id="sfWeekLabel">—</span>
+              <button class="btn-ghost" onclick="sfNavigateWeek(1)" aria-label="Next week">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+              <button class="btn-ghost" onclick="sfGoToday()" style="font-size: 0.72rem; padding: 0.3rem 0.7rem;">
+                Today
+              </button>
+            </div>
+          </div>
+
+          <div class="sf-summary-strip">
+            <div class="sf-summary-chip sf-chip-primary">
+              <i class="bi bi-calendar-check"></i>
+              <div><span id="sfTotalBooked">—</span><small>Total Bookings</small></div>
+            </div>
+            <div class="sf-summary-chip sf-chip-success">
+              <i class="bi bi-check-circle"></i>
+              <div><span id="sfSlotsOpen">—</span><small>Open Slots</small></div>
+            </div>
+            <div class="sf-summary-chip sf-chip-warning">
+              <i class="bi bi-exclamation-circle"></i>
+              <div><span id="sfSlotsFull">—</span><small>Full Slots</small></div>
+            </div>
+            <div class="sf-summary-chip sf-chip-danger">
+              <i class="bi bi-x-circle"></i>
+              <div><span id="sfSlotsUnavailable">—</span><small>Unavailable</small></div>
+            </div>
+            <div class="sf-summary-chip sf-chip-info">
+              <i class="bi bi-people"></i>
+              <div><span id="sfUniqueClients">—</span><small>Unique Clients</small></div>
+            </div>
+          </div>
+
+          <div class="sf-grid-wrap">
+            <div class="sf-grid" id="sfGrid" role="grid" aria-label="Weekly schedule forecast">
+              <div class="sf-loading" id="sfLoading">
+                <i class="bi bi-arrow-repeat sf-spin"></i> Loading schedule…
+              </div>
+            </div>
+          </div>
+
+          <div class="sf-drawer-overlay" id="sfDrawerOverlay" onclick="sfCloseDrawer()" aria-hidden="true"></div>
+
+          <aside class="sf-drawer" id="sfDrawer" role="dialog" aria-label="Slot details" aria-modal="true" tabindex="-1">
+            <div class="sf-drawer-head">
+              <div>
+                <h5 id="sfDrawerTitle">Slot Detail</h5>
+                <small id="sfDrawerSub" class="text-muted"></small>
+              </div>
+              <button class="sf-drawer-close" onclick="sfCloseDrawer()" aria-label="Close">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <div class="sf-drawer-meter">
+              <div class="sf-meter-row">
+                <span class="sf-meter-label">Capacity</span>
+                <span class="sf-meter-val" id="sfMeterVal">0 / 3</span>
+              </div>
+              <div class="sf-meter-track">
+                <div class="sf-meter-fill" id="sfMeterFill"></div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; padding: 0.75rem 1rem 0.25rem;">
+              <span class="sf-detail-chip" id="sfDrawerStatus">—</span>
+              <span class="sf-detail-chip sf-chip-secondary" id="sfDrawerAvail">—</span>
+            </div>
+            <div class="sf-drawer-section-label">Booked Clients</div>
+            <div class="sf-drawer-clients" id="sfDrawerClients"></div>
+          </aside>
+
+        </div>
+
+
+        <!-- ── MESSAGES PANEL ────────────────────────────────────── -->
+        <div class="panel panel-chat" id="panel-chats">
+          <div class="admin-chat-layout">
+
+            <!-- Conversations Sidebar -->
+            <div class="conv-list" id="conversationsSidebar">
+              <div class="conv-list-header">
+                <h6><i class="bi bi-chat-dots" aria-hidden="true"></i> Conversations</h6>
+              </div>
+              <div class="conv-list-body" id="conversationsList"></div>
+            </div>
+
+            <!-- Chat Window -->
+            <div class="chat-shell" id="chatMessages">
+              <div class="chat-head">
+                <div class="chat-head-left">
+                  <div class="chat-avatar-lg">
+                    <i class="bi bi-person-circle" aria-hidden="true"></i>
+                  </div>
+                  <div>
+                    <h5 class="chat-head-title">Client Support Chat</h5>
+                    <div class="chat-head-status">
+                      <span class="status-dot status-indicator online" id="connectionStatus"></span>
+                      <small id="statusText">Online</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-messages" id="chatMessagesContainer-inner" aria-live="polite">
+                <div class="chat-empty-hint">
+                  <i class="bi bi-chat-square-dots" aria-hidden="true"></i>
+                  <p>Select a conversation to begin</p>
+                </div>
+              </div>
+
+              <div class="typing-indicator" id="typingIndicator" style="display: none;" aria-live="polite">
+                <div class="typing-bubble"><span></span><span></span><span></span></div>
+                <small>Client is typing…</small>
+              </div>
+
+              <div class="chat-input-bar">
+                <button class="chat-attach-btn" onclick="document.getElementById('fileInput').click()"
+                  aria-label="Attach file">
+                  <i class="bi bi-paperclip" aria-hidden="true"></i>
+                </button>
+                <input type="file" id="fileInput" style="display: none;"
+                  accept="image/*,.pdf,.doc,.docx,.txt"
+                  onchange="handleFileSelect(event)" />
+                <div class="chat-textarea-wrap">
+                  <textarea id="messageInput" class="chat-textarea" placeholder="Type a message…"
+                    rows="1" onkeydown="handleKeyPress(event)" oninput="handleTyping()"
+                    aria-label="Message"></textarea>
+                </div>
+                <button class="chat-send-btn" onclick="sendMessage()" aria-label="Send">
+                  <i class="bi bi-send-fill" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+    <!-- /app-shell -->
+
+
+    <!-- ══ SCRIPTS ═══════════════════════════════════════════════════ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script>
+      "use strict";
+
+
+      /* ═══════════════════════════════════════════════════════════════
+         WALK-IN MODAL
+      ═══════════════════════════════════════════════════════════════ */
+
+      let _wiSelectedClientId = null;
+      let _wiSearchTimer      = null;
+      let _wiServices         = [];
+
+      async function openWalkInModal() {
+        _wiSelectedClientId = null;
+        document.getElementById("wiClientSearch").value      = "";
+        document.getElementById("wiSearchResults").style.display  = "none";
+        document.getElementById("wiSelectedClient").style.display = "none";
+        document.getElementById("wiNoAccountNote").style.display  = "none";
+        document.getElementById("walkInStep2").style.display      = "none";
+        document.getElementById("wiSubmitBtn").style.display      = "none";
+        document.getElementById("wiErrMsg").style.display         = "none";
+        document.getElementById("wiNotes").value              = "";
+        document.getElementById("walkInModalOverlay").style.display = "flex";
+        await loadWalkInServices();
+      }
+
+      function closeWalkInModal() {
+        document.getElementById("walkInModalOverlay").style.display = "none";
+      }
+
+      async function loadWalkInServices() {
+        try {
+          const res  = await fetch(`${BASE_URL}/api/user/services`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          const data = await res.json();
+          _wiServices = Array.isArray(data) ? data : (data.services || []);
+
+          const sel = document.getElementById("wiServiceSelect");
+          sel.innerHTML =
+            `<option value="">— Select a service —</option>` +
+            _wiServices.map((s) => `<option value="${s.service_id}">${s.service_name}</option>`).join("");
+        } catch (e) {
+          console.error("Failed to load services:", e);
+        }
+      }
+
+      function searchWalkInClient() {
+        clearTimeout(_wiSearchTimer);
+        const q         = document.getElementById("wiClientSearch").value.trim();
+        const resultsEl = document.getElementById("wiSearchResults");
+        if (q.length < 2) { resultsEl.style.display = "none"; return; }
+
+        _wiSearchTimer = setTimeout(async () => {
+          try {
+            const res     = await fetch(
+              `${BASE_URL}/api/admin/walkin/search-client?search=${encodeURIComponent(q)}`,
+              { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+            );
+            const clients = await res.json();
+
+            if (!clients.length) {
+              document.getElementById("wiNoAccountNote").style.display = "flex";
+              resultsEl.style.display = "none";
+              return;
+            }
+
+            document.getElementById("wiNoAccountNote").style.display = "none";
+            resultsEl.innerHTML = clients.map((c) => {
+              const initials = ((c.first_name || "")[0] || "") + ((c.last_name || "")[0] || "");
+              return `
+                <div class="wi-result-row"
+                  onclick="selectWalkInClient(${c.id}, '${escapeHtml(c.first_name)} ${escapeHtml(c.last_name)}', '${escapeHtml(c.email)}')">
+                  <div class="wi-result-avatar">${initials.toUpperCase()}</div>
+                  <div>
+                    <div class="wi-result-name">${c.first_name} ${c.last_name}</div>
+                    <div class="wi-result-email">${c.email} · @${c.username}</div>
+                  </div>
+                </div>`;
+            }).join("");
+            resultsEl.style.display = "block";
+          } catch (e) {
+            console.error("Client search failed:", e);
+          }
+        }, 350);
+      }
+
+      function selectWalkInClient(id, name, email) {
+        _wiSelectedClientId = id;
+
+        document.getElementById("wiSearchResults").style.display  = "none";
+        document.getElementById("wiNoAccountNote").style.display  = "none";
+        document.getElementById("wiSelectedClient").style.display = "flex";
+        document.getElementById("wiSelectedClient").innerHTML = `
+          <i class="bi bi-person-check-fill"></i>
+          <div>
+            <div class="wi-selected-name">${name}</div>
+            <div class="wi-selected-email">${email}</div>
+          </div>
+          <button class="wi-change-btn" onclick="resetWalkInClient()">Change</button>`;
+
+        document.getElementById("walkInStep2").style.display  = "block";
+        document.getElementById("wiSubmitBtn").style.display  = "inline-flex";
+      }
+
+      function resetWalkInClient() {
+        _wiSelectedClientId = null;
+        document.getElementById("wiSelectedClient").style.display = "none";
+        document.getElementById("walkInStep2").style.display      = "none";
+        document.getElementById("wiSubmitBtn").style.display      = "none";
+        document.getElementById("wiClientSearch").value           = "";
+        document.getElementById("wiClientSearch").focus();
+      }
+
+      async function submitWalkIn() {
+        const serviceId = document.getElementById("wiServiceSelect").value;
+        const notes     = document.getElementById("wiNotes").value.trim();
+        const errEl     = document.getElementById("wiErrMsg");
+        const btn       = document.getElementById("wiSubmitBtn");
+
+        errEl.style.display = "none";
+        if (!_wiSelectedClientId) { errEl.textContent = "Please select a client."; errEl.style.display = "block"; return; }
+        if (!serviceId)           { errEl.textContent = "Please select a service."; errEl.style.display = "block"; return; }
+
+        btn.disabled   = true;
+        btn.innerHTML  = '<i class="bi bi-hourglass-split"></i> Creating…';
+
+        try {
+          const res  = await fetch(`${BASE_URL}/api/admin/walkin/create`, {
+            method:  "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ clientId: _wiSelectedClientId, serviceId, notes }),
+          });
+          const data = await res.json();
+
+          if (res.ok) {
+            closeWalkInModal();
+            showNotification?.("Walk-in transaction created successfully!", "success");
+            loadWalkInTransactions();
+
+          } else {
+            errEl.textContent   = data.message || "Failed to create transaction.";
+            errEl.style.display = "block";
+          }
+        } catch (e) {
+          errEl.textContent   = "Network error. Please try again.";
+          errEl.style.display = "block";
+        } finally {
+          btn.disabled  = false;
+          btn.innerHTML = '<i class="bi bi-plus-circle-fill"></i> Create Transaction';
+        }
+      }
+
+      async function loadWalkInTransactions() {
+          console.log("loadWalkInTransactions")
+
+        try {
+          const res  = await fetch(`${BASE_URL}/api/admin/getWalkinDocumentTransactions`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          const all     = await res.json();
+
+          renderWalkInTable(all);
+        } catch (e) {
+          console.error("Load walk-in error:", e);
+        }
+      }
+
+      function renderWalkInTable(rows) {
+        const tbody = document.getElementById("walkinTableBody");
+        if (!rows.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="8" class="text-center py-4" style="color: var(--text-muted);">
+                <i class="bi bi-inbox" style="font-size: 1.5rem; display: block; margin-bottom: 0.4rem; opacity: 0.4;"></i>
+                No walk-in transactions yet.
+              </td>
+            </tr>`;
+          return;
+        }
+
+        tbody.innerHTML = rows.map((t) => {
+          const hasP      = t.has_penalty && t.penalty_amount > 0;
+          const statusCls = `status-chip s-${(t.status_name || "pending").replace("_", "-").toLowerCase()}`;
+          return `
+            <tr>
+              <td style="font-size: 0.8rem; color: var(--text-muted);">#${t.transaction_id}</td>
+              <td>
+                <div style="font-size: 0.84rem; font-weight: 600;">${t.first_name} ${t.last_name}</div>
+                <div style="font-size: 0.71rem; color: var(--text-muted);">${t.email}</div>
+              </td>
+              <td style="font-size: 0.82rem;">${t.service_name}</td>
+              <td><span class="wi-type-badge">Walk-In</span></td>
+              <td><span class="${statusCls}" style="font-size: 0.72rem;">${t.status_name}</span></td>
+              <td>${hasP
+                ? `<span class="wi-penalty-badge">₱${t.penalty_amount}</span>`
+                : `<span style="color: var(--text-muted); font-size: 0.75rem;">—</span>`}
+              </td>
+              <td style="font-size: 0.75rem; color: var(--text-muted);">
+                ${new Date(t.created_at).toLocaleDateString("en-PH")}
+              </td>
+              <td>
+                ${t.status_name === "claimed"
+  ? `<button class="btn-outline-sm btn-amber" onclick="generateTransactionReport(${t.transaction_id})"><i class="bi bi-file-pdf"></i> Report</button>`
+  : `<button class="btn-outline-sm btn-indigo" onclick="showUpdateStatusModal(${t.transaction_id},'${t.status_name}')"><i class="bi bi-pencil"></i> Update</button>`}
+<button class="btn-outline-sm btn-teal" onclick="viewTransactionTimeline(${t.transaction_id})">
+  <i class="bi bi-clock-history"></i> Timeline
+</button>
+              </td>
+            </tr>`;
+        }).join("");
+      }
+
+
+      /* ═══════════════════════════════════════════════════════════════
+         CLIENT HISTORY MODAL
+      ═══════════════════════════════════════════════════════════════ */
+
+      let _histClientConvId = null;
+      let _histClientId     = null;
+      let _histClientName   = "";
+
+      async function openClientHistory(userId, clientName, clientEmail) {
+        _histClientId   = userId;
+        _histClientName = clientName;
+
+        document.getElementById("histModalClientName").textContent  = clientName;
+        document.getElementById("histModalClientEmail").textContent = clientEmail;
+        document.getElementById("histApptList").innerHTML =
+          `<div class="hist-empty"><i class="bi bi-hourglass-split"></i>Loading…</div>`;
+        document.getElementById("histTxList").innerHTML =
+          `<div class="hist-empty"><i class="bi bi-hourglass-split"></i>Loading…</div>`;
+        document.getElementById("clientHistoryOverlay").style.display = "flex";
+        switchHistTab("appointments", document.querySelector(".wi-tab"));
+
+        try {
+          const res  = await fetch(`${BASE_URL}/api/admin/clients/${userId}/history`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          const data = await res.json();
+          _histClientConvId = data.conversationId;
+
+          const histChatBtn = document.getElementById("histChatBtn");
+          if (histChatBtn) histChatBtn.style.display = data.conversationId ? "" : "none";
+
+          /* Appointments */
+          const appts = data.appointments || [];
+          document.getElementById("histApptList").innerHTML = appts.length
+            ? appts.map((a) => {
+                const svcLine = a.services
+                  ? `<div class="hist-card-meta"><i class="bi bi-briefcase"></i> ${a.services}</div>`
+                  : "";
+                const notes = a.notes
+                  ? `<div class="sf-notes-row"><i class="bi bi-chat-left-text"></i>${a.notes}</div>`
+                  : "";
+                return `
+                  <div class="hist-card">
+                    <div class="hist-card-head">
+                      <div>
+                        <div class="hist-card-title">
+                          ${sfFormatDate(a.appointment_date, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                          — ${formatTime12h(a.appointment_time)}
+                        </div>
+                        ${svcLine}
+                        ${notes}
+                      </div>
+                      <span class="status-chip s-${a.status}" style="font-size: 0.68rem;">${a.status}</span>
+                    </div>
+                    ${a.remarks ? `<div class="hist-card-meta" style="color: var(--text-muted); font-style: italic;">"${a.remarks}"</div>` : ""}
+                  </div>`;
+              }).join("")
+            : `<div class="hist-empty"><i class="bi bi-calendar-x"></i>No appointments found.</div>`;
+
+          /* Transactions */
+          const txs = data.transactions || [];
+          document.getElementById("histTxList").innerHTML = txs.length
+            ? txs.map((t) => {
+                const penalty   = t.has_penalty ? `<span class="wi-penalty-badge" style="margin-left: 0.4rem;">₱${t.penalty_amount} penalty</span>` : "";
+                const typeBadge = t.transaction_type === "walk_in" ? `<span class="wi-type-badge" style="margin-left: 0.4rem;">Walk-In</span>` : "";
+                return `
+                  <div class="hist-card">
+                    <div class="hist-card-head">
+                      <div>
+                        <div class="hist-card-title">${t.service_name} ${typeBadge} ${penalty}</div>
+                        <div class="hist-card-meta">
+                          Tx #${t.transaction_id} · ${sfFormatDate(t.created_at, { month: "short", day: "numeric", year: "numeric" })}
+                        </div>
+                        ${t.claim_deadline
+                          ? `<div class="hist-card-meta" style="color: var(--warning);">
+                               <i class="bi bi-clock-history"></i>
+                               Claim by ${sfFormatDate(t.claim_deadline, { month: "short", day: "numeric", year: "numeric" })}
+                             </div>`
+                          : ""}
+                      </div>
+                      <span class="status-chip s-${t.status_name}" style="font-size: 0.68rem;">${t.status_name}</span>
+                    </div>
+                  </div>`;
+              }).join("")
+            : `<div class="hist-empty"><i class="bi bi-file-x"></i>No transactions found.</div>`;
+
+        } catch (e) {
+          console.error("History load error:", e);
+        }
+      }
+
+      function closeClientHistory() {
+        document.getElementById("clientHistoryOverlay").style.display = "none";
+        _histClientConvId = null;
+        _histClientId     = null;
+        _histClientName   = "";
+      }
+
+      function openBanFromHistory() {
+        if (!_histClientId) return;
+        closeClientHistory();
+        openBanModal(_histClientId, _histClientName);
+      }
+
+      function switchHistTab(tab, btn) {
+        document.querySelectorAll(".wi-tab").forEach((t) => t.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        document.getElementById("histTabAppointments").style.display = tab === "appointments" ? "" : "none";
+        document.getElementById("histTabTransactions").style.display = tab === "transactions"  ? "" : "none";
+      }
+
+      function openHistChat() {
+        if (!_histClientConvId) {
+          showToast("No active conversation found for this client.", "warning");
+          return;
+        }
+        closeClientHistory();
+        showAdminSection("chats");
+        setTimeout(() => {
+          if (typeof selectConversation === "function") selectConversation(_histClientConvId);
+        }, 80);
+      }
+
+
+      /* ═══════════════════════════════════════════════════════════════
+         SCHEDULE FORECAST — sfOpenDrawer
+      ═══════════════════════════════════════════════════════════════ */
+
+      function sfOpenDrawer(key, dateStr, time, slot, clients) {
+        _sfDrawerSlot = key;
+
+        const date   = new Date(dateStr + "T00:00:00");
+        const dLabel = date.toLocaleDateString("en-US", {
+          weekday: "long", month: "long", day: "numeric", year: "numeric",
+        });
+        document.getElementById("sfDrawerTitle").textContent = SF_TIME_LABELS[time] || time;
+        document.getElementById("sfDrawerSub").textContent   = dLabel;
+
+        /* Meter */
+        const booked = slot.actual_bookings || 0;
+        const cap    = slot.max_capacity    || 3;
+        document.getElementById("sfMeterVal").textContent  = `${booked} / ${cap}`;
+        document.getElementById("sfMeterFill").style.width = `${Math.round((booked / cap) * 100)}%`;
+
+        /* Status chips */
+        const statusEl = document.getElementById("sfDrawerStatus");
+        const availEl  = document.getElementById("sfDrawerAvail");
+        if (booked >= cap) {
+          statusEl.textContent  = "Full";
+          statusEl.style.cssText = "background:rgba(244,63,94,.18);color:var(--danger);border-color:var(--danger)";
+        } else if (booked > 0) {
+          statusEl.textContent  = "Partial";
+          statusEl.style.cssText = "background:rgba(251,146,60,.18);color:var(--warning);border-color:var(--warning)";
+        } else {
+          statusEl.textContent  = "Open";
+          statusEl.style.cssText = "background:rgba(52,211,153,.18);color:var(--success);border-color:var(--success)";
+        }
+        availEl.textContent = slot.is_available ? "Available" : "Unavailable";
+
+        /* Booked clients */
+        const listEl = document.getElementById("sfDrawerClients");
+        if (!clients.length) {
+          listEl.innerHTML = `<div class="sf-empty-drawer"><i class="bi bi-calendar-x"></i>No bookings for this slot</div>`;
+        } else {
+          listEl.innerHTML = clients.map((c) => {
+            const initials    = ((c.first_name || "")[0] || "") + ((c.last_name || "")[0] || "");
+            const statusCls   = `sf-client-status sf-status-${(c.status || "pending").toLowerCase()}`;
+            const phone       = c.phone_number
+              ? `<span style="margin-left: 0.5rem;"><i class="bi bi-telephone"></i> ${c.phone_number}</span>`
+              : "";
+            const services    = c.services
+              ? `<div class="sf-client-services"><i class="bi bi-briefcase-fill"></i>${c.services}</div>`
+              : "";
+            const notes       = c.notes
+              ? `<div class="sf-notes-row"><i class="bi bi-chat-left-text"></i>${escapeHtml(c.notes)}</div>`
+              : "";
+            const lapsedBadge = c.status === "lapsed"
+              ? `<span style="font-size: 0.62rem; margin-left: 0.3rem; color: #94a3b8; background: rgba(100,116,139,.15); padding: 0.1rem 0.4rem; border-radius: 999px; border: 1px solid rgba(100,116,139,.3);">Lapsed</span>`
+              : "";
+
+            return `
+              <div class="sf-client-row"
+                onclick="openClientHistory(${c.client_id || c.id}, '${escapeHtml((c.first_name || "") + " " + (c.last_name || ""))}', '${escapeHtml(c.email || "")}')">
+                <div class="sf-client-avatar">${initials.toUpperCase()}</div>
+                <div class="sf-client-info" style="flex: 1; min-width: 0;">
+                  <div class="sf-client-name">${c.first_name} ${c.last_name}${lapsedBadge}</div>
+                  <div class="sf-client-detail">
+                    <i class="bi bi-envelope"></i> ${c.email || "—"}${phone}
+                  </div>
+                  ${services}
+                  ${notes}
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; flex-shrink: 0;">
+                  <span class="${statusCls}" style="font-size: 0.66rem;">${c.status}</span>
+                  <button class="btn-ghost" style="font-size: 0.66rem; padding: 0.15rem 0.5rem;"
+                    onclick="event.stopPropagation(); openClientHistory(${c.client_id || c.id}, '${escapeHtml((c.first_name || "") + " " + (c.last_name || ""))}', '${escapeHtml(c.email || "")}')">
+                    <i class="bi bi-clock-history"></i> History
+                  </button>
+                </div>
+              </div>`;
+          }).join("");
+        }
+
+        document.getElementById("sfDrawerOverlay").classList.add("sf-drawer-vis");
+        document.getElementById("sfDrawer").classList.add("sf-drawer-open");
+        document.getElementById("sfDrawer").focus();
+      }
+
+
+      /* ── Safe Date Helpers ─────────────────────────────────────── */
+
+      function sfSafeDate(val) {
+        if (!val) return null;
+        let d;
+        if (typeof val === "string") {
+          if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+            d = new Date(val + "T00:00:00");
+          } else if (val.includes("T")) {
+            d = new Date(val.slice(0, 10) + "T00:00:00");
+          } else {
+            d = new Date(val);
+          }
+        } else {
+          d = new Date(val);
+        }
+        return (d instanceof Date && !isNaN(d)) ? d : null;
+      }
+
+      function sfFormatDate(val, opts, locale = "en-PH") {
+        const d = sfSafeDate(val);
+        if (!d) return "—";
+        return d.toLocaleDateString(locale, opts);
+      }
+
+      function formatTime12h(t) {
+        if (!t) return "—";
+        const [h, m] = t.split(":").map(Number);
+        const ampm   = h >= 12 ? "PM" : "AM";
+        const h12    = h % 12 || 12;
+        return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+      }
+
+
+      /* ── Unread Messages Badge ─────────────────────────────────── */
+
+      async function fetchAdminUnreadCount() {
+        try {
+          const res   = await fetch(`${BASE_URL}/api/chat/getActiveConversations`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          const convs = await res.json();
+          const total = convs.reduce((s, c) => s + (c.unread_count || 0), 0);
+          _updateAdminMsgBadge(total);
+        } catch (e) { /* silent */ }
+      }
+
+      function _updateAdminMsgBadge(count) {
+        const badge = document.getElementById("unreadMsgBadge");
+        if (!badge) return;
+        if (count > 0) {
+          badge.textContent    = count > 99 ? "99+" : count;
+          badge.style.display  = "inline-flex";
+        } else {
+          badge.style.display  = "none";
+        }
+        if (typeof updateChatFabBadge === "function") updateChatFabBadge(count);
+      }
+
+      function showChatPanel() {
+        const panel = document.getElementById("panel-chats");
+        panel.style.display = "flex";
+      }
+
+      function hideChatPanel() {
+        const panel = document.getElementById("panel-chats");
+        panel.style.display = "none";
+      }
+
+      function toggleChatPanel() {
+        const panel = document.getElementById("panel-chats");
+        panel.style.display = panel.style.display === "flex" ? "none" : "flex";
+      }
+
+
+      /* ── Theme ─────────────────────────────────────────────────── */
+
+      const ROOT = document.documentElement;
+
+      function applyTheme(t) {
+        ROOT.setAttribute("data-theme", t);
+        localStorage.setItem("rnc-theme", t);
+      }
+
+      function toggleTheme() {
+        applyTheme(ROOT.getAttribute("data-theme") === "dark" ? "light" : "dark");
+      }
+
+      (function initTheme() {
+        const s = localStorage.getItem("rnc-theme");
+        if (s) {
+          applyTheme(s);
+        } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme:light)").matches) {
+          applyTheme("light");
+        } else {
+          applyTheme("dark");
+        }
+      })();
+
+
+      /* ── Sidebar Mobile Toggle ─────────────────────────────────── */
+
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("sidebar-open");
+      }
+
+      document.addEventListener("click", function (e) {
+        const sb  = document.getElementById("sidebar");
+        const tog = document.getElementById("sidebarToggle");
+        if (sb.classList.contains("sidebar-open") && !sb.contains(e.target) && !tog.contains(e.target)) {
+          sb.classList.remove("sidebar-open");
+        }
+      });
+
+
+      /* ── Toast System ──────────────────────────────────────────── */
+
+      const _toastIcons = {
+        success: '<i class="bi bi-check-circle-fill toast-icon"></i>',
+        error:   '<i class="bi bi-x-circle-fill toast-icon"></i>',
+        warning: '<i class="bi bi-exclamation-triangle-fill toast-icon"></i>',
+        info:    '<i class="bi bi-info-circle-fill toast-icon"></i>',
+      };
+
+      const _toastLabels = {
+        success: "Success",
+        error:   "Error",
+        warning: "Warning",
+        info:    "Info",
+      };
+
+      function showNotificationMessage(message, type = "info", _ign = null, duration = 5000) {
+        if (!["success", "error", "warning", "info"].includes(type)) type = "info";
+
+        let c = document.getElementById("global-toast-container");
+        if (!c) {
+          c = document.createElement("div");
+          c.id = "global-toast-container";
+          document.body.appendChild(c);
+        }
+
+        const p = document.createElement("div");
+        p.className = "toast-pill toast-" + type;
+        p.setAttribute("role", "alert");
+        p.setAttribute("aria-live", "assertive");
+        p.setAttribute("aria-atomic", "true");
+        p.innerHTML =
+          _toastIcons[type] +
+          '<div class="toast-body"><strong>' + _toastLabels[type] + "</strong>" + message + "</div>" +
+          '<button class="toast-close" aria-label="Dismiss">&times;</button>' +
+          '<div class="toast-progress" style="animation-duration:' + duration + 'ms;"></div>';
+
+        c.appendChild(p);
+        requestAnimationFrame(() => requestAnimationFrame(() => p.classList.add("toast-show")));
+
+        function dismiss() {
+          clearTimeout(timer);
+          p.classList.remove("toast-show");
+          p.classList.add("toast-hide");
+          p.addEventListener("transitionend", () => p.remove(), { once: true });
+        }
+
+        p.querySelector(".toast-close").addEventListener("click", dismiss);
+        const timer = setTimeout(dismiss, duration);
+      }
+
+      function showServerMessage(msg, type = "error", autoHide = true) {
+        showNotificationMessage(msg, type === "error" ? "error" : type, null, autoHide ? 5000 : 999999);
+      }
+
+
+      /* ── Inline Message Helpers ────────────────────────────────── */
+
+      function _showInlineMsg(boxId, txtId, msg, type) {
+        const b = document.getElementById(boxId);
+        const t = document.getElementById(txtId);
+        b.className =
+          "rnc-alert rnc-alert-" +
+          (type === "success" ? "success" : type === "warning" ? "warning" : "danger") +
+          " mb-3";
+        t.textContent    = msg;
+        b.style.display  = "flex";
+        setTimeout(() => { b.style.display = "none"; }, 6000);
+      }
+
+      function showChangePasswordMessage(msg, type = "error") {
+        _showInlineMsg("changePasswordMessage", "changePasswordMsgText", msg, type);
+      }
+
+      function showServiceMessage(msg, type = "error") {
+        _showInlineMsg("serviceMessage", "serviceMsgText", msg, type);
+      }
+
+      function showStatusMessage(msg, type = "error") {
+        _showInlineMsg("statusMessage", "statusMsgText", msg, type);
+      }
+
+
+      /* ── Custom Confirm ────────────────────────────────────────── */
+
+      let confirmModalResolve = null;
+
+      function showConfirm({
+        title       = "Are you sure?",
+        message     = "This action cannot be undone.",
+        confirmText = "Confirm",
+        type        = "info",
+      } = {}) {
+        return new Promise((resolve) => {
+          confirmModalResolve = (val) => {
+            document.getElementById("confirmModalOverlay").style.display = "none";
+            resolve(val);
+          };
+
+          document.getElementById("confirmModalTitle").textContent   = title;
+          document.getElementById("confirmModalMessage").textContent = message;
+          document.getElementById("confirmModalBtn").textContent     = confirmText;
+
+          const icon      = document.getElementById("confirmModalIcon");
+          const iconInner = document.getElementById("confirmModalIconInner");
+          const btn       = document.getElementById("confirmModalBtn");
+
+          const iconMap = {
+            warn:   "bi bi-exclamation-triangle-fill",
+            danger: "bi bi-trash3-fill",
+            info:   "bi bi-question-circle-fill",
+          };
+          iconInner.className = iconMap[type] || iconMap.info;
+          icon.className      = "confirm-icon-wrap confirm-icon-" + (type || "info");
+          btn.className       = "confirm-btn-ok" + (type === "danger" ? " confirm-btn-danger" : "");
+
+          document.getElementById("confirmModalOverlay").style.display = "flex";
+        });
+      }
+
+      document.getElementById("confirmModalOverlay").addEventListener("click", function (e) {
+        if (e.target === this && confirmModalResolve) confirmModalResolve(false);
+      });
+
+
+      /* ── Bootstrap Modal Instances ─────────────────────────────── */
+
+      const logoutModal                  = new bootstrap.Modal(document.getElementById("logoutModal"));
+      const changePasswordModal          = new bootstrap.Modal(document.getElementById("changePasswordModal"));
+      const serviceModal                 = new bootstrap.Modal(document.getElementById("serviceModal"));
+      const updateStatusModal            = new bootstrap.Modal(document.getElementById("updateStatusModal"));
+      const remarksModal                 = new bootstrap.Modal(document.getElementById("remarksModal"));
+      const messageUserModal             = new bootstrap.Modal(document.getElementById("messageUserModal"));
+      const timelineModal                = new bootstrap.Modal(document.getElementById("timelineModal"));
+      const cancelAppointmentReasonModal = new bootstrap.Modal(document.getElementById("appointmentReasonModal"));
+      const completeAppointmentModal     = new bootstrap.Modal(document.getElementById("completeAppointmentModal"));
+
+      function showLogoutModal() {
+        logoutModal.show();
+      }
+
+      function showChangePasswordModal() {
+        ["currentPassword", "newPassword", "confirmNewPassword"].forEach(
+          (id) => (document.getElementById(id).value = "")
+        );
+        changePasswordModal.show();
+      }
+
+
+      /* ── Section Navigation ────────────────────────────────────── */
+
+      const _titleMap = {
+        dashboard:    "Dashboard",
+        appointments: "Appointments",
+        transactions: "Transactions",
+        services:     "Services",
+        users:        "Clients",
+        chats:        "Messages",
+        walkin:        "Walkin",
+        schedule:     "Schedule Forecast",
+      };
+
+      async function showAdminSection(name) {
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+        document.querySelectorAll(".sidebar-nav-item").forEach((i) => i.classList.remove("active"));
+
+        const panel   = document.getElementById("panel-" + name);
+        if (panel) panel.classList.add("active");
+
+        const navItem = document.querySelector(`.sidebar-nav-item[data-section="${name}"]`);
+        if (navItem) navItem.classList.add("active");
+
+        document.getElementById("topbarTitle").textContent = _titleMap[name] || "";
+        document.getElementById("sidebar").classList.remove("sidebar-open");
+
+        if (name === "dashboard")    await initDashboardCharts();
+        if (name === "appointments") await fetchClientAppointments(document.getElementById("active-filter-appointment-button").value);
+        if (name === "transactions") await fetchDocumentTransaction(document.getElementById("active-filter-transaction-button").value);
+        if (name === "services")     await fetchServices();
+        if (name === "users")        await fetchUsers();
+        if (name === "walkin")       await loadWalkInTransactions();
+        if (name === "schedule")     await fetchScheduleForecast();
+      }
+
+
+      /* ── Appointments ──────────────────────────────────────────── */
+
+      async function filterAppointments(status) {
+        document.getElementById("active-filter-appointment-button").value = status;
+        document.querySelectorAll("#panel-appointments .filter-chip").forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
+        document.getElementById("appointmentSearch").value = "";
+        await fetchClientAppointments(status);
+      }
+
+      function showAppointmentReasonModal(id) {
+        cancelAppointmentReasonModal.show();
+        document.getElementById("appointmentID").innerHTML = id;
+      }
+
+      async function submitCancellationReason() {
+        const id     = document.getElementById("appointmentID").innerHTML;
+        const reason = document.getElementById("cancelReason").value;
+        const res    = await fetch("/api/admin/cancelAppointment", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          body: JSON.stringify({ appointmentID: id, cancelReason: reason }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          cancelAppointmentReasonModal.hide();
+          filterAppointments("pending");
+        }
+      }
+
+      async function fetchClientAppointments(status = "all") {
+        const res          = await fetch(`/api/admin/filterAppointments/${status}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const appointments = await res.json();
+        renderAppointmentsList(appointments, status);
+      }
+
+      function renderAppointmentsList(appointments, status) {
+        const c = document.getElementById("appointmentsList");
+        if (!appointments || appointments.length === 0) {
+          c.innerHTML = '<div class="empty-state"><i class="bi bi-calendar-x"></i><p>No appointments found</p></div>';
+          return;
+        }
+        c.innerHTML = appointments.map((app) => `
+          <div class="data-card">
+            <div class="data-card-header">
+              <div class="data-card-meta">
+                <span class="data-card-id">${app.client_name}</span>
+                <span class="data-card-date">
+                  Booked ${new Date(app.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} ·
+                  Appt ${new Date(app.appointment_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} ${app.appointment_time}
+                </span>
+              </div>
+              <span class="status-chip status-${app.status}">${app.status}</span>
+            </div>
+            <div class="data-card-tags">
+              ${app.services.map((s) => `<span class="mini-tag">${s}</span>`).join("")}
+            </div>
+            ${app.notes ? `<p class="data-card-note"><i class="bi bi-sticky-fill"></i>${app.notes}</p>` : ""}
+            <div class="data-card-actions">
+              ${status === "today"
+                ? `<button class="btn-outline-sm btn-amber" onclick="remindClient('${app.appointment_id}','${app.email}','reminder')"><i class="bi bi-bell"></i> Remind</button>`
+                : ""}
+              ${app.status !== "completed" && app.status !== "cancelled"
+                ? `<button class="btn-outline-sm btn-teal" onclick="showUpdateAppointmentStatus('${app.appointment_id}','${app.status}')">
+                     <i class="bi bi-${app.status === "approved" ? "check2-circle" : "calendar-check"}"></i>
+                     ${app.status === "approved" ? "Complete" : "Approve"}
+                   </button>`
+                : ""}
+              ${app.status === "pending"
+                ? `<button class="btn-danger-sm" onclick="showAppointmentReasonModal('${app.appointment_id}')">
+                     <i class="bi bi-x-circle"></i> Cancel
+                   </button>`
+                : ""}
+            </div>
+          </div>`
+        ).join("");
+      }
+
+      async function showUpdateAppointmentStatus(appointmentID) {
+        try {
+          document.getElementById("completeAppointmentID").value   = appointmentID;
+          document.getElementById("originalServices").innerHTML    = "";
+          document.getElementById("additionalServices").innerHTML  = "";
+          document.getElementById("completionRemarks").value       = "";
+          document.getElementById("selectionSummary").style.display = "none";
+
+          const res  = await fetch(`${BASE_URL}/api/admin/getAppointmentServices/${appointmentID}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          if (!res.ok) throw new Error("Failed to fetch appointment services");
+
+          const data = await res.json();
+          const { appointment, appointmentServices, allServices } = data;
+
+          document.getElementById("completeClientID").value  = appointment.client_id;
+          document.getElementById("clientName").textContent  = `${appointment.first_name} ${appointment.last_name}`;
+          document.getElementById("clientEmail").textContent = appointment.email;
+          document.getElementById("appointmentDate").textContent =
+            sfFormatDate(appointment.appointment_date, { year: "numeric", month: "long", day: "numeric" }) || "—";
+          document.getElementById("appointmentTime").textContent = appointment.appointment_time;
+
+          const origIds = appointmentServices.map((s) => s.service_id);
+          document.getElementById("originalServices").innerHTML = appointmentServices.map((s) => `
+            <label class="service-check-label" style="border-color: rgba(52, 211, 153, .3);">
+              <input type="checkbox" class="service-check-input service-checkbox" value="${s.service_id}" checked
+                onchange="updateServiceSelection()">
+              <div class="service-check-body">
+                <strong>${s.service_name}</strong>
+                <span>${s.description || "No description"}</span>
+              </div>
+            </label>`).join("");
+
+          const extra = allServices.filter((s) => !origIds.includes(s.service_id));
+          document.getElementById("additionalServices").innerHTML = extra.length
+            ? extra.map((s) => `
+                <label class="service-check-label">
+                  <input type="checkbox" class="service-check-input service-checkbox" value="${s.service_id}"
+                    onchange="updateServiceSelection()">
+                  <div class="service-check-body">
+                    <strong>${s.service_name}</strong>
+                    <span>${s.description || "No description"}</span>
+                  </div>
+                </label>`).join("")
+            : '<p style="font-size: 0.78rem; color: var(--text-muted);">No additional services available</p>';
+
+          updateServiceSelection();
+          completeAppointmentModal.show();
+        } catch (err) {
+          console.error(err);
+          showServerMessage("Failed to load appointment details", "error");
+        }
+      }
+
+      function updateServiceSelection() {
+        const boxes   = document.querySelectorAll(".service-checkbox");
+        const checked = Array.from(boxes).filter((c) => c.checked);
+        const s       = document.getElementById("selectionSummary");
+        if (checked.length > 0) {
+          document.getElementById("selectedCount").textContent = checked.length;
+          s.style.display = "flex";
+        } else {
+          s.style.display = "none";
+        }
+      }
+
+      async function submitCompleteAppointment() {
+        const appointmentId      = document.getElementById("completeAppointmentID").value;
+        const remarks            = document.getElementById("completionRemarks").value;
+        const selectedServiceIds = Array.from(document.querySelectorAll(".service-checkbox:checked"))
+          .map((c) => parseInt(c.value));
+
+        if (!selectedServiceIds.length) {
+          showServerMessage("Please select at least one service", "error");
+          return;
+        }
+
+        const ok = await showConfirm({
+          title:       "Complete Appointment",
+          message:     `Complete this appointment and create ${selectedServiceIds.length} transaction(s)? An email will be sent to the client.`,
+          confirmText: "Complete",
+          type:        "info",
+        });
+        if (!ok) return;
+
+        const btn    = event.target;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing…';
+
+        try {
+          const res  = await fetch(`${BASE_URL}/api/admin/completeAppointment`, {
+            method:  "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ appointmentId, selectedServiceIds, remarks }),
+          });
+          const data = await res.json();
+          if (res.ok) {
+            showServerMessage(`Appointment completed! ${data.transactionCount} transaction(s) created.`, "success");
+            completeAppointmentModal.hide();
+            await fetchClientAppointments();
+          } else {
+            showServerMessage(data.message || "Failed to complete appointment", "error");
+          }
+        } catch {
+          showServerMessage("Failed to complete appointment. Please try again.", "error");
+        } finally {
+          btn.disabled  = false;
+          btn.innerHTML = '<i class="bi bi-check-circle"></i> Complete & Create Transactions';
+        }
+      }
+
+
+      /* ── Transactions ──────────────────────────────────────────── */
+
+      async function filterTransactions(status) {
+        document.getElementById("active-filter-transaction-button").value = status;
+        document.querySelectorAll("#panel-transactions .filter-chip").forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
+        await fetchDocumentTransaction(status);
+      }
+
+      async function fetchDocumentTransaction(status = "all") {
+        const res = await fetch(`${BASE_URL}/api/admin/getDocumentTransactions/${status}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch transactions");
+        displayTransactions(await res.json());
+      }
+
+      function displayTransactions(transactions) {
+        const c = document.getElementById("transactionsList");
+        if (!transactions || !transactions.length) {
+          c.innerHTML = '<div class="empty-state"><i class="bi bi-inbox"></i><p>No transactions found</p></div>';
+          return;
+        }
+        c.innerHTML = transactions.map((tx) => `
+          <div class="data-card">
+            <div class="data-card-header">
+              <div class="data-card-meta">
+                <span class="data-card-id">Transaction #${tx.transaction_id}</span>
+                <span class="data-card-date">${tx.first_name} ${tx.last_name} · ${tx.email}</span>
+              </div>
+              <span class="status-chip status-${tx.status_name.toLowerCase().replace(/\s+/g, "")}">${mapStatus(tx.status_name)}</span>
+            </div>
+            <div class="data-card-rows">
+              <div class="data-row"><span class="data-row-label">Service</span><span class="data-row-val">${tx.service_name}</span></div>
+              <div class="data-row">
+                <span class="data-row-label">Created</span>
+                <span class="data-row-val">${new Date(tx.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+              </div>
+              <div class="data-row">
+                <span class="data-row-label">Updated</span>
+                <span class="data-row-val">${new Date(tx.updated_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+              </div>
+            </div>
+            <div class="data-card-actions">
+              ${tx.status_name === "claimed"
+                ? `<button class="btn-outline-sm btn-amber" onclick="generateTransactionReport(${tx.transaction_id})"><i class="bi bi-file-pdf"></i> Report</button>`
+                : `<button class="btn-outline-sm btn-indigo" onclick="showUpdateStatusModal(${tx.transaction_id},'${tx.status_name}')"><i class="bi bi-pencil"></i> Update</button>`}
+              <button class="btn-outline-sm btn-teal" onclick="viewTransactionTimeline(${tx.transaction_id})">
+                <i class="bi bi-clock-history"></i> Timeline
+              </button>
+            </div>
+          </div>`
+        ).join("");
+      }
+
+      async function showUpdateStatusModal(transactionId, status) {
+        document.getElementById("updateTransactionId").value         = transactionId;
+        document.getElementById("newTransactionStatus").value        = "";
+        document.getElementById("statusRemarks").value               = "";
+        document.getElementById("statusImages").value                = "";
+        document.getElementById("imagePreviewContainer").innerHTML   = "";
+        document.getElementById("statusMessage").style.display       = "none";
+        await loadStatuses(status);
+        updateStatusModal.show();
+      }
+
+      const STATUS_ID_MAP = {
+        submitted: 1,
+        ongoing:   2,
+        completed: 3,
+        to_claim:  4,
+        pending:   6,
+        claimed:   5,
+        cancelled: 7,
+      };
+
+      const STATUS_FLOW = {
+        pending:   ["submitted"],
+        submitted: ["ongoing"],
+        ongoing:   ["completed"],
+        completed: ["to_claim"],
+        to_claim:  ["claimed"],
+        cancelled: [],
+      };
+
+      function loadStatuses(cur) {
+        const sel = document.getElementById("newTransactionStatus");
+        sel.innerHTML = '<option value="">— Select Status —</option>';
+        (STATUS_FLOW[cur] || []).forEach((s) => {
+          const o       = document.createElement("option");
+          o.value       = STATUS_ID_MAP[s];
+          o.textContent = mapStatus(s);
+          sel.appendChild(o);
+        });
+      }
+
+      function mapStatus(s) {
+        return ({
+          submitted: "Submitted",
+          pending:   "Pending",
+          ongoing:   "On Going",
+          to_claim:  "To Claim",
+          completed: "Completed",
+          claimed:   "Claimed",
+          cancelled: "Cancelled",
+        }[s] ?? s);
+      }
+
+
+      async function viewTransactionTimeline(id) {
+        try {
+          const res = await fetch(`${BASE_URL}/api/admin/getTransactionTimeline/${id}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          displayTimeline(await res.json());
+          timelineModal.show();
+        } catch {
+          showServerMessage("Failed to load timeline", "error");
+        }
+      }
+
+      function displayTimeline(timeline) {
+        const c = document.getElementById("timelineContent");
+        if (!timeline || !timeline.length) {
+          c.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No timeline data</p>';
+          return;
+        }
+        const colors = ["#6366f1", "#22d3ee", "#fb923c", "#34d399", "#a78bfa", "#f43f5e"];
+        c.innerHTML =
+          '<div class="timeline-list">' +
+          timeline.map((item, i) => {
+            const col = colors[i % colors.length];
+            return `
+              <div class="timeline-entry" style="border-left-color: ${col}">
+                <div class="timeline-dot" style="background: ${col};"></div>
+                <div class="timeline-body">
+                  <div class="timeline-status">→ ${mapStatus(item.status_name)}</div>
+                  <div class="timeline-date">
+                    ${new Date(item.changed_at).toLocaleDateString("en-US", {
+                      year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit",
+                    })}
+                  </div>
+                  <div class="timeline-by"><strong>By:</strong> ${item.first_name} ${item.last_name}</div>
+                  ${item.remarks ? `<div class="timeline-remarks"><strong>Remarks:</strong> ${item.remarks}</div>` : ""}
+                  ${item.photos && item.photos.length
+                    ? `<div class="timeline-photos">${item.photos.map((p) =>
+                        `<a href="/${p.file_path}" target="_blank"><img src="/${p.file_path}" class="timeline-photo" alt="Attachment" loading="lazy"></a>`
+                      ).join("")}</div>`
+                    : ""}
+                </div>
+              </div>`;
+          }).join("") +
+          "</div>";
+      }
+
+      const ALLOWED_IMAGE_MIMETYPES = new Set([
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+      ]);
+      const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; 
+      const MAX_IMAGE_COUNT      = 5;
+
+      let _validatedImageFiles = [];
+
+      function handleImagePreview(input) {
+        const c = document.getElementById('imagePreviewContainer');
+        c.innerHTML = '';
+        _validatedImageFiles = [];
+
+        if (!input.files || input.files.length === 0) return;
+
+        const files = Array.from(input.files);
+
+        //  Count check 
+        if (files.length > MAX_IMAGE_COUNT) {
+          showStatusMessage(
+            `You can upload a maximum of ${MAX_IMAGE_COUNT} images at once.`,
+            'error'
+          );
+          input.value = '';
+          return;
+        }
+
+        const invalidFiles = [];
+
+        files.forEach((file, i) => {
+          // Type check 
+          if (!ALLOWED_IMAGE_MIMETYPES.has(file.type)) {
+            const isMedia = file.type.startsWith('video/') || file.type.startsWith('audio/');
+            const reason  = isMedia
+              ? `"${file.name}": ${file.type.startsWith('video/') ? 'Video' : 'Audio'} files are not allowed.`
+              : `"${file.name}": Unsupported file type (${file.type || 'unknown'}).`;
+            invalidFiles.push(reason);
+            return;
+          }
+
+          // 3. Size check
+          if (file.size > MAX_IMAGE_SIZE_BYTES) {
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+            invalidFiles.push(`"${file.name}": File is ${sizeMB} MB — maximum is 5 MB.`);
+            return;
+          }
+
+          // Valid — render preview
+          _validatedImageFiles.push(file);
+          const validIndex = _validatedImageFiles.length - 1;
+
+          const r      = new FileReader();
+          r.onload     = (e) => {
+            const d     = document.createElement('div');
+            d.className = 'img-preview-item';
+            d.dataset.index = validIndex;
+            d.innerHTML = `
+              <img src="${e.target.result}" alt="Preview">
+              <button onclick="removeImagePreview(${validIndex})" aria-label="Remove image">&times;</button>
+            `;
+            c.appendChild(d);
+          };
+          r.readAsDataURL(file);
+        });
+
+        //  Report any rejected files
+        if (invalidFiles.length > 0) {
+          showStatusMessage(
+            `${invalidFiles.length} file(s) were rejected:\n${invalidFiles.join('\n')}\n\nOnly JPEG, PNG, and GIF images up to 5 MB are allowed.`,
+            'error'
+          );
+        }
+
+        // Reset the input so the browser doesn't re-use the original FileList
+        input.value = '';
+      }
+
+      function removeImagePreview(index) {
+        _validatedImageFiles.splice(index, 1);
+
+        // Re-render all remaining previews so indices stay consistent
+        const c = document.getElementById('imagePreviewContainer');
+        c.innerHTML = '';
+
+        _validatedImageFiles.forEach((file, i) => {
+          const r    = new FileReader();
+          r.onload   = (e) => {
+            const d     = document.createElement('div');
+            d.className = 'img-preview-item';
+            d.dataset.index = i;
+            d.innerHTML = `
+              <img src="${e.target.result}" alt="Preview">
+              <button onclick="removeImagePreview(${i})" aria-label="Remove image">&times;</button>
+            `;
+            c.appendChild(d);
+          };
+          r.readAsDataURL(file);
+        });
+      }
+
+      async function saveTransactionStatus() {
+        const id       = document.getElementById('updateTransactionId').value;
+        const statusId = document.getElementById('newTransactionStatus').value;
+        const remarks  = document.getElementById('statusRemarks').value;
+
+        if (!statusId) {
+          showStatusMessage('Please select a status.', 'error');
+          return;
+        }
+
+        // Use the pre-validated in-memory list instead of reading the (now-reset) input
+        const images = _validatedImageFiles;
+
+        // Guard: re-check count just in case (defensive)
+        if (images.length > MAX_IMAGE_COUNT) {
+          showStatusMessage(`Maximum ${MAX_IMAGE_COUNT} images allowed.`, 'error');
+          return;
+        }
+
+        const btn     = event.target;
+        btn.disabled  = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Updating…';
+
+        try {
+          const fd = new FormData();
+          fd.append('transactionId', id);
+          fd.append('statusId',      statusId);
+          fd.append('remarks',       remarks);
+          images.forEach((file) => fd.append('images', file));
+
+          const res  = await fetch(`${BASE_URL}/api/admin/updateTransactionStatus`, {
+            method:  'PUT',
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            body:    fd,
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            showServerMessage(data.message + ' — Email notification sent', 'success');
+            // Clear validated list after successful submit
+            _validatedImageFiles = [];
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            updateStatusModal.hide();
+            await fetchDocumentTransaction();
+          } else {
+            // Surface the server's specific error (size, type, count, etc.)
+            showStatusMessage(data.message || 'Failed to update. Try again.', 'error');
+          }
+        } catch {
+          showStatusMessage('Failed to update. Check your connection and try again.', 'error');
+        } finally {
+          btn.disabled  = false;
+          btn.innerHTML = '<i class="bi bi-check-circle"></i> Update & Notify Client';
+        }
+      }
+
+      async function searchDocumentTransaction() {
+        const status = document.getElementById("active-filter-transaction-button").value;
+        const term   = document.getElementById("transactionSearch").value.trim();
+        if (term.length < 2) return fetchDocumentTransaction(status);
+
+        const res = await fetch(`${BASE_URL}/api/admin/searchDocumentTransaction/${term}/${status}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (!res.ok) throw new Error("Failed");
+        displayTransactions(await res.json());
+      }
+
+      async function searchAppointments() {
+        const term   = document.getElementById("appointmentSearch").value.trim();
+        const status = document.getElementById("active-filter-appointment-button").value;
+        if (term.length < 2) return fetchClientAppointments(status);
+
+        const res = await fetch(
+          `${BASE_URL}/api/admin/searchAppointments/${encodeURIComponent(term)}/${status}`,
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        );
+        if (!res.ok) { showServerMessage("Search failed", "error"); return; }
+        renderAppointmentsList(await res.json(), status);
+      }
+
+
+      /* ── Services ──────────────────────────────────────────────── */
+
+      async function fetchServices() {
+        const res      = await fetch("/api/admin/getAllServices", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const services = await res.json();
+        renderServices(services);
+      }
+
+      function renderServices(services) {
+        const grid = document.getElementById("servicesList");
+        if (!services || !services.length) {
+          grid.innerHTML = '<div class="empty-state"><i class="bi bi-gear"></i><p>No services yet</p></div>';
+          return;
+        }
+        grid.innerHTML = services.map((s) => `
+          <div class="service-card-admin">
+            <div class="service-card-header">
+              <div>
+                <h5 class="service-card-title">${s.service_name}</h5>
+                <p class="service-card-desc">${s.description}</p>
+              </div>
+              <span class="status-chip ${s.is_active == 1 ? "status-completed" : "status-cancelled"}">
+                ${s.is_active == 1 ? "Active" : "Inactive"}
+              </span>
+            </div>
+            <div class="service-card-actions">
+              <button class="btn-outline-sm btn-indigo" onclick="editService('${s.service_id}')">
+                <i class="bi bi-pencil"></i> Edit
+              </button>
+              <button class="btn-outline-sm ${s.is_active ? "btn-danger-outline" : "btn-teal"}"
+                onclick="toggleServiceStatus('${s.service_id}', ${s.is_active ? 0 : 1})">
+                <i class="bi bi-toggle-${s.is_active ? "on" : "off"}"></i>
+                ${s.is_active ? "Deactivate" : "Activate"}
+              </button>
+            </div>
+          </div>`
+        ).join("");
+      }
+
+      function showAddServiceModal() {
+        document.getElementById("serviceModalTitle").textContent = "Add New Service";
+        document.getElementById("serviceName").value            = "";
+        document.getElementById("serviceDescription").value     = "";
+        document.getElementById("serviceID").value              = "";
+        document.getElementById("serviceMessage").style.display = "none";
+        serviceModal.show();
+      }
+
+      function editService(id) {
+        document.getElementById("serviceModalTitle").textContent = "Edit Service";
+        document.getElementById("serviceID").value              = id;
+        document.getElementById("serviceMessage").style.display = "none";
+        serviceModal.show();
+      }
+
+      async function saveService() {
+        const name = document.getElementById("serviceName").value;
+        const desc = document.getElementById("serviceDescription").value;
+        const id   = document.getElementById("serviceID").value;
+
+        if (!name || !desc) return showServiceMessage("Please fill in all fields", "error");
+        if (name.length < 4) return showServiceMessage("Name too short", "error");
+
+        const url = id ? `/api/admin/saveService/${id}` : `/api/admin/saveService`;
+        const res = await fetch(url, {
+          method:  id ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:  `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ serviceName: name, description: desc }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          serviceModal.hide();
+          await fetchServices();
+          showServerMessage(data.message, "success");
+        } else {
+          showServiceMessage(data.message, "error");
+        }
+      }
+
+      async function toggleServiceStatus(serviceID, newStatus) {
+        const ok = await showConfirm({
+          title:       "Update Service Status",
+          message:     "Change the status of this service?",
+          confirmText: "Update",
+          type:        "warn",
+        });
+        if (!ok) return;
+
+        const res  = await fetch("/api/admin/toggleServiceStatus", {
+          method:  "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ serviceID, newStatus }),
+        });
+        const data = await res.json();
+        showServerMessage(data.message, data.success ? "success" : "error");
+        await fetchServices();
+      }
+
+      async function searchService() {
+        const q = document.getElementById("serviceSearch").value;
+        if (!q.length) return fetchServices();
+        if (q.length < 2) return;
+        const res = await fetch(`/api/admin/searchService/${q}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        renderServices(await res.json());
+      }
+
+
+      /* ── Users / Clients ───────────────────────────────────────── */
+
+      function filterUsers(role) {
+        document.querySelectorAll("#panel-users .filter-chip").forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
+        fetchUsers(role);
+      }
+
+      async function fetchUsers(role = "all") {
+        const res   = await fetch(`${BASE_URL}/api/admin/getAllUsers/${role}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const users = await res.json();
+        const tbody = document.getElementById("usersTableBody");
+
+        if (!users || !users.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="table-empty">No users found</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = users.map((u) => {
+          const isBanned = u.is_banned;
+          const banLabel = isBanned
+            ? (u.ban_type === "permanent"
+                ? "Permanently Banned"
+                : `Banned until ${sfFormatDate(u.ban_until, { month: "short", day: "numeric", year: "numeric" })}`)
+            : "";
+          return `
+            <tr>
+              <td class="td-name">${u.full_name || "null"}</td>
+              <td class="td-email">${u.email}</td>
+              <td><span class="status-chip role-${u.role}">${u.role}</span></td>
+              <td>
+                ${isBanned
+                  ? `<span class="status-chip status-cancelled" title="${banLabel}"><i class="bi bi-slash-circle"></i> Banned</span>`
+                  : `<span class="status-chip ${u.is_active ? "status-completed" : "status-cancelled"}">${u.is_active ? "Active" : "Inactive"}</span>`}
+              </td>
+              <td>
+                <span class="status-chip ${u.is_verified ? "status-completed" : "status-submitted"}">
+                  ${u.is_verified ? "Verified" : "Unverified"}
+                </span>
+              </td>
+              <td class="td-actions">
+                <button class="btn-outline-sm btn-indigo"
+                  onclick="openClientHistory(${u.id}, '${(u.full_name || "").replace(/'/g, "\\'")}', '${u.email}')"
+                  title="View History"><i class="bi bi-eye"></i></button>
+                <button class="btn-outline-sm btn-teal"
+                  onclick="goToClientChat(${u.id}, '${(u.full_name || "").replace(/'/g, "\\'")}', '${u.email}')"
+                  title="Open Chat"><i class="bi bi-chat-dots"></i></button>
+                ${u.role === "client"
+                  ? isBanned
+                    ? `<button class="btn-outline-sm btn-teal" onclick="confirmUnbanUser(${u.id}, '${(u.full_name || "").replace(/'/g, "\\'")}')"><i class="bi bi-check-circle"></i> Unban</button>`
+                    : `<button class="btn-outline-sm" style="color: var(--danger); border-color: rgba(244,63,94,.4);" onclick="openBanModal(${u.id}, '${(u.full_name || "").replace(/'/g, "\\'")}')"><i class="bi bi-slash-circle"></i> Ban</button>`
+                  : ""}
+              </td>
+            </tr>`;
+        }).join("");
+      }
+
+      function searchUsers() {
+        const q    = document.getElementById("userSearch").value.trim();
+        const role = document.querySelector("#panel-users .filter-chip.active")?.textContent?.trim().toLowerCase() || "all";
+        if (q.length === 0) { fetchUsers(role); return; }
+        if (q.length < 2) return;
+        document.querySelectorAll("#usersTableBody tr").forEach((row) => {
+          row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? "" : "none";
+        });
+      }
+
+      async function goToClientChat(userId, clientName, clientEmail) {
+        try {
+          const res = await fetch(`${BASE_URL}/api/admin/clients/${userId}/history`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          });
+          if (!res.ok) throw new Error('Failed to fetch client history.');
+
+          const data           = await res.json();
+          let   conversationId = data.conversationId;
+
+          if (!conversationId) {
+            const createRes = await fetch(
+              `${BASE_URL}/api/chat/${userId}/createConversation`,
+              {
+                method:  'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization:  `Bearer ${localStorage.getItem('token')}`,
+                },
+              }
+            );
+
+            if (!createRes.ok) throw new Error('Failed to create conversation.');
+            const createData = await createRes.json();
+            conversationId   = createData.conversation_id;
+          }
+
+          showChatPanel()
+
+          await new Promise(resolve => requestAnimationFrame(resolve));
+
+          if (typeof loadActiveConversations === 'function') {
+            await loadActiveConversations();
+          }
+          if (typeof selectConversation === 'function') {
+            await selectConversation(conversationId);
+          }
+
+          document
+            .querySelectorAll('.conversation-item')
+            .forEach(el => el.classList.remove('active'));
+
+          const match = document.querySelector(
+            `.conversation-item[onclick*="${conversationId}"]`
+          );
+          if (match) {
+            match.classList.add('active');
+            match.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+
+          const input = document.getElementById('messageInput');
+          if (input) input.focus();
+
+        } catch (err) {
+          console.error('goToClientChat error:', err);
+          showNotificationMessage(
+            err.message || 'Could not open conversation. Please try again.',
+            'error'
+          );
+        }
+      }
+
+      let _banTargetId   = null;
+      let _banTargetName = "";
+
+      function openBanModal(userId, userName) {
+        _banTargetId   = userId;
+        _banTargetName = userName;
+        document.getElementById("banModalClientName").textContent = userName;
+        document.getElementById("banType").value                  = "3_days";
+        document.getElementById("banReason").value                = "";
+        document.getElementById("banModalErr").style.display      = "none";
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("banModal")).show();
+      }
+
+      async function submitBanUser() {
+        const banType   = document.getElementById("banType").value;
+        const banReason = document.getElementById("banReason").value.trim();
+        const errEl     = document.getElementById("banModalErr");
+        const btn       = document.getElementById("banSubmitBtn");
+
+        errEl.style.display = "none";
+        btn.disabled        = true;
+        btn.innerHTML       = '<span class="spinner-border spinner-border-sm me-1"></span>Banning…';
+
+        try {
+          const res  = await fetch(`${BASE_URL}/api/admin/clients/${_banTargetId}/ban`, {
+            method:  "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ banType, banReason }),
+          });
+          const data = await res.json();
+
+          if (!res.ok) {
+            errEl.textContent   = data.message || "Failed to ban user.";
+            errEl.style.display = "block";
+            return;
+          }
+
+          bootstrap.Modal.getInstance(document.getElementById("banModal")).hide();
+          showNotificationMessage(`${_banTargetName} has been banned.`, "warning");
+
+          await fetchUsers("all");
+          document.querySelectorAll("#panel-users .filter-chip").forEach((b) => b.classList.remove("active"));
+          document.querySelector("#panel-users .filter-chip").classList.add("active");
+          goToClientChat(_banTargetId, _banTargetName, "");
+
+        } catch {
+          errEl.textContent   = "Network error. Please try again.";
+          errEl.style.display = "block";
+        } finally {
+          btn.disabled  = false;
+          btn.innerHTML = '<i class="bi bi-slash-circle"></i> Ban Account';
+        }
+      }
+
+      async function confirmUnbanUser(userId, userName) {
+        if (!confirm(`Lift the ban on ${userName}?`)) return;
+        try {
+          const res = await fetch(`${BASE_URL}/api/admin/clients/${userId}/unban`, {
+            method:  "POST",
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          if (res.ok) {
+            showNotificationMessage(`${userName}'s ban has been lifted.`, "success");
+            fetchUsers("all");
+          } else {
+            showNotificationMessage("Failed to unban user.", "error");
+          }
+        } catch {
+          showNotificationMessage("Network error.", "error");
+        }
+      }
+
+      async function changePassword() {
+        const cp = document.getElementById("currentPassword").value;
+        const nw = document.getElementById("newPassword").value;
+        const cf = document.getElementById("confirmNewPassword").value;
+
+        if (cp.length < 10 || !cp) return showChangePasswordMessage("Current Password doesn't match!", "error");
+        if (nw !== cf)            return showChangePasswordMessage("Passwords do not match", "error");
+        if (nw.length < 12 || nw.length > 24) return showChangePasswordMessage("Password must be 12–24 characters", "error");
+
+        const token = localStorage.getItem("token");
+        if (!token) return showChangePasswordMessage("You must be logged in", "error");
+
+        try {
+          const res  = await fetch(`${BASE_URL}/api/user/createNewPassword`, {
+            method:  "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ newPassword: nw, currentPassword: cp }),
+          });
+          const data = await res.json();
+          if (res.ok) {
+            showServerMessage(data.message, "success");
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            changePasswordModal.hide();
+          } else {
+            showChangePasswordMessage(data.message, "error");
+          }
+        } catch {
+          showChangePasswordMessage("Server error. Please try again.", "error");
+        }
+      }
+
+
+      /* ── Report PDF ────────────────────────────────────────────── */
+
+      async function generateTransactionReport(transactionId) {
+        showServerMessage("Preparing report…", "info");
+        try {
+          const res = await fetch(`${BASE_URL}/api/admin/getTransactionReport/${transactionId}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          if (!res.ok) throw new Error();
+          printTransactionReport(await res.json());
+        } catch {
+          showServerMessage("Failed to generate report", "error");
+        }
+      }
+
+      function printTransactionReport(data) {
+        const { transaction, timeline, appointment } = data;
+        const iframe = document.createElement("iframe");
+        iframe.style.cssText = "position: absolute; width: 0; height: 0; border: none;";
+        document.body.appendChild(iframe);
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report #${transaction.transaction_id}</title>
+<style>
+  @page { size: A4; margin: 20mm 15mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.5; color: #000; background: #fff; }
+  .report-header { text-align: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 3px double #000; }
+  .company-name { font-size: 18pt; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px; }
+  .company-tagline { font-size: 10pt; font-style: italic; margin-bottom: 15px; }
+  .report-title { font-size: 16pt; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+  .report-subtitle { font-size: 12pt; margin-bottom: 5px; }
+  .report-date { font-size: 9pt; color: #333; }
+  .section { margin-bottom: 25px; page-break-inside: avoid; }
+  .section-title { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 5px; border-bottom: 2px solid #000; letter-spacing: 1px; }
+  .info-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+  .info-table td { padding: 6px 10px; border: 1px solid #000; vertical-align: top; }
+  .info-table .label { width: 35%; font-weight: bold; background: #f5f5f5; }
+  .info-table .value { width: 65%; }
+  .timeline-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .timeline-table th { background: #000; color: #fff; padding: 8px; text-align: left; font-size: 10pt; font-weight: bold; border: 1px solid #000; }
+  .timeline-table td { padding: 8px; border: 1px solid #000; font-size: 10pt; vertical-align: top; }
+  .timeline-table tr:nth-child(even) { background: #f9f9f9; }
+  .status-box { display: inline-block; padding: 4px 12px; border: 2px solid #000; font-weight: bold; text-transform: uppercase; font-size: 10pt; }
+  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+  .photo-item { text-align: center; border: 1px solid #000; padding: 5px; }
+  .photo-item img { max-width: 100%; max-height: 150px; display: block; margin: 0 auto; }
+  .photo-caption { font-size: 8pt; margin-top: 5px; word-break: break-all; }
+  .signature-section { margin-top: 50px; }
+  .signature-row { display: table; width: 100%; margin-top: 40px; }
+  .signature-box { display: table-cell; width: 48%; text-align: center; }
+  .signature-box:first-child { padding-right: 4%; }
+  .signature-line { border-top: 2px solid #000; margin-top: 60px; padding-top: 8px; font-weight: bold; }
+  .signature-label { font-size: 9pt; margin-top: 5px; color: #555; }
+  .footer { margin-top: 40px; padding-top: 15px; border-top: 2px solid #000; text-align: center; font-size: 9pt; }
+  .footer-note { font-style: italic; margin-top: 5px; color: #555; }
+  .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80pt; color: rgba(0,0,0,0.05); z-index: -1; font-weight: bold; }
+  @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+</style></head>
+<body>
+<div class="watermark">OFFICIAL</div>
+<div class="report-header">
+  <div class="company-name">RANDC DOCUMENTATION SERVICES</div>
+  <div class="company-tagline">Professional Document Processing Solutions</div>
+  <div class="report-title">Document Processing Transaction Report</div>
+  <div class="report-subtitle">Transaction ID: #${transaction.transaction_id}</div>
+  <div class="report-date">Report Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
+</div>
+<div class="section">
+  <div class="section-title">I. Client Information</div>
+  <table class="info-table">
+    <tr><td class="label">Full Name</td><td class="value">${transaction.first_name} ${transaction.middle_name || ""} ${transaction.last_name}</td></tr>
+    <tr><td class="label">Email</td><td class="value">${transaction.email}</td></tr>
+    <tr><td class="label">Contact</td><td class="value">${transaction.phone_number || "Not Provided"}</td></tr>
+    <tr><td class="label">Sex</td><td class="value">${transaction.sex || "Not Specified"}</td></tr>
+    <tr><td class="label">Client ID</td><td class="value">#${transaction.client_id}</td></tr>
+  </table>
+</div>
+<div class="section">
+  <div class="section-title">II. Service Details</div>
+  <table class="info-table">
+    <tr><td class="label">Service Name</td><td class="value">${transaction.service_name}</td></tr>
+    <tr><td class="label">Description</td><td class="value">${transaction.service_description || "N/A"}</td></tr>
+    <tr><td class="label">Current Status</td><td class="value"><span class="status-box">${transaction.current_status}</span></td></tr>
+  </table>
+</div>
+<div class="section">
+  <div class="section-title">III. Transaction Information</div>
+  <table class="info-table">
+    <tr><td class="label">Transaction ID</td><td class="value">#${transaction.transaction_id}</td></tr>
+    <tr><td class="label">Date Initiated</td><td class="value">${new Date(transaction.transaction_created_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</td></tr>
+    <tr><td class="label">Last Updated</td><td class="value">${new Date(transaction.transaction_updated_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</td></tr>
+    <tr><td class="label">Processed By</td><td class="value">${transaction.created_by_first_name} ${transaction.created_by_last_name}</td></tr>
+  </table>
+</div>
+${appointment ? `
+<div class="section">
+  <div class="section-title">IV. Related Appointment</div>
+  <table class="info-table">
+    <tr><td class="label">Appointment ID</td><td class="value">#${appointment.appointment_id}</td></tr>
+    <tr><td class="label">Date & Time</td><td class="value">${new Date(appointment.appointment_date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })} at ${appointment.appointment_time}</td></tr>
+    ${appointment.notes ? `<tr><td class="label">Notes</td><td class="value">${appointment.notes}</td></tr>` : ""}
+  </table>
+</div>` : ""}
+<div class="section" style="page-break-before: always;">
+  <div class="section-title">V. Processing Timeline</div>
+  <table class="timeline-table">
+    <thead>
+      <tr><th>#</th><th>Date & Time</th><th>Status</th><th>Updated By</th><th>Remarks</th></tr>
+    </thead>
+    <tbody>
+      ${timeline.map((item, idx) => `
+        <tr>
+          <td style="text-align: center; font-weight: bold;">${idx + 1}</td>
+          <td>
+            ${new Date(item.changed_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}<br>
+            <small>${new Date(item.changed_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</small>
+          </td>
+          <td><strong>${item.status_name}</strong></td>
+          <td>${item.changed_by_first_name} ${item.changed_by_last_name}</td>
+          <td>${item.remarks || "No remarks"}</td>
+        </tr>
+        ${item.photos && item.photos.length
+          ? `<tr><td colspan="5" style="background: #f0f0f0; padding: 10px;"><strong>Attachments:</strong>
+               <div class="photo-grid">${item.photos.map((p) =>
+                 `<div class="photo-item"><img src="/${p.file_path}" alt="${p.file_name}"><div class="photo-caption">${p.file_name}</div></div>`
+               ).join("")}</div></td></tr>`
+          : ""}`
+      ).join("")}
+    </tbody>
+  </table>
+</div>
+<div class="signature-section">
+  <div class="section-title">VI. Certification</div>
+  <p style="margin-bottom: 20px; text-align: justify; font-size: 10pt;">
+    This certifies that the information in this report is true and accurate as of the date of generation.
+  </p>
+  <div class="signature-row">
+    <div class="signature-box">
+      <div class="signature-line">${transaction.first_name} ${transaction.last_name}</div>
+      <div class="signature-label">Client Signature / Date</div>
+    </div>
+    <div class="signature-box">
+      <div class="signature-line">Authorized Officer</div>
+      <div class="signature-label">RandC Documentation Services / Date</div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <strong>RANDC DOCUMENTATION SERVICES</strong><br>
+  Professional Document Processing Solutions<br>
+  <div class="footer-note">
+    Official computer-generated report — Reference: TR-${transaction.transaction_id}-${new Date().getFullYear()}<br>
+    Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+  </div>
+</div>
+</body></html>`);
+        doc.close();
+        iframe.contentWindow.onload = () => {
+          setTimeout(() => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+            setTimeout(() => document.body.removeChild(iframe), 100);
+          }, 250);
+        };
+      }
+
+
+      /* ═══════════════════════════════════════════════════════════════
+         SCHEDULE FORECAST
+      ═══════════════════════════════════════════════════════════════ */
+
+      const SF_TIMES = [
+        "08:00:00", "09:00:00", "10:00:00", "11:00:00",
+        "13:00:00", "14:00:00", "15:00:00", "16:00:00",
+      ];
+   
+      const SF_TIME_LABELS = {
+        "08:00:00": "8:00 AM",  "09:00:00": "9:00 AM",
+        "10:00:00": "10:00 AM", "11:00:00": "11:00 AM",
+        "13:00:00": "1:00 PM",  "14:00:00": "2:00 PM",
+        "15:00:00": "3:00 PM",  "16:00:00": "4:00 PM",
+      };
+   
+      const SF_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+      let _sfWeekStart  = null;
+      let _sfSlotData   = null;
+      let _sfDrawerSlot = null;
+
+      function sfGoToday() {
+        _sfWeekStart = sfGetWeekStart(new Date());
+        fetchScheduleForecast();
+      }
+
+      function sfNavigateWeek(dir) {
+        if (!_sfWeekStart) return;
+        _sfWeekStart = new Date(_sfWeekStart);
+        _sfWeekStart.setDate(_sfWeekStart.getDate() + dir * 7);
+        fetchScheduleForecast();
+      }
+
+      function sfGetWeekStart(date) {
+        const d   = new Date(date);
+        const day = d.getDay();
+        d.setDate(d.getDate() - day);
+        d.setHours(0, 0, 0, 0);
+        return d;
+      }
+
+      function sfDateStr(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+
+      function sfFormatWeekLabel(start) {
+        const end  = new Date(start);
+        end.setDate(end.getDate() + 6);
+        const opts = { month: "short", day: "numeric" };
+        return `${start.toLocaleDateString("en-US", opts)} – ${end.toLocaleDateString("en-US", { ...opts, year: "numeric" })}`;
+      }
+
+      async function fetchScheduleForecast() {
+        if (!_sfWeekStart) _sfWeekStart = sfGetWeekStart(new Date());
+
+        const endDay = new Date(_sfWeekStart);
+        endDay.setDate(endDay.getDate() + 6);
+
+        const start = sfDateStr(_sfWeekStart);
+        const end   = sfDateStr(endDay);
+
+        document.getElementById("sfWeekLabel").textContent = sfFormatWeekLabel(_sfWeekStart);
+        document.getElementById("sfGrid").innerHTML = `
+          <div class="sf-loading"><i class="bi bi-arrow-repeat sf-spin"></i> Loading schedule…</div>`;
+
+        try {
+          const res = await fetch(`${BASE_URL}/api/admin/getScheduleForecast/${start}/${end}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          if (!res.ok) throw new Error("Failed to fetch");
+          _sfSlotData = await res.json();
+          sfRenderGrid(_sfSlotData, start, end);
+          sfRenderSummary(_sfSlotData.summary);
+        } catch (e) {
+          console.error("fetchScheduleForecast error:", e);
+          document.getElementById("sfGrid").innerHTML = `
+            <div class="sf-loading" style="color: var(--danger);">
+              <i class="bi bi-exclamation-triangle"></i> Failed to load schedule. Please try again.
+            </div>`;
+        }
+      }
+
+      function sfRenderSummary(s) {
+        document.getElementById("sfTotalBooked").textContent      = s.totalBooked;
+        document.getElementById("sfSlotsOpen").textContent        = s.slotsOpen;
+        document.getElementById("sfSlotsFull").textContent        = s.slotsFull;
+        document.getElementById("sfSlotsUnavailable").textContent = s.slotsUnavailable;
+        document.getElementById("sfUniqueClients").textContent    = s.uniqueClients;
+      }
+
+      function sfRenderGrid(data, startStr, endStr) {
+        const grid = document.getElementById("sfGrid");
+        grid.innerHTML = "";
+
+        const days = [];
+        const cur  = new Date(_sfWeekStart);
+        for (let i = 0; i < 7; i++) {
+          days.push(new Date(cur));
+          cur.setDate(cur.getDate() + 1);
+        }
+
+        const todayStr = sfDateStr(new Date());
+
+        // Build lookup maps
+        const slotMap    = {};
+        const bookingMap = {};
+        data.slots.forEach((sl) => {
+          slotMap[`${sl.appointment_date}|${sl.appointment_time}`] = sl;
+        });
+        data.bookings.forEach((b) => {
+          const key = `${b.appointment_date}|${b.appointment_time}`;
+          if (!bookingMap[key]) bookingMap[key] = [];
+          bookingMap[key].push(b);
+        });
+
+        // Header row
+        const corner = document.createElement("div");
+        corner.className = "sf-hdr-corner";
+        corner.setAttribute("aria-hidden", "true");
+        grid.appendChild(corner);
+
+        days.forEach((d) => {
+          const dateStr   = sfDateStr(d);
+          const isToday   = dateStr === todayStr;
+          const dayOfWeek = d.getDay();
+          const isClosed  = dayOfWeek === 0;
+
+          const cell = document.createElement("div");
+          cell.className = `sf-day-hdr${isToday ? " sf-today" : ""}${isClosed ? " sf-day-closed" : ""}`;
+          cell.innerHTML = `
+            <div class="sf-day-name">
+              ${SF_DAYS[d.getDay()]}${isClosed ? '<span class="sf-closed-hdr-badge">Closed</span>' : ""}
+            </div>
+            <div class="sf-day-date">${d.getDate()}</div>`;
+          grid.appendChild(cell);
+        });
+
+        // Time rows
+        const lastTimeIdx = SF_TIMES.length - 1;
+
+        SF_TIMES.forEach((time, tIdx) => {
+          const timeCell = document.createElement("div");
+          timeCell.className = `sf-time-label${tIdx === lastTimeIdx ? " sf-row-last" : ""}`;
+          timeCell.textContent = SF_TIME_LABELS[time] || time.slice(0, 5);
+          grid.appendChild(timeCell);
+
+          days.forEach((d) => {
+            const dateStr   = sfDateStr(d);
+            const dayOfWeek = d.getDay();
+            const isClosed  = dayOfWeek === 0;
+            const key       = `${dateStr}|${time}`;
+            const slot      = slotMap[key];
+            const clients   = bookingMap[key] || [];
+            const isLastRow = tIdx === lastTimeIdx;
+
+            const cell = document.createElement("div");
+            cell.classList.add("sf-cell");
+            if (isLastRow) cell.classList.add("sf-row-last");
+
+            if (isClosed) {
+              cell.classList.add("sf-closed");
+              if (tIdx === 0) cell.innerHTML = `<span class="sf-closed-label">Closed</span>`;
+              cell.style.cursor = "default";
+              cell.setAttribute("aria-label", `${SF_DAYS[dayOfWeek]} — Office closed`);
+            } else if (!slot) {
+              cell.classList.add("sf-empty");
+              cell.innerHTML = `<span class="sf-cell-count" style="opacity: .25;">—</span>`;
+              cell.style.cursor = "default";
+            } else {
+              const booked = slot.actual_bookings || 0;
+              const cap    = slot.max_capacity    || 3;
+              const pct    = Math.round((booked / cap) * 100);
+              const avail  = slot.is_available;
+
+              if (!avail) {
+                cell.classList.add("sf-unavail");
+                cell.innerHTML = `<span class="sf-unavail-label">Unavailable</span>`;
+              } else if (booked >= cap) {
+                cell.classList.add("sf-full");
+                sfBuildCellContent(cell, booked, cap, pct, clients);
+              } else if (booked > 0) {
+                cell.classList.add("sf-partial");
+                sfBuildCellContent(cell, booked, cap, pct, clients);
+              } else {
+                cell.classList.add("sf-open");
+                sfBuildCellContent(cell, booked, cap, 0, clients);
+              }
+
+              if (avail) {
+                cell.setAttribute("role", "button");
+                cell.setAttribute("tabindex", "0");
+                cell.setAttribute("aria-label", `${dateStr} ${SF_TIME_LABELS[time]}: ${booked} of ${cap} booked`);
+                cell.onclick = () => sfOpenDrawer(key, dateStr, time, slot, clients);
+                cell.onkeydown = (e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    sfOpenDrawer(key, dateStr, time, slot, clients);
+                  }
+                };
+              }
+            }
+
+            grid.appendChild(cell);
+          });
+        });
+      }
+
+      function sfBuildCellContent(cell, booked, cap, pct, clients) {
+        const bar  = document.createElement("div");
+        bar.className = "sf-cell-bar";
+        const fill = document.createElement("div");
+        fill.className    = "sf-cell-bar-fill";
+        fill.style.width  = `${pct}%`;
+        bar.appendChild(fill);
+
+        const count = document.createElement("div");
+        count.className   = "sf-cell-count";
+        count.textContent = `${booked}/${cap}`;
+
+        const capLabel = document.createElement("div");
+        capLabel.className   = "sf-cell-cap";
+        capLabel.textContent = booked === 0 ? "Open" : booked >= cap ? "Full" : `${cap - booked} left`;
+
+        const avatarWrap = document.createElement("div");
+        avatarWrap.className = "sf-cell-avatars";
+        clients.slice(0, 3).forEach((c) => {
+          const dot     = document.createElement("div");
+          dot.className = "sf-avatar-dot";
+          dot.title     = `${c.first_name} ${c.last_name}`;
+          dot.textContent = (c.first_name?.[0] || "") + (c.last_name?.[0] || "");
+          avatarWrap.appendChild(dot);
+        });
+        if (clients.length > 3) {
+          const more = document.createElement("div");
+          more.className        = "sf-avatar-dot";
+          more.style.background = "var(--border-bright)";
+          more.style.color      = "var(--text-muted)";
+          more.title            = `+${clients.length - 3} more`;
+          more.textContent      = `+${clients.length - 3}`;
+          avatarWrap.appendChild(more);
+        }
+
+        cell.appendChild(bar);
+        cell.appendChild(count);
+        cell.appendChild(capLabel);
+        cell.appendChild(avatarWrap);
+      }
+
+      function sfCloseDrawer() {
+        _sfDrawerSlot = null;
+        document.getElementById("sfDrawerOverlay").classList.remove("sf-drawer-vis");
+        document.getElementById("sfDrawer").classList.remove("sf-drawer-open");
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") sfCloseDrawer();
+      });
+
+
+      /* ═══════════════════════════════════════════════════════════════
+         DASHBOARD CHARTS
+      ═══════════════════════════════════════════════════════════════ */
+
+      let apptChart = null;
+      let txChart   = null;
+
+      const CHART_COLORS = {
+        pending:   "#fb923c",
+        approved:  "#22d3ee",
+        completed: "#34d399",
+        cancelled: "#f43f5e",
+        submitted: "#a78bfa",
+        ongoing:   "#fbbf24",
+        to_claim:  "#38bdf8",
+        claimed:   "#6ee7b7",
+      };
+
+      async function initDashboardCharts() {
+        try {
+          const token = localStorage.getItem("token");
+          if (!token) return;
+          const headers = { Authorization: `Bearer ${token}` };
+
+          // Fetch counts
+          const apptStatuses = ["pending", "approved", "completed", "cancelled"];
+          const apptCounts   = await Promise.all(
+            apptStatuses.map((status) =>
+              fetch(`/api/admin/filterAppointments/${status}`, { headers })
+                .then((r) => (r.ok ? r.json() : []))
+                .then((d) => (Array.isArray(d) ? d.length : 0))
+                .catch(() => 0)
+            )
+          );
+
+          const txStatuses = ["pending", "submitted", "ongoing", "completed", "to_claim", "claimed", "cancelled"];
+          const txCounts   = await Promise.all(
+            txStatuses.map((status) =>
+              fetch(`${BASE_URL}/api/admin/getDocumentTransactions/${status}`, { headers })
+                .then((r) => (r.ok ? r.json() : []))
+                .then((d) => (Array.isArray(d) ? d.length : 0))
+                .catch(() => 0)
+            )
+          );
+
+          // Update stat chips
+          const todayRes = await fetch(`/api/admin/filterAppointments/today`, { headers }).catch(() => null);
+          if (todayRes && todayRes.ok) {
+            const d = await todayRes.json();
+            document.getElementById("todayAppointments").textContent = Array.isArray(d) ? d.length : 0;
+          }
+          document.getElementById("pendingAppointments").textContent = apptCounts[0];
+          document.getElementById("activeTransactions").textContent  = txCounts[txStatuses.indexOf("ongoing")] || 0;
+
+          // Theme colours
+          const isDark = document.documentElement.getAttribute("data-theme") !== "light";
+          const gridColor    = isDark ? "#232f4a" : "#e5e7eb";
+          const labelColor   = isDark ? "#8a97b4" : "#6b7280";
+          const tooltipBg    = isDark ? "#141e33" : "#ffffff";
+          const tooltipText  = isDark ? "#e8edf7" : "#0f172a";
+          const tooltipBody  = isDark ? "#8a97b4" : "#374151";
+          const tooltipBorder = isDark ? "#2e3f60" : "#dde1ef";
+
+          // Appointments bar chart
+          const apptCanvas = document.getElementById("appointmentsChart");
+          if (apptCanvas) {
+            const existing = Chart.getChart(apptCanvas);
+            if (existing) existing.destroy();
+            apptChart = new Chart(apptCanvas, {
+              type: "bar",
+              data: {
+                labels:   apptStatuses.map((s) => s.charAt(0).toUpperCase() + s.slice(1)),
+                datasets: [{
+                  label:           "Appointments",
+                  data:            apptCounts,
+                  backgroundColor: apptStatuses.map((s) => CHART_COLORS[s] + "33"),
+                  borderColor:     apptStatuses.map((s) => CHART_COLORS[s]),
+                  borderWidth:     2,
+                  borderRadius:    6,
+                  borderSkipped:   false,
+                }],
+              },
+              options: {
+                responsive:          true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend:  { display: false },
+                  tooltip: {
+                    backgroundColor: tooltipBg,
+                    titleColor:      tooltipText,
+                    bodyColor:       tooltipBody,
+                    borderColor:     tooltipBorder,
+                    borderWidth:     1,
+                    padding:         10,
+                    cornerRadius:    8,
+                  },
+                },
+                scales: {
+                  x: { grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 11 } } },
+                  y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 11 }, stepSize: 1 }, beginAtZero: true },
+                },
+              },
+            });
+          }
+
+          // Transactions doughnut chart
+          const txCanvas = document.getElementById("transactionsChart");
+          if (txCanvas) {
+            const existing = Chart.getChart(txCanvas);
+            if (existing) existing.destroy();
+
+            const filtered = txStatuses
+              .map((s, i) => ({ label: mapStatus(s), count: txCounts[i], color: CHART_COLORS[s] || "#6366f1" }))
+              .filter((d) => d.count > 0);
+            const hasData = filtered.length > 0;
+
+            txChart = new Chart(txCanvas, {
+              type: "doughnut",
+              data: {
+                labels:   hasData ? filtered.map((d) => d.label) : ["No Data"],
+                datasets: [{
+                  data:            hasData ? filtered.map((d) => d.count) : [1],
+                  backgroundColor: hasData ? filtered.map((d) => d.color + "88") : ["#2e3f60"],
+                  borderColor:     hasData ? filtered.map((d) => d.color)        : ["#2e3f60"],
+                  borderWidth:     2,
+                  hoverOffset:     6,
+                }],
+              },
+              options: {
+                responsive:          true,
+                maintainAspectRatio: false,
+                cutout:              "62%",
+                plugins: {
+                  legend: {
+                    position: "bottom",
+                    labels: {
+                      color:           labelColor,
+                      font:            { size: 11 },
+                      padding:         12,
+                      usePointStyle:   true,
+                      pointStyleWidth: 10,
+                    },
+                  },
+                  tooltip: {
+                    backgroundColor: tooltipBg,
+                    titleColor:      tooltipText,
+                    bodyColor:       tooltipBody,
+                    borderColor:     tooltipBorder,
+                    borderWidth:     1,
+                    padding:         10,
+                    cornerRadius:    8,
+                  },
+                },
+              },
+            });
+          }
+        } catch (error) {
+
+
+          console.error("Chart init error:", error);
+        }
+      }
+
+      function initializeUser() {
+        const token = localStorage.getItem("token");
+        let user = JSON.parse(localStorage.getItem("user") || "null");
+
+        if (!token || !user){
+          window.location.href = "/";
+          return;
+        }
+
+       if(user.role === 'client'){
+            window.location.href = "/pages/client.html";
+            return;
+       }
+
+        document.getElementById("user-name").textContent =`${user.first_name}, ${user.last_name}`;
+        document.getElementById("user-role").textContent = user.role;
+        fetchServices();
+        initDashboardCharts();
+        fetchAdminUnreadCount()
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        if (!localStorage.getItem("token")) {
+          window.location.href = "/";
+          return;
+        }
+        initializeUser();
+        const el = document.getElementById("currentDate");
+        if (el)
+          el.textContent = new Date().toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
+      });
+    
+
+    </script>
+  </body>
+</html>

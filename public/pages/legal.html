@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legal — RandC Document Processing</title>
+  <meta name="description" content="Terms of Service, Privacy Policy, and Data Privacy Act compliance for RandC Document Processing System.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/randclogo.png" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <style>
+  :root {
+      --primary:      #16a34a;
+      --primary-dark: #15803d;
+      --primary-glow: rgba(22,163,74,.18);
+      --accent:       #0891b2;
+      --danger:       #dc2626;
+      --warning:      #d97706;
+      --gradient:     linear-gradient(135deg,#16a34a 0%,#0891b2 100%);
+      --gradient-soft:linear-gradient(135deg,rgba(22,163,74,.08) 0%,rgba(8,145,178,.05) 100%);
+      --gradient-warn:linear-gradient(135deg,#d97706 0%,#dc2626 100%);
+      --bg-base:      #f1f3fa;
+      --bg-surface:   #ffffff;
+      --bg-elevated:  #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary:#374151;
+      --text-muted:   #6b7280;
+      --border:       #dde1ef;
+      --shadow-sm:    0 1px 4px rgba(0,0,0,.08);
+      --shadow-md:    0 4px 16px rgba(0,0,0,.1);
+      --shadow-lg:    0 12px 36px rgba(0,0,0,.13);
+      --radius-sm:    6px;
+      --radius-md:    10px;
+      --radius-lg:    14px;
+      --radius-xl:    20px;
+      --transition:   all .2s cubic-bezier(.4,0,.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-size: .95rem;
+      line-height: 1.7;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    strong { font-weight: 600; color: var(--text-primary); }
+
+    /* ── Top bar ─────────────────────────────────────────────── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: .75rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-size: .82rem; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-muted);
+      text-decoration: none; transition: var(--transition);
+    }
+    .back-link:hover { color: var(--primary); text-decoration: none; }
+    .top-bar-brand {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800; font-size: 1.05rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Sidebar + Layout ────────────────────────────────────── */
+    .page-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    @media (max-width: 768px) {
+      .page-wrap { grid-template-columns: 1fr; gap: 1.5rem; padding: 1.5rem 1rem 4rem; }
+      .toc-sidebar { position: static !important; }
+    }
+
+    /* ── Table of Contents sidebar ───────────────────────────── */
+    .toc-sidebar {
+      position: sticky; top: 72px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .toc-sidebar h6 {
+      font-family: 'Outfit', sans-serif;
+      font-size: .7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em;
+      color: var(--text-muted);
+      margin-bottom: .75rem;
+    }
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: .1rem; }
+    .toc-list a {
+      display: block; font-size: .78rem; color: var(--text-secondary);
+      padding: .3rem .5rem; border-radius: var(--radius-sm);
+      transition: var(--transition); text-decoration: none;
+      border-left: 2px solid transparent;
+    }
+    .toc-list a:hover { color: var(--primary); background: #eef0ff; border-left-color: var(--primary); }
+    .toc-list a.active { color: var(--primary); font-weight: 600; background: #eef0ff; border-left-color: var(--primary); }
+    .toc-list .toc-section-label {
+      font-size: .67rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--text-muted);
+      padding: .6rem .5rem .2rem; display: block;
+    }
+
+    /* ── Main content ────────────────────────────────────────── */
+    .legal-main { min-width: 0; }
+
+    .page-hero {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-hero .updated {
+      font-size: .75rem; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text-muted); margin-bottom: 1rem;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .page-hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem; font-weight: 800; line-height: 1.15;
+      color: var(--text-primary); margin-bottom: 1rem;
+    }
+    .page-hero h1 span {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .summary-box {
+      background: var(--text-primary);
+      color: #f8fafc;
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      font-size: .88rem; line-height: 1.65;
+    }
+
+    /* ── Legal sections ──────────────────────────────────────── */
+    .legal-section {
+      margin-bottom: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .legal-section:first-of-type { border-top: none; padding-top: 0; }
+
+    .section-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: .75rem; font-weight: 700; letter-spacing: .08em;
+      color: var(--text-muted); text-transform: uppercase;
+      margin-bottom: .4rem; display: flex; align-items: center; gap: .4rem;
+    }
+    .section-num::before {
+      content: attr(data-num);
+      font-size: .65rem; font-weight: 800;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: .1rem .4rem;
+      color: var(--primary);
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .legal-section h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary); margin-bottom: .75rem;
+    }
+    .legal-section p { color: var(--text-secondary); margin-bottom: .75rem; }
+    .legal-section p:last-child { margin-bottom: 0; }
+
+    .legal-section ul, .legal-section ol {
+      padding-left: 1.25rem; margin: .5rem 0 .75rem;
+      display: flex; flex-direction: column; gap: .35rem;
+    }
+    .legal-section li { color: var(--text-secondary); }
+
+    /* Callout box */
+    .callout {
+      border-left: 3px solid var(--primary);
+      background: #eef0ff;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: .75rem 1rem;
+      font-size: .85rem; font-style: italic;
+      color: var(--text-secondary);
+      margin: .75rem 0;
+    }
+    .callout.warn { border-left-color: var(--warning); background: #fefce8; }
+    .callout.success { border-left-color: var(--success); background: #f0fdf4; }
+    .callout.danger { border-left-color: var(--danger); background: #fff1f2; }
+
+    /* Status flow diagram */
+    .status-flow {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .35rem;
+      margin: .75rem 0; padding: 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+    .status-chip {
+      font-family: 'Outfit', sans-serif;
+      font-size: .7rem; font-weight: 700;
+      padding: .25rem .65rem; border-radius: 99px;
+      text-transform: capitalize; white-space: nowrap;
+    }
+    .s-pending   { background: #fef3c7; color: #92400e; }
+    .s-submitted { background: #e0e7ff; color: #3730a3; }
+    .s-ongoing   { background: #cffafe; color: #0e7490; }
+    .s-completed { background: #dcfce7; color: #15803d; }
+    .s-toclaim   { background: #fef9c3; color: #854d0e; }
+    .s-claimed   { background: #d1fae5; color: #065f46; }
+    .s-cancelled { background: #fee2e2; color: #991b1b; }
+    .s-approved  { background: #dbeafe; color: #1e40af; }
+    .flow-arrow  { color: var(--text-muted); font-size: .8rem; }
+
+    /* Document status table */
+    .status-table {
+      width: 100%; border-collapse: collapse; font-size: .83rem;
+      margin: .75rem 0;
+    }
+    .status-table th {
+      font-family: 'Outfit', sans-serif;
+      font-size: .68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--text-muted);
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      padding: .5rem .75rem; text-align: left;
+    }
+    .status-table td {
+      border: 1px solid var(--border);
+      padding: .5rem .75rem; color: var(--text-secondary);
+      vertical-align: top;
+    }
+    .status-table tr:hover td { background: #f8f9fc; }
+
+    /* Divider between major sections */
+    .major-divider {
+      margin: 3.5rem 0 2.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .major-divider-line { flex: 1; height: 1px; background: var(--border); }
+    .major-divider-label {
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem; font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+    }
+
+    /* Contact card */
+    .contact-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-top: 1rem;
+      display: flex; flex-direction: column; gap: .5rem;
+    }
+    .contact-row { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--text-secondary); }
+    .contact-row i { color: var(--primary); font-size: .9rem; }
+
+    /* Footer note */
+    .page-footer-note {
+      margin-top: 4rem; padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: .78rem; color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top bar ──────────────────────────────────────────────── -->
+<header class="top-bar">
+  <a href="/" class="back-link">
+    <i class="bi bi-arrow-left"></i> Back to Home
+  </a>
+  
+  <span class="top-bar-brand">
+ RandC
+  </span>
+  
+  <span style="font-size:.78rem;color:var(--text-muted);">Legal Documents</span>
+</header>
+
+<!-- ── Page ─────────────────────────────────────────────────── -->
+<div class="page-wrap">
+
+  <!-- ── TOC Sidebar ──────────────────────────────────────── -->
+  <aside class="toc-sidebar" aria-label="Table of contents">
+    <h6>On this page</h6>
+    <ul class="toc-list">
+      <li><span class="toc-section-label">Terms of Service</span></li>
+      <li><a href="#tos-acceptance">1. Acceptance</a></li>
+      <li><a href="#tos-services">2. Our Services</a></li>
+      <li><a href="#tos-accounts">3. Accounts</a></li>
+      <li><a href="#tos-appointments">4. Appointments</a></li>
+      <li><a href="#tos-transactions">5. Transactions</a></li>
+      <li><a href="#tos-conduct">6. User Conduct</a></li>
+      <li><a href="#tos-liability">7. Liability</a></li>
+      <li><a href="#tos-termination">8. Termination</a></li>
+      <li><a href="#tos-changes">9. Changes</a></li>
+      <li><span class="toc-section-label">Privacy Policy</span></li>
+      <li><a href="#pp-collect">10. Data We Collect</a></li>
+      <li><a href="#pp-use">11. How We Use It</a></li>
+      <li><a href="#pp-sharing">12. Sharing</a></li>
+      <li><a href="#pp-retention">13. Retention</a></li>
+      <li><a href="#pp-rights">14. Your Rights</a></li>
+      <li><a href="#pp-security">15. Security</a></li>
+      <li><a href="#pp-dpa">16. Data Privacy Act</a></li>
+      <li><a href="#pp-contact">17. Contact</a></li>
+    </ul>
+  </aside>
+
+  <!-- ── Main ─────────────────────────────────────────────── -->
+  <main class="legal-main">
+
+    <!-- Hero -->
+    <div class="page-hero">
+      <p class="updated"><i class="bi bi-calendar3"></i> Last updated: March 3, 2026</p>
+      <h1>Terms of Service <span>&amp; Privacy Policy</span></h1>
+      <div class="summary-box">
+        By creating an account or using the RandC Document Processing System and its features, you agree to the terms outlined below. These terms govern your use of our appointment booking, document transaction, and support services. Please read them carefully before proceeding.
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════
+         TERMS OF SERVICE
+    ════════════════════════════════════════════════════ -->
+
+    <section class="legal-section" id="tos-acceptance">
+      <p class="section-num" data-num="01">Terms of Service</p>
+      <h2>Acceptance of Terms</h2>
+      <p>By accessing or using the RandC Document Processing System ("the System," "our platform"), whether through the web portal or client dashboard, you confirm that you have read, understood, and agree to be bound by these Terms of Service and our Privacy Policy.</p>
+      <p>If you do not agree to any part of these terms, you must not use the System. These terms apply to all users — registered clients, visiting members of the public, and administrative staff.</p>
+      <div class="callout">
+        By checking <em>"I agree to the Terms and Conditions"</em> during registration, you confirm that you have read and fully accept these terms.
+      </div>
+    </section>
+
+    <section class="legal-section" id="tos-services">
+      <p class="section-num" data-num="02">Terms of Service</p>
+      <h2>Our Services</h2>
+      <p>RandC provides professional document processing services for real estate and legal requirements in the Philippines, including but not limited to:</p>
+      <ul>
+        <li>Transfer of Title and Tax Declaration</li>
+        <li>Land/Condo Title Declaration</li>
+        <li>Cancellation of Mortgage</li>
+        <li>Extra Judicial Settlement / Tax Amnesty / Reconstruction of Lost Title</li>
+        <li>Subdivision / Consolidation of Title / Land Appraisal / E-Titling</li>
+        <li>Payment of Real Estate Property Tax &amp; Tax Clearance</li>
+        <li>Other Related Documentation Services</li>
+      </ul>
+      <p>The availability of specific services is subject to change. RandC reserves the right to modify, suspend, or discontinue any service at any time with reasonable notice provided through the platform or via email.</p>
+    </section>
+
+    <section class="legal-section" id="tos-accounts">
+      <p class="section-num" data-num="03">Terms of Service</p>
+      <h2>Account Registration &amp; Responsibilities</h2>
+      <p>To access the client portal and book appointments or track document transactions, you must register an account using a valid Gmail address and a unique username. An email verification code will be sent to confirm your address before your account is activated.</p>
+      <ul>
+        <li>You are responsible for keeping your login credentials (username and password) strictly confidential.</li>
+        <li>You must not share your account with any other person.</li>
+        <li>All information provided at registration must be accurate, complete, and kept up to date.</li>
+        <li>You are responsible for all activity that occurs under your account.</li>
+        <li>Passwords must be between 12 and 24 characters in length.</li>
+      </ul>
+      <p>RandC reserves the right to suspend or permanently terminate accounts that violate these terms, provide false information, or engage in abusive behavior toward staff or the platform.</p>
+    </section>
+
+    <section class="legal-section" id="tos-appointments">
+      <p class="section-num" data-num="04">Terms of Service</p>
+      <h2>Appointment Booking &amp; Cancellation</h2>
+      <p>Registered clients may book appointments through the client portal by selecting one or more services, a preferred date, and an available time slot. Each time slot has a maximum capacity of <strong>3 bookings</strong>.</p>
+
+      <p><strong>Automatic Approval:</strong> Upon successful submission of an appointment request, your appointment is <strong>automatically set to Approved</strong> status and a confirmation email is sent to your registered Gmail address. No additional manual review is required for initial booking.</p>
+
+      <div class="status-flow" aria-label="Appointment status flow">
+        <span class="status-chip s-approved">Approved</span>
+        <span class="flow-arrow">→</span>
+        <span class="status-chip s-completed">Completed</span>
+        <span class="flow-arrow">or</span>
+        <span class="status-chip s-cancelled">Cancelled</span>
+      </div>
+
+      <p><strong>Cancellation Policy:</strong></p>
+      <ul>
+        <li>Clients may cancel an approved appointment through the portal at any time prior to the scheduled date and time.</li>
+        <li>A reason for cancellation is <strong>required</strong> when submitting a cancellation request. Requests without a stated reason will not be accepted.</li>
+        <li>Appointments that have already been <strong>Completed</strong> cannot be cancelled retroactively.</li>
+        <li>RandC staff may also cancel appointments in exceptional circumstances and will provide a reason and notification.</li>
+      </ul>
+      <div class="callout warn">
+        Repeated no-shows or last-minute cancellations without valid justification may result in temporary restriction of booking privileges.
+      </div>
+    </section>
+
+    <section class="legal-section" id="tos-transactions">
+      <p class="section-num" data-num="05">Terms of Service</p>
+      <h2>Document Transactions &amp; Processing</h2>
+      <p>Once engaged for a document processing service, a transaction record is created and its progress is tracked through the following status stages:</p>
+
+      <div class="status-flow" aria-label="Transaction status flow">
+        <span class="status-chip s-pending">Pending</span>
+        <span class="flow-arrow">→</span>
+        <span class="status-chip s-submitted">Submitted</span>
+        <span class="flow-arrow">→</span>
+        <span class="status-chip s-ongoing">Ongoing</span>
+        <span class="flow-arrow">→</span>
+        <span class="status-chip s-completed">Completed</span>
+        <span class="flow-arrow">→</span>
+        <span class="status-chip s-toclaim">To Claim</span>
+        <span class="flow-arrow">→</span>
+        <span class="status-chip s-claimed">Claimed</span>
+      </div>
+
+      <table class="status-table" aria-label="Transaction status descriptions">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="status-chip s-pending">Pending</span></td><td>Transaction has been initiated and is waiting to be formally submitted for processing.</td></tr>
+          <tr><td><span class="status-chip s-submitted">Submitted</span></td><td>Document has been submitted and is waiting to be picked up by processing staff.</td></tr>
+          <tr><td><span class="status-chip s-ongoing">Ongoing</span></td><td>Document is currently being processed by RandC staff at government agencies.</td></tr>
+          <tr><td><span class="status-chip s-completed">Completed</span></td><td>Document processing is complete and the output document is ready.</td></tr>
+          <tr><td><span class="status-chip s-toclaim">To Claim</span></td><td>Document is ready and available for the client to physically claim at the office.</td></tr>
+          <tr><td><span class="status-chip s-claimed">Claimed</span></td><td>Document has been successfully claimed by the client. The process is finished.</td></tr>
+          <tr><td><span class="status-chip s-cancelled">Cancelled</span></td><td>The transaction was cancelled before completion.</td></tr>
+        </tbody>
+      </table>
+
+      <p>Clients may view a full timeline of status changes, staff remarks, and any attached photos through the Transaction Timeline feature in the client portal. Processing times vary depending on government agency workload, document complexity, and compliance requirements, and are provided as estimates only.</p>
+      <div class="callout">
+        RandC is not responsible for delays caused by third-party government agencies, incomplete client-provided documents, or force majeure events.
+      </div>
+
+      <div class="callout warn" style="margin-top:1rem;">
+        <strong>⏰ Ready-to-Claim Deadline &amp; Penalty Policy</strong><br>
+        Documents marked as <span class="status-chip s-toclaim" style="font-size:.78rem;padding:2px 8px;">To Claim</span> must be physically claimed at the RandC office within <strong>7 calendar days</strong> from the date the document was updated to <b>To Claim</b> .<br><br>
+        Failure to claim within 7-days will have a <strong>₱200.00 penalty fee</strong>, which must be settled prior to or upon claiming the document. Clients will be notified by email and in-portal notification when their document is ready, including the exact claim deadline and penalty warning.
+      </div>
+    </section>
+
+    <section class="legal-section" id="tos-conduct">
+      <p class="section-num" data-num="06">Terms of Service</p>
+      <h2>Acceptable Use &amp; User Conduct</h2>
+      <p>When using the platform — including the Support Chat feature — you agree not to:</p>
+      <ul>
+        <li>Transmit false, misleading, or fraudulent information to RandC staff.</li>
+        <li>Use abusive, threatening, or harassing language in any communication.</li>
+        <li>Attempt to gain unauthorized access to other accounts or system data.</li>
+        <li>Upload files that contain malware, viruses, or harmful code.</li>
+        <li>Use the platform for any purpose other than legitimate document processing needs.</li>
+        <li>Attempt to circumvent any security, verification, or access control measures.</li>
+      </ul>
+      <p>Violations of these conduct rules may result in immediate account suspension and referral to appropriate legal authorities where warranted.</p>
+    </section>
+
+    <section class="legal-section" id="tos-liability">
+      <p class="section-num" data-num="07">Terms of Service</p>
+      <h2>Limitation of Liability</h2>
+      <p>RandC provides the System on an "as is" and "as available" basis. While we strive for accuracy and reliability, we do not warrant that the platform will be uninterrupted, error-free, or completely secure at all times.</p>
+      <p>To the maximum extent permitted by Philippine law, RandC shall not be liable for:</p>
+      <ul>
+        <li>Indirect, incidental, or consequential damages arising from your use of the platform.</li>
+        <li>Loss of data due to technical failures beyond our reasonable control.</li>
+        <li>Delays in government processing not attributable to RandC's actions.</li>
+        <li>Third-party actions or content accessible through the platform.</li>
+      </ul>
+    </section>
+
+    <section class="legal-section" id="tos-termination">
+      <p class="section-num" data-num="08">Terms of Service</p>
+      <h2>Account Suspension &amp; Termination</h2>
+      <p>RandC may suspend or terminate your access to the System at its sole discretion if you breach any provision of these terms, engage in fraudulent activity, or upon your written request to close your account.</p>
+      <p>Upon termination, your right to access the portal ceases immediately. Ongoing transaction records associated with your account will be retained for the period required by applicable law and our data retention policy.</p>
+    </section>
+
+    <section class="legal-section" id="tos-changes">
+      <p class="section-num" data-num="09">Terms of Service</p>
+      <h2>Changes to These Terms</h2>
+      <p>RandC reserves the right to modify these Terms of Service at any time. Changes will be posted on this page with an updated "Last Updated" date. Continued use of the platform after changes are posted constitutes acceptance of the revised terms.</p>
+      <p>For significant changes, we will notify registered users via email to their registered Gmail address.</p>
+    </section>
+
+    <!-- Major Divider -->
+    <div class="major-divider">
+      <div class="major-divider-line"></div>
+      <span class="major-divider-label">Privacy Policy</span>
+      <div class="major-divider-line"></div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════
+         PRIVACY POLICY
+    ════════════════════════════════════════════════════ -->
+
+    <section class="legal-section" id="pp-collect">
+      <p class="section-num" data-num="10">Privacy Policy</p>
+      <h2>Information We Collect</h2>
+      <p>When you register and use the RandC platform, we collect the following categories of personal information:</p>
+      <ul>
+        <li><strong>Identity data:</strong> First name, last name, middle name, sex, and profile picture (optional).</li>
+        <li><strong>Contact data:</strong> Gmail address and phone number.</li>
+        <li><strong>Account credentials:</strong> Username and hashed password. Verification codes are stored temporarily and expire after a set period.</li>
+        <li><strong>Appointment data:</strong> Preferred date and time, selected services, notes, appointment status, and cancellation reasons.</li>
+        <li><strong>Transaction data:</strong> Service type, document processing status, staff remarks, attached photos from timeline updates, and transaction history.</li>
+        <li><strong>Communication data:</strong> Messages sent and received through the Support Chat, including any files uploaded during chat (images and documents up to 10 MB).</li>
+        <li><strong>Usage data:</strong> Last login timestamp, last seen timestamp, and session token identifiers for security purposes.</li>
+      </ul>
+    </section>
+
+    <section class="legal-section" id="pp-use">
+      <p class="section-num" data-num="11">Privacy Policy</p>
+      <h2>How We Use Your Information</h2>
+      <p>The personal data we collect is used solely for the following purposes:</p>
+      <ul>
+        <li>To create and manage your client account and verify your identity.</li>
+        <li>To process appointment bookings and send confirmation and update emails to your registered Gmail address.</li>
+        <li>To track and communicate the status of your document processing transactions.</li>
+        <li>To enable real-time support communication via the Support Chat system.</li>
+        <li>To generate statistical reports for internal service improvement (anonymized data only).</li>
+        <li>To comply with legal and regulatory obligations under Philippine law.</li>
+        <li>To send important system notifications related to your account or active transactions.</li>
+      </ul>
+      <div class="callout success">
+        We do not use your personal data for marketing purposes without your explicit consent, and we do not sell or rent your data to any third party.
+      </div>
+    </section>
+
+    <section class="legal-section" id="pp-sharing">
+      <p class="section-num" data-num="12">Privacy Policy</p>
+      <h2>Data Sharing &amp; Disclosure</h2>
+      <p>RandC does not sell, trade, or rent your personal information to outside parties. Your data may be accessed only in the following limited circumstances:</p>
+      <ul>
+        <li><strong>RandC Staff &amp; Admins:</strong> Authorized personnel with system access may view your appointment and transaction data as necessary to fulfill your service requests.</li>
+        <li><strong>Legal obligation:</strong> We may disclose information to law enforcement, regulators, or courts if required by applicable Philippine law or lawful court order.</li>
+        <li><strong>Business continuity:</strong> In the event of a system transfer or business restructuring, data may be transferred to a successor entity under equivalent privacy protections.</li>
+      </ul>
+    </section>
+
+    <section class="legal-section" id="pp-retention">
+      <p class="section-num" data-num="13">Privacy Policy</p>
+      <h2>Data Retention</h2>
+      <p>We retain your personal data for as long as your account is active and for a reasonable period afterward as required by law or business necessity. Specifically:</p>
+      <ul>
+        <li>Active account data is retained for the duration of your account's existence.</li>
+        <li>Transaction records are retained for a minimum of <strong>5 years</strong> from the date of completion to comply with Philippine property law requirements.</li>
+        <li>Chat messages are retained for <strong>2 years</strong> from the date of the conversation.</li>
+        <li>Expired verification codes and temporary session tokens are purged automatically on a rolling basis.</li>
+        <li>Upon account deletion at your request, personal identity and contact data will be anonymized within 30 days, except where retention is legally required.</li>
+      </ul>
+    </section>
+
+    <section class="legal-section" id="pp-rights">
+      <p class="section-num" data-num="14">Privacy Policy</p>
+      <h2>Your Rights Under Philippine Law</h2>
+      <p>As a data subject under the <strong>Data Privacy Act of 2012 (Republic Act No. 10173)</strong>, you have the following rights regarding your personal data:</p>
+      <ul>
+        <li><strong>Right to be Informed:</strong> You have the right to know what data we collect and how we use it — as described in this policy.</li>
+        <li><strong>Right to Access:</strong> You may request a copy of the personal data we hold about you at any time.</li>
+        <li><strong>Right to Rectification:</strong> You may correct inaccurate or incomplete personal data held by us.</li>
+        <li><strong>Right to Erasure / Blocking:</strong> You may request deletion or blocking of your data in cases where it is no longer necessary for the purposes it was collected, subject to legal retention requirements.</li>
+        <li><strong>Right to Object:</strong> You may object to the processing of your data for specific purposes.</li>
+        <li><strong>Right to Data Portability:</strong> You may request a structured, machine-readable copy of data you provided to us.</li>
+        <li><strong>Right to Lodge a Complaint:</strong> You may file a complaint with the <strong>National Privacy Commission (NPC)</strong> if you believe your rights have been violated.</li>
+      </ul>
+      <p>To exercise any of these rights, please contact our Data Protection Officer using the contact details in Section 17.</p>
+    </section>
+
+    <section class="legal-section" id="pp-security">
+      <p class="section-num" data-num="15">Privacy Policy</p>
+      <h2>Data Security</h2>
+      <p>RandC implements reasonable technical and organizational measures to protect your personal data from unauthorized access, disclosure, alteration, or destruction. These include:</p>
+      <ul>
+        <li>Password hashing using industry-standard algorithms — plaintext passwords are never stored.</li>
+        <li>Token-based authentication (JWT) for secure session management.</li>
+        <li>Email verification required for account activation, preventing unauthorized registrations.</li>
+        <li>Role-based access controls ensuring that client data is only accessible to authorized staff.</li>
+        <li>Encrypted transmission of data via HTTPS.</li>
+      </ul>
+      <div class="callout danger">
+        While we take reasonable precautions, no system is completely immune to security threats. In the event of a data breach affecting your rights and freedoms, we will notify you and the National Privacy Commission within 72 hours as required by the NPC Circular on Personal Data Breach Management.
+      </div>
+    </section>
+
+    <section class="legal-section" id="pp-dpa">
+      <p class="section-num" data-num="16">Privacy Policy</p>
+      <h2>Data Privacy Act Compliance</h2>
+      <p>RandC is committed to full compliance with the <strong>Data Privacy Act of 2012 (R.A. 10173)</strong> and its Implementing Rules and Regulations, as enforced by the National Privacy Commission of the Philippines.</p>
+      <p>This includes adherence to the three core principles of data processing under Philippine law:</p>
+      <ul>
+        <li><strong>Transparency:</strong> We inform you of all data collection and processing activities through this Privacy Policy.</li>
+        <li><strong>Legitimate Purpose:</strong> All data processing is tied to a specific, declared, and lawful purpose directly connected to providing our document processing services.</li>
+        <li><strong>Proportionality:</strong> We collect only the minimum data necessary to fulfill the stated purposes and do not use it in ways incompatible with those purposes.</li>
+      </ul>
+      <p>Our designated <strong>Data Protection Officer (DPO)</strong> oversees compliance with the DPA and handles data subject rights requests. Contact details are provided in Section 17.</p>
+    </section>
+
+    <section class="legal-section" id="pp-contact">
+      <p class="section-num" data-num="17">Privacy Policy</p>
+      <h2>Contact Us</h2>
+      <p>If you have questions, concerns, or requests regarding these terms, your personal data, or our data practices, please reach out to us through any of the following channels:</p>
+      <div class="contact-card">
+        <div class="contact-row">
+          <i class="bi bi-building"></i>
+          <span><strong>RandC Document Processing</strong><br>267 De Vega Compound, Silangan St. Caingin, Meycauayan, Bulacan 3020</span>
+        </div>
+        <div class="contact-row">
+          <i class="bi bi-envelope"></i>
+          <a href="mailto:info@randc.ph">info@randc.ph</a>
+        </div>
+        <div class="contact-row">
+          <i class="bi bi-envelope-at"></i>
+          <a href="mailto:support@randc.ph">support@randc.ph</a>
+        </div>
+        <div class="contact-row">
+          <i class="bi bi-telephone"></i>
+          <a href="tel:+639171234567">+63 917 123 4567</a>
+        </div>
+        <div class="contact-row">
+          <i class="bi bi-clock"></i>
+          <span>Mon – Fri: 8:00 AM – 5:00 PM &nbsp;|&nbsp; Sat: 8:00 AM – 12:00 PM</span>
+        </div>
+      </div>
+      <p style="margin-top:.75rem;">For data privacy concerns specifically, address your request to the <strong>Data Protection Officer</strong> at the email addresses above with the subject line <em>"Data Subject Rights Request."</em></p>
+      <p>For formal complaints, you may also contact the <strong>National Privacy Commission</strong> at <a href="https://www.privacy.gov.ph" target="_blank" rel="noopener">www.privacy.gov.ph</a>.</p>
+    </section>
+
+    <div class="page-footer-note">
+      <p>These terms were last updated on <strong>March 3, 2026</strong>. Prior versions are available upon request.</p>
+      <p style="margin-top:.35rem;">© 2026 RandC Document Processing. All rights reserved. &nbsp;·&nbsp; <a href="./index.html">Back to Home</a></p>
+    </div>
+
+  </main>
+</div><!-- /page-wrap -->
+
+<script>
+/* Active TOC link on scroll */
+const sections = document.querySelectorAll('.legal-section[id]');
+const tocLinks  = document.querySelectorAll('.toc-list a');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      tocLinks.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`.toc-list a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

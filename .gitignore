@@ -1,0 +1,4 @@
+node_modules/
+uploads/messages/
+uploads/transaction_photos/
+.env

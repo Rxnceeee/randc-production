@@ -1,0 +1,3244 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Client Dashboard — RandC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link
+      rel="shortcut icon"
+      href="../images/randclogo.png"
+      type="image/x-icon"
+    />
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <link rel="stylesheet" href="../css/client.css" />
+    <script src="../js/global.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/inactivityLogout.js"></script>
+  </head>
+  <body>
+    <!-- ══ GLOBAL TOAST CONTAINER ═════════════════════════════════════════ -->
+    <div
+      id="global-toast-container"
+      aria-live="assertive"
+      aria-atomic="true"
+    ></div>
+
+    <!-- ══ ALERT MODAL ════════════════════════════════════════════════════ -->
+    <div
+      class="modal fade"
+      id="alertModal"
+      tabindex="-1"
+      aria-modal="true"
+      role="alertdialog"
+    >
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 400px">
+        <div class="modal-content rnc-modal">
+          <div class="modal-header" id="alertModalHeader">
+            <div class="modal-header-icon" id="alertModalIcon">
+              <i class="bi bi-info-circle-fill"></i>
+            </div>
+            <div>
+              <div class="modal-title" id="alertModalTitleText">
+                Information
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn-close-rnc ms-auto"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            >
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p
+              id="alertModalMessage"
+              class="mb-0"
+              style="
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+                line-height: 1.6;
+              "
+            ></p>
+          </div>
+          <div class="modal-footer-rnc">
+            <button
+              type="button"
+              class="btn-submit"
+              data-bs-dismiss="modal"
+              style="max-width: 120px"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRM MODAL -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-modal="true" role="alertdialog">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 400px">
+        <div class="modal-content rnc-modal">
+          <div class="modal-header" style="background: rgba(251, 146, 60, 0.12); border-color: rgba(251, 146, 60, 0.3);">
+            <div class="modal-header-icon" style="background: rgba(251, 146, 60, 0.2); color: var(--warning)">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div>
+              <div class="modal-title">Confirm Action</div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal" aria-label="Close">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <p id="confirmModalMessage" class="mb-0" style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;"></p>
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal" style="border-radius: var(--radius-md); padding: 0.6rem 1.25rem; font-size: 0.875rem;">
+              Cancel
+            </button>
+            <button type="button" class="btn-submit" id="confirmModalButton" style="max-width: 140px; background: linear-gradient(135deg, #fb923c, #f43f5e);">
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LOGOUT MODAL ═══════════════════════════════════════════════════ -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 380px">
+        <div class="modal-content rnc-modal">
+          <div
+            class="modal-header"
+            style="
+              background: rgba(244, 63, 94, 0.1);
+              border-color: rgba(244, 63, 94, 0.25);
+            "
+          >
+            <div
+              class="modal-header-icon"
+              style="background: rgba(244, 63, 94, 0.2); color: var(--danger)"
+            >
+              <i class="bi bi-box-arrow-right"></i>
+            </div>
+            <div><div class="modal-title">Confirm Logout</div></div>
+            <button
+              type="button"
+              class="btn-close-rnc ms-auto"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+          <div class="modal-body" style="text-align: center; padding: 1.5rem">
+            <p
+              style="color: var(--text-secondary); font-size: 0.9rem; margin: 0"
+            >
+              You will need to sign in again to access your account.
+            </p>
+          </div>
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+            <button
+              type="button"
+              class="btn-ghost"
+              data-bs-dismiss="modal"
+              style="
+                border-radius: var(--radius-md);
+                padding: 0.6rem 1.25rem;
+                font-size: 0.875rem;
+              "
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn-submit"
+              onclick="Logout()"
+              style="
+                max-width: 140px;
+                background: linear-gradient(135deg, #f43f5e, #be123c);
+              "
+            >
+              Yes, Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SETUP USER MODAL ═══════════════════════════════════════════════ -->
+    <div class="modal fade" id="setupUserModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 440px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header">
+            <div class="modal-header-icon">
+              <i class="bi bi-person-fill-gear"></i>
+            </div>
+
+            <div>
+              <div class="modal-title">Complete Your Profile</div>
+              <div class="modal-subtitle">One-time setup to get started</div>
+            </div>
+          </div>
+
+          <div class="modal-body">
+
+            <div class="rnc-alert rnc-alert-info mb-3">
+              <i class="bi bi-info-circle-fill"></i>
+              Please enter your personal information to continue.
+            </div>
+
+            <form id="setupUserForm">
+
+              <div class="rnc-form-row">
+
+                <div class="rnc-form-group">
+                  <label class="rnc-label">First Name <span class="req">*</span></label>
+                  <input type="text" id="firstName" class="rnc-input" placeholder="John" required>
+                </div>
+
+                <div class="rnc-form-group">
+                  <label class="rnc-label">Last Name <span class="req">*</span></label>
+                  <input type="text" id="lastName" class="rnc-input" placeholder="Doe" required>
+                </div>
+
+              </div>
+
+              <div class="rnc-form-group">
+                <label class="rnc-label">Middle Name <span style="color: var(--text-muted); font-weight: 400">(Optional)</span></label>
+                <input type="text" id="middleName" class="rnc-input" placeholder="Mabini">
+              </div>
+
+              <div class="rnc-form-row">
+
+                <div class="rnc-form-group">
+                  <label class="rnc-label">Sex <span class="req">*</span></label>
+                  <select id="sex" class="rnc-input" required>
+                    <option value="">-- Select --</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+
+                <div class="rnc-form-group">
+                  <label class="rnc-label">Contact Number <span class="req">*</span></label>
+                  <input type="tel" id="contactNumber" class="rnc-input" placeholder="09123456789" required>
+                </div>
+
+              </div>
+
+              <button type="submit" class="btn-submit mt-2">
+                <i class="bi bi-check-circle"></i> Save &amp; Continue
+              </button>
+
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BOOK APPOINTMENT MODAL ═════════════════════════════════════════ -->
+    <div class="modal fade" id="appointmentModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header">
+            <div class="modal-header-icon">
+              <i class="bi bi-calendar-plus"></i>
+            </div>
+
+            <div>
+              <div class="modal-title">Book Appointment</div>
+              <div class="modal-subtitle">Select services and your preferred date</div>
+            </div>
+
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body">
+
+            <form id="appointmentForm">
+
+              <div class="rnc-form-group">
+                <label class="rnc-label">Services <span class="req">*</span></label>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem;">Select one or more services you need</p>
+                <div id="services-col" class="services-check-grid"></div>
+              </div>
+
+              <div class="rnc-form-row">
+                <div class="rnc-form-group">
+                  <label class="rnc-label">Preferred Date <span class="req">*</span></label>
+                  <input type="date" class="rnc-input" id="appointmentDate" required>
+                </div>
+              </div>
+
+              <div class="rnc-form-group">
+                <label class="rnc-label">Time Slot <span class="req">*</span></label>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem;">Max 3 bookings per slot</p>
+                <div id="timeSlotContainer" class="time-slot-grid">
+                  <p style="font-size: 0.85rem; color: var(--text-muted)">Please select a date first</p>
+                </div>
+              </div>
+
+              <div class="rnc-form-group">
+                <label class="rnc-label">Additional Notes</label>
+                <textarea class="rnc-input" id="notes" rows="3" placeholder="Any special requirements..."></textarea>
+              </div>
+
+              <div class="rnc-alert rnc-alert-info">
+                <i class="bi bi-info-circle-fill"></i>
+                Bring all required documents on your appointment date.
+              </div>
+
+            </form>
+
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal" style="border-radius: var(--radius-md); padding: 0.6rem 1.25rem; font-size: 0.875rem;">
+              Cancel
+            </button>
+
+            <button type="button" class="btn-submit" id="submitAppointmentButton" onclick="submitAppointment(event)" style="max-width: 180px">
+              <i class="bi bi-check-circle"></i> Submit
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CANCEL APPOINTMENT MODAL ═══════════════════════════════════════ -->
+    <div class="modal fade" id="updateAppointmentStatusModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.25);">
+
+            <div class="modal-header-icon" style="background: rgba(244, 63, 94, 0.2); color: var(--danger)">
+              <i class="bi bi-x-circle-fill"></i>
+            </div>
+
+            <div>
+              <div class="modal-title">Cancel Appointment</div>
+              <div class="modal-subtitle">Please provide a reason</div>
+            </div>
+
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+
+          </div>
+
+          <div class="modal-body">
+
+            <div id="updateAppointmentStatusMessageBox" class="rnc-alert rnc-alert-danger mb-3" style="display: none">
+              <i class="bi bi-x-circle-fill"></i>
+              <span id="updateAppointmentStatusMessage"></span>
+            </div>
+
+            <input type="hidden" id="updateAppointmentID">
+
+            <div class="rnc-form-group">
+              <label class="rnc-label">Reason for Cancellation <span class="req">*</span></label>
+              <textarea class="rnc-input" id="cancellationReason" rows="3" placeholder="Please enter reason..."></textarea>
+            </div>
+
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal" style="border-radius: var(--radius-md); padding: 0.6rem 1.25rem; font-size: 0.875rem;">
+              Go Back
+            </button>
+
+            <button onclick="cancelAppointment()" class="btn-submit" style="max-width: 180px; background: linear-gradient(135deg, #f43f5e, #be123c);">
+              <i class="bi bi-check-circle"></i> Confirm Cancel
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CHANGE PASSWORD MODAL ══════════════════════════════════════════ -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header">
+
+            <div class="modal-header-icon">
+              <i class="bi bi-key-fill"></i>
+            </div>
+
+            <div>
+              <div class="modal-title">Change Password</div>
+              <div class="modal-subtitle">Keep your account secure</div>
+            </div>
+
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+
+          </div>
+
+          <div class="modal-body">
+
+            <div id="changePasswordMessage" class="rnc-alert mb-3" style="display: none">
+              <span id="changePasswordMsgText"></span>
+            </div>
+
+            <div class="rnc-form-group">
+              <label class="rnc-label">Current Password</label>
+              <input type="password" id="currentPassword" class="rnc-input" placeholder="Enter current password">
+            </div>
+
+            <div class="rnc-form-group">
+              <label class="rnc-label">New Password</label>
+              <input type="password" id="newPassword" class="rnc-input" placeholder="12–24 characters">
+              <span style="font-size: 0.72rem; color: var(--text-muted)">Minimum 12, maximum 24 characters</span>
+            </div>
+
+            <div class="rnc-form-group">
+              <label class="rnc-label">Confirm New Password</label>
+              <input type="password" id="confirmNewPassword" class="rnc-input" placeholder="Re-enter new password">
+            </div>
+
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal" style="border-radius: var(--radius-md); padding: 0.6rem 1.25rem; font-size: 0.875rem;">
+              Cancel
+            </button>
+
+            <button onclick="changePassword()" class="btn-submit" style="max-width: 160px">
+              <i class="bi bi-check-circle"></i> Update
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TIMELINE MODAL ════════════════════════════════════════════════ -->
+    <div class="modal fade" id="clientTimelineModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header">
+
+            <div class="modal-header-icon">
+              <i class="bi bi-clock-history"></i>
+            </div>
+
+            <div>
+              <div class="modal-title">Processing Timeline</div>
+              <div class="modal-subtitle">Status history for this transaction</div>
+            </div>
+
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+
+          </div>
+
+          <div class="modal-body" id="clientTimelineContent"></div>
+
+        </div>
+      </div>
+    </div>
+    
+    <!-- ══ CANCEL TRANSACTION MODAL ═══════════════════════════════════════ -->
+    <div class="modal fade" id="cancelTransactionModal" tabindex="-1" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
+        <div class="modal-content rnc-modal">
+
+          <div class="modal-header" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.25);">
+
+            <div class="modal-header-icon" style="background: rgba(244, 63, 94, 0.2); color: var(--danger)">
+              <i class="bi bi-x-circle-fill"></i>
+            </div>
+
+            <div>
+              <div class="modal-title">Cancel Transaction</div>
+              <div class="modal-subtitle">This action cannot be undone</div>
+            </div>
+
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+
+          </div>
+
+          <div class="modal-body">
+
+            <input type="hidden" id="cancelTransactionId">
+
+            <div class="rnc-alert rnc-alert-warning mb-3">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              Please provide a detailed reason for cancellation.
+            </div>
+
+            <div class="rnc-form-group">
+              <label class="rnc-label">Reason <span class="req">*</span></label>
+              <textarea id="cancelReason" class="rnc-input" rows="3" placeholder="Minimum 10 characters..."></textarea>
+              <span style="font-size: 0.72rem; color: var(--text-muted)">Minimum 10 characters required</span>
+            </div>
+
+          </div>
+
+          <div class="modal-footer-rnc" style="gap: 0.5rem">
+
+            <button type="button" class="btn-ghost" data-bs-dismiss="modal" style="border-radius: var(--radius-md); padding: 0.6rem 1.25rem; font-size: 0.875rem;">
+              Go Back
+            </button>
+
+            <button onclick="submitCancelTransaction()" class="btn-submit" style="max-width: 180px; background: linear-gradient(135deg, #f43f5e, #be123c);">
+              <i class="bi bi-check-circle"></i> Confirm Cancel
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DELETE ACCOUNT MODAL ══════════════════════════════════════════ -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1"
+         aria-labelledby="deleteAccountModalLabel" aria-modal="true" role="dialog">
+      <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
+        <div class="modal-content rnc-modal">
+          <div class="modal-header" style="border-bottom:1px solid var(--border);">
+            <div class="modal-header-icon" style="background:rgba(244,63,94,.15);" aria-hidden="true">
+              <i class="bi bi-trash3-fill" style="color:var(--danger);"></i>
+            </div>
+            <div>
+              <div class="modal-title" id="deleteAccountModalLabel" style="color:var(--danger);">
+                Delete Account
+              </div>
+              <div class="modal-subtitle">This action cannot be undone</div>
+            </div>
+            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal" aria-label="Close">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!-- Warning banner -->
+            <div class="delete-warning-banner">
+              <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+              <div>
+                <strong>Warning — Permanent Action</strong>
+                <p>Deleting your account will permanently remove all your data, 7 days after the deletion date. You cannot recover your account after this action.</p>
+              </div>
+            </div>
+
+            <!-- Blockers info -->
+            <div class="delete-blockers" id="deleteBlockersList" style="display:none;">
+              <div class="delete-blocker-item" id="deleteBlockerAppointment" style="display:none;">
+                <i class="bi bi-calendar-x-fill" aria-hidden="true"></i>
+                <span>You have <strong>active appointments</strong>. Cancel them before deleting.</span>
+              </div>
+              <div class="delete-blocker-item" id="deleteBlockerTransaction" style="display:none;">
+                <i class="bi bi-file-earmark-x-fill" aria-hidden="true"></i>
+                <span>You have <strong>active transactions</strong>. Wait for them to complete before deleting.</span>
+              </div>
+            </div>
+
+            <!-- What will be deleted -->
+            <ul class="delete-checklist">
+              <li><i class="bi bi-check2" aria-hidden="true"></i> Your profile and account credentials</li>
+              <li><i class="bi bi-check2" aria-hidden="true"></i> All your appointment history</li>
+              <li><i class="bi bi-check2" aria-hidden="true"></i> All your transaction records</li>
+              <li><i class="bi bi-check2" aria-hidden="true"></i> Your submitted testimonials</li>
+            </ul>
+
+            <!-- Confirmation input -->
+            <div class="mb-1 mt-3">
+              <label class="form-label" for="deleteConfirmInput" style="font-size:.85rem;font-weight:600;">
+                Type <code class="delete-confirm-code">Confirm Delete</code> to continue
+              </label>
+              <input type="text" class="form-control" id="deleteConfirmInput"
+                     placeholder="Confirm Delete"
+                     oninput="onDeleteConfirmInput(this)"
+                     autocomplete="off" aria-required="true" />
+            </div>
+            <div id="deleteAccountError" class="delete-error-msg" style="display:none;" role="alert"></div>
+          </div>
+          <div class="modal-footer" style="border-top:1px solid var(--border);gap:.5rem;justify-content:flex-end;">
+            <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn-delete-confirm" id="deleteAccountBtn"
+                    onclick="submitDeleteAccount()" disabled aria-label="Confirm account deletion">
+              <i class="bi bi-trash3-fill" aria-hidden="true"></i> Delete My Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <div class="rnc-overlay" id="testiModalOverlay" style="display:none;" onclick="closeTestiModal()"></div>
+    <div class="rnc-modal-sheet" id="testiModal" role="dialog" aria-modal="true" aria-labelledby="testiModalTitle" style="display:none;">
+      <div class="rnc-modal-sheet-head">
+        <div>
+          <h5 id="testiModalTitle" class="mb-0">Leave a Review</h5>
+          <small id="testiModalSub" style="color:var(--text-muted);"></small>
+        </div>
+        <button class="btn-close-rnc" onclick="closeTestiModal()" aria-label="Close">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="rnc-modal-sheet-body">
+        <input type="hidden" id="testiTransactionId" />
+
+        <!-- Star Rating -->
+        <div class="testi-rating-label">Your Rating</div>
+        <div class="testi-stars" id="testiStars" role="radiogroup" aria-label="Rating">
+          <span class="testi-star" data-val="1" onclick="setRating(1)" tabindex="0" role="radio" aria-label="1 star"><i class="bi bi-star-fill"></i></span>
+          <span class="testi-star" data-val="2" onclick="setRating(2)" tabindex="0" role="radio" aria-label="2 stars"><i class="bi bi-star-fill"></i></span>
+          <span class="testi-star" data-val="3" onclick="setRating(3)" tabindex="0" role="radio" aria-label="3 stars"><i class="bi bi-star-fill"></i></span>
+          <span class="testi-star" data-val="4" onclick="setRating(4)" tabindex="0" role="radio" aria-label="4 stars"><i class="bi bi-star-fill"></i></span>
+          <span class="testi-star" data-val="5" onclick="setRating(5)" tabindex="0" role="radio" aria-label="5 stars"><i class="bi bi-star-fill"></i></span>
+        </div>
+        <div class="testi-rating-desc" id="testiRatingDesc">Select a rating</div>
+
+        <!-- Message -->
+        <label class="testi-rating-label" for="testiMessage">Your Review</label>
+        <textarea id="testiMessage" class="testi-textarea"
+                  placeholder="Share your experience with RandC's service…"
+                  rows="4" maxlength="500"></textarea>
+        <small class="testi-char-count"><span id="testiCharCount">0</span> / 500</small>
+
+        <!-- Privacy note -->
+        <div class="testi-privacy-note">
+          <i class="bi bi-shield-lock-fill"></i>
+          Your review will appear publicly as your initials only (e.g. <strong>Mr. J.D.</strong>). 
+          Your full name, email, and contact info are never shown.
+        </div>
+
+        <div id="testiModalErr" class="testi-err" style="display:none;"></div>
+      </div>
+      <div class="rnc-modal-sheet-foot">
+        <button class="btn-ghost" onclick="closeTestiModal()">Cancel</button>
+        <button class="btn-submit" id="testiSubmitBtn" onclick="submitTestimonial()">
+          <i class="bi bi-send-fill"></i> Submit Review
+        </button>
+      </div>
+    </div>
+</div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+     APP SHELL
+═══════════════════════════════════════════════════════════════════ -->
+    <div class="app-shell">
+      <!-- SIDEBAR ══════════════════════════════════════════════════════ -->
+      <aside class="app-sidebar" id="sidebar" aria-label="Sidebar navigation">
+        <!-- Brand -->
+        <div class="sidebar-brand">
+          <div>
+            <img
+              src="../images/randclogo.png"
+              alt="RandC"
+              width="32"
+              height="32"
+            />
+          </div>
+          <div>
+            <div class="sidebar-brand-name">RandC</div>
+            <div class="sidebar-brand-sub">Client Portal</div>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="sidebar-nav" aria-label="Main navigation">
+          <a
+            class="sidebar-nav-item active"
+            onclick="showSection('dashboardPanel')"
+            role="button"
+            tabindex="0"
+            data-section="dashboardPanel"
+            aria-label="Dashboard"
+          >
+            <i class="bi bi-speedometer2" aria-hidden="true"></i>
+            <span>Dashboard</span>
+          </a>
+          <a
+            class="sidebar-nav-item"
+            onclick="showSection('appointmentPanel')"
+            role="button"
+            tabindex="0"
+            data-section="appointmentPanel"
+            aria-label="Appointments"
+          >
+            <i class="bi bi-calendar-check" aria-hidden="true"></i>
+            <span>Appointments</span>
+          </a>
+          <a
+            class="sidebar-nav-item"
+            onclick="showSection('transactionsPanel')"
+            role="button"
+            tabindex="0"
+            data-section="transactionsPanel"
+            aria-label="Transactions"
+          >
+            <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+            <span>Transactions</span>
+          </a>
+          <a class="sidebar-nav-item" onclick="showSection('testimonialsPanel')"
+            data-section="testimonialsPanel" role="button" tabindex="0">
+            <i class="bi bi-star-fill" aria-hidden="true"></i><span>Testimonials</span>
+          </a>
+          <a
+            class="sidebar-nav-item"
+            onclick="showSection('userProfilePanel')"
+            role="button"
+            tabindex="0"
+            data-section="userProfilePanel"
+            aria-label="My Account"
+          >
+            <i class="bi bi-person-circle" aria-hidden="true"></i>
+            <span>My Account</span>
+          </a>
+          <a
+            class="sidebar-nav-item"
+            onclick="showSection('adminChatPanel')"
+            role="button"
+            tabindex="0"
+            data-section="adminChatPanel"
+            aria-label="Support Chat"
+          >
+            <span class="nav-icon-wrap">
+              <i class="bi bi-chat-dots" aria-hidden="true"></i>
+              <span class="chat-nav-badge" id="chatNavBadge" style="display:none;" aria-label="Unread messages"></span>
+            </span>
+            <span>Support Chat</span>
+          </a>
+          
+        </nav>
+
+        <!-- Sidebar footer -->
+        <div class="sidebar-footer">
+          <!-- Theme toggle -->
+          <button
+            class="sidebar-theme-btn"
+            id="themeToggle"
+            onclick="toggleTheme()"
+            aria-label="Toggle light/dark mode"
+          >
+            <span class="theme-icon-dark" aria-hidden="true"
+              ><i class="bi bi-sun-fill"></i
+            ></span>
+            <span class="theme-icon-light" aria-hidden="true"
+              ><i class="bi bi-moon-fill"></i
+            ></span>
+            <span class="theme-label-dark">Light Mode</span>
+            <span class="theme-label-light">Dark Mode</span>
+          </button>
+
+          <!-- Notification bell -->
+          
+
+          <!-- User -->
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar" aria-hidden="true">
+              <i class="bi bi-person-fill"></i>
+            </div>
+            <div class="sidebar-user-info">
+              <p class="sidebar-user-name" id="user-name">Loading...</p>
+              <p class="sidebar-user-role" id="user-role">Client</p>
+            </div>
+            <button
+              class="sidebar-logout-btn"
+              onclick="showLogoutModal()"
+              title="Logout"
+              aria-label="Logout"
+            >
+              <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            </button>
+            <button
+            class="sidebar-notif-btn"
+            onclick="toggleNotifications()"
+            aria-label="Notifications"
+            id="notifBell"
+          >
+            <i class="bi bi-bell-fill" aria-hidden="true"></i>
+            <span
+              class="notif-badge"
+              id="notificationCount"
+              style="display: none"
+              >0</span
+            >
+          </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- NOTIFICATION PANEL (overlay) -->
+      <div
+        class="notif-panel"
+        id="notificationPanel"
+        aria-label="Notifications"
+        role="region"
+      >
+        <div class="notif-panel-header">
+          <h6>
+            <i class="bi bi-bell-fill" aria-hidden="true"></i> Notifications
+          </h6>
+          <button class="notif-mark-read" onclick="markAllAsRead()">
+            Mark all read
+          </button>
+        </div>
+        <div class="notif-list" id="notificationList"></div>
+      </div>
+
+      <!-- MAIN PANEL ════════════════════════════════════════════════════ -->
+      <main class="app-main" id="mainContent" role="main">
+        <!-- TOP BAR -->
+        <div class="app-topbar">
+          <button
+            class="topbar-menu-btn"
+            id="sidebarToggle"
+            onclick="toggleSidebar()"
+            aria-label="Toggle sidebar"
+          >
+            <i class="bi bi-list" aria-hidden="true"></i>
+          </button>
+          <div class="topbar-title" id="topbarTitle">Dashboard</div>
+          <div class="topbar-right">
+            <button
+              class="topbar-action-btn"
+              data-bs-toggle="modal"
+              data-bs-target="#appointmentModal"
+              aria-label="Book appointment"
+            >
+              <i class="bi bi-calendar-plus" aria-hidden="true"></i>
+              <span>Book</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PANELS ════════════════════════════════════════════════════════ -->
+
+        <!-- DASHBOARD ════════════════════════════════════════════════════ -->
+        <div class="panel active" id="dashboardPanel">
+          <!-- Stats row -->
+          <div class="stats-row">
+            <div class="stat-chip stat-primary">
+              <div class="stat-chip-icon">
+                <i class="bi bi-calendar-check" aria-hidden="true"></i>
+              </div>
+              <div class="stat-chip-body">
+                <strong id="totalAppointments">0</strong>
+                <span>Appointments</span>
+              </div>
+            </div>
+            <div class="stat-chip stat-success">
+              <div class="stat-chip-icon">
+                <i class="bi bi-file-earmark-check" aria-hidden="true"></i>
+              </div>
+              <div class="stat-chip-body">
+                <strong id="totalTransactions">0</strong>
+                <span>Transactions</span>
+              </div>
+            </div>
+            <div class="stat-chip stat-warning">
+              <div class="stat-chip-icon">
+                <i class="bi bi-clock-history" aria-hidden="true"></i>
+              </div>
+              <div class="stat-chip-body">
+                <strong id="pendingItems">0</strong>
+                <span>Pending</span>
+              </div>
+            </div>
+            <div class="stat-chip stat-info">
+              <div class="stat-chip-icon">
+                <i class="bi bi-check-circle" aria-hidden="true"></i>
+              </div>
+              <div class="stat-chip-body">
+                <strong id="completedItems">0</strong>
+                <span>Completed</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="section-block">
+            <div class="section-block-header">
+              <span class="section-block-title"
+                ><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
+                Quick Actions</span
+              >
+            </div>
+            <div class="quick-grid">
+              <button
+                class="quick-chip"
+                data-bs-toggle="modal"
+                data-bs-target="#appointmentModal"
+                aria-label="Book appointment"
+              >
+                <i class="bi bi-calendar-plus" aria-hidden="true"></i>
+                <span>Book Appointment</span>
+              </button>
+              <button
+                class="quick-chip"
+                onclick="showSection('transactionsPanel')"
+                aria-label="View transactions"
+              >
+                <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                <span>View Transactions</span>
+              </button>
+              <button
+                class="quick-chip"
+                onclick="showSection('appointmentPanel')"
+                aria-label="My appointments"
+              >
+                <i class="bi bi-calendar-event" aria-hidden="true"></i>
+                <span>My Appointments</span>
+              </button>
+              <button
+                class="quick-chip"
+                onclick="showSection('userProfilePanel')"
+                aria-label="My profile"
+              >
+                <i class="bi bi-person-circle" aria-hidden="true"></i>
+                <span>My Profile</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Two-col: Upcoming + Active -->
+          <div class="dash-two-col">
+            <div class="section-block">
+              <div class="section-block-header">
+                <span class="section-block-title"
+                  ><i class="bi bi-calendar-event" aria-hidden="true"></i>
+                  Upcoming Appointments</span
+                >
+                <a
+                  href="#"
+                  class="section-block-link"
+                  onclick="
+                    event.preventDefault();
+                    showSection('appointmentPanel');
+                  "
+                  >View All</a
+                >
+              </div>
+              <div id="upcomingAppointmentsList" class="compact-list"></div>
+            </div>
+
+            <div class="section-block">
+              <div class="section-block-header">
+                <span class="section-block-title"
+                  ><i class="bi bi-hourglass-split" aria-hidden="true"></i>
+                  Active Transactions</span
+                >
+                <a
+                  href="#"
+                  class="section-block-link"
+                  onclick="
+                    event.preventDefault();
+                    showSection('transactionsPanel');
+                  "
+                  >View All</a
+                >
+              </div>
+              <div id="activeTransactionsList" class="compact-list"></div>
+            </div>
+          </div>
+
+          <!-- Recent Activity + Monthly Overview -->
+          <div class="dash-two-col">
+            <div class="section-block">
+              <div class="section-block-header">
+                <span class="section-block-title"
+                  ><i class="bi bi-clock-history" aria-hidden="true"></i> Recent
+                  Activity</span
+                >
+              </div>
+              <div id="recentActivityList" class="activity-compact-list"></div>
+            </div>
+
+            <div class="section-block">
+              <div class="section-block-header">
+                <span class="section-block-title"
+                  ><i class="bi bi-bar-chart-fill" aria-hidden="true"></i>
+                  Monthly Overview</span
+                >
+              </div>
+              <div class="monthly-overview">
+                <div class="monthly-item">
+                  <div class="monthly-label">
+                    <span>Appointments This Month</span
+                    ><strong id="monthlyAppointmentCount">0</strong>
+                  </div>
+                  <div class="monthly-bar-track">
+                    <div
+                      class="monthly-bar-fill fill-primary"
+                      id="monthlyAppointmentProgress"
+                    ></div>
+                  </div>
+                </div>
+                <div class="monthly-item">
+                  <div class="monthly-label">
+                    <span>Transactions This Month</span
+                    ><strong id="monthlyTransactionCount">0</strong>
+                  </div>
+                  <div class="monthly-bar-track">
+                    <div
+                      class="monthly-bar-fill fill-success"
+                      id="monthlyTransactionProgress"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- APPOINTMENTS ═════════════════════════════════════════════════ -->
+        <div class="panel" id="appointmentPanel">
+          <div class="panel-topbar">
+            <h3 class="panel-heading">
+              <i class="bi bi-calendar-check" aria-hidden="true"></i> My
+              Appointments
+            </h3>
+            <button
+              class="btn-primary-rnc"
+              data-bs-toggle="modal"
+              data-bs-target="#appointmentModal"
+            >
+              <i class="bi bi-plus-lg" aria-hidden="true"></i> New
+            </button>
+          </div>
+
+          <div class="filter-strip">
+            <button
+              class="filter-chip active"
+              onclick="filterAppointment('all')"
+            >
+              All
+            </button>
+            <button class="filter-chip" onclick="filterAppointment('approved')">
+              Approved
+            </button>
+            <button
+              class="filter-chip"
+              onclick="filterAppointment('completed')"
+            >
+              Completed
+            </button>
+            <button
+              class="filter-chip"
+              onclick="filterAppointment('cancelled')"
+            >
+              Cancelled
+            </button>
+          </div>
+
+          <div id="appointment" class="cards-grid"></div>
+        </div>
+
+        <!-- TRANSACTIONS ═════════════════════════════════════════════════ -->
+        <div class="panel" id="transactionsPanel">
+          <div class="panel-topbar">
+            <h3 class="panel-heading">
+              <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+              Transactions
+              <span class="count-badge" id="currentTransactionCount">0</span>
+            </h3>
+          </div>
+
+          <div class="search-strip">
+            <div class="search-wrap">
+              <i class="bi bi-search search-ico" aria-hidden="true"></i>
+              <input
+                type="text"
+                class="search-rnc"
+                id="transactionSearch"
+                placeholder="Search by ID, service, or status…"
+                oninput="searchDocumentTransaction()"
+              />
+            </div>
+          </div>
+
+          <div class="filter-strip">
+            <input
+              type="hidden"
+              id="active-filter-transaction-button"
+              value="all"
+            />
+            <button
+              class="filter-chip active"
+              onclick="filterClientTransactions('all', event)"
+            >
+              All
+            </button>
+            <button
+              class="filter-chip"
+              onclick="filterClientTransactions('pending', event)"
+            >
+              Pending
+            </button>
+            <button
+              class="filter-chip"
+              onclick="filterClientTransactions('submitted', event)"
+            >
+              Submitted
+            </button>
+            <button
+              class="filter-chip"
+              onclick="filterClientTransactions('ongoing', event)"
+            >
+              Ongoing
+            </button>
+            <button
+              class="filter-chip"
+              onclick="filterClientTransactions('done', event)"
+            >
+              Done
+            </button>
+            <button
+              class="filter-chip"
+              onclick="filterClientTransactions('to_claim', event)"
+            >
+              To Claim
+            </button>
+            <button
+              class="filter-chip"
+              onclick="filterClientTransactions('completed', event)"
+            >
+              Completed
+            </button>
+            <button
+              class="filter-chip"
+              onclick="filterClientTransactions('claimed', event)"
+            >
+              Claimed
+            </button>
+            <button
+              class="filter-chip"
+              onclick="filterClientTransactions('cancelled', event)"
+            >
+              Cancelled
+            </button>
+          </div>
+
+          <div id="transactionsList" class="cards-grid"></div>
+        </div>
+        <!-- TESTIMONIALS -->
+        <div class="panel" id="testimonialsPanel">
+          <div class="panel-topbar">
+            <h2 class="panel-heading">
+              <i class="bi bi-star-fill" aria-hidden="true"></i> My Testimonials
+            </h2>
+          </div>
+
+          <!-- Eligible transactions (claimed but no testimonial yet) -->
+          <div id="testimonialEligibleWrap" style="margin-bottom:1.5rem;">
+            <div class="testi-section-label">
+              <i class="bi bi-pencil-square"></i> Leave a Review
+            </div>
+            <div id="testimonialEligibleList">
+              <div class="testi-empty">
+                <i class="bi bi-hourglass-split"></i>
+                <p>No claimed transactions available to review yet.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Already submitted testimonials -->
+          <div id="myTestimonialsWrap">
+            <div class="testi-section-label">
+              <i class="bi bi-chat-quote-fill"></i> My Submitted Reviews
+            </div>
+            <div id="myTestimonialsList">
+              <div class="testi-empty">
+                <i class="bi bi-inbox"></i>
+                <p>You haven't submitted any reviews yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MY ACCOUNT ═══════════════════════════════════════════════════ -->
+        <div class="panel" id="userProfilePanel">
+          <div class="panel-topbar">
+            <h3 class="panel-heading">
+              <i class="bi bi-person-circle" aria-hidden="true"></i> My Account
+            </h3>
+            <button class="btn-primary-rnc" onclick="showChangePasswordModal()">
+              <i class="bi bi-key-fill" aria-hidden="true"></i> Change Password
+            </button>
+          </div>
+
+          <!-- ── Profile Card ── -->
+          <div class="profile-card mb-3">
+            <div class="profile-avatar" id="profileAvatarBig" aria-hidden="true">
+              <i class="bi bi-person-fill"></i>
+            </div>
+            <div class="profile-info">
+              <h4 id="profileName">—</h4>
+              <p id="profile-role">Client</p>
+            </div>
+          </div>
+
+          <!-- ── Account Details Grid ── -->
+          <div class="account-info-grid">
+            <div class="account-info-row">
+              <span class="account-info-label"><i class="bi bi-person-badge"></i> Username</span>
+              <span class="account-info-val" id="profileUsername">—</span>
+            </div>
+            <div class="account-info-row">
+              <span class="account-info-label"><i class="bi bi-envelope"></i> Email</span>
+              <span class="account-info-val" id="profileEmail">—</span>
+            </div>
+            <div class="account-info-row">
+              <span class="account-info-label"><i class="bi bi-gender-ambiguous"></i> Sex</span>
+              <span class="account-info-val" id="profileSex">—</span>
+            </div>
+            <div class="account-info-row">
+              <span class="account-info-label"><i class="bi bi-calendar3"></i> Member Since</span>
+              <span class="account-info-val" id="profileJoined">—</span>
+            </div>
+          </div>
+
+          <!-- ── Danger Zone ── -->
+          <div class="danger-zone">
+            <div class="danger-zone-header">
+              <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+              <div>
+                <h6>Danger Zone</h6>
+                <p>These actions are irreversible. Please proceed with caution.</p>
+              </div>
+            </div>
+            <div class="danger-zone-body">
+              <div class="danger-zone-item">
+                <div>
+                  <strong>Delete Account</strong>
+                  <p>Permanently remove your account and all associated data. You cannot undo this action.</p>
+                </div>
+                <button class="btn-danger-zone" onclick="showDeleteAccountModal()" aria-label="Request account deletion">
+                  <i class="bi bi-trash3-fill" aria-hidden="true"></i> Delete Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUPPORT CHAT CLIENT SIDE ══════════════════════════════════════════════════ -->
+        <div class="panel panel-chat" id="adminChatPanel">
+          <div class="chat-shell">
+            <div class="chat-head">
+              <div class="chat-head-left">
+                <div class="chat-avatar-lg">
+                  <i class="bi bi-headset" aria-hidden="true"></i
+                  ><span class="online-dot" id="onlineDot"></span>
+                </div>
+                <div>
+                  <h5 class="chat-head-title">Support Chat</h5>
+                  <div class="chat-head-status">
+                    <span class="status-dot" id="connectionStatus"></span>
+                    <small id="statusText">Connecting…</small>
+                  </div>
+                </div>
+              </div>
+              <div class="chat-secure-badge">
+                <i class="bi bi-shield-check" aria-hidden="true"></i> Secure
+              </div>
+            </div>
+
+            <div
+              class="chat-messages"
+              id="chatMessages"
+              aria-live="polite"
+              aria-label="Chat messages"
+            ></div>
+
+            <div
+              class="typing-indicator"
+              id="typingIndicator"
+              style="display: none"
+              aria-live="polite"
+              aria-label="Support is typing"
+            >
+              <div class="typing-avatar">
+                <i class="bi bi-headset" aria-hidden="true"></i>
+              </div>
+              <div class="typing-bubble">
+                <span></span><span></span><span></span>
+              </div>
+              <small>Support is typing</small>
+            </div>
+
+            <div class="chat-input-bar">
+              <button
+                class="chat-attach-btn"
+                onclick="document.getElementById('fileInput').click()"
+                title="Attach file"
+                aria-label="Attach file"
+              >
+                <i class="bi bi-paperclip" aria-hidden="true"></i>
+              </button>
+              <input
+                type="file"
+                id="fileInput"
+                style="display: none"
+                accept="image/*,.pdf,.doc,.docx,.txt"
+                onchange="handleFileSelect(event)"
+              />
+              <div class="chat-textarea-wrap">
+                <textarea
+                  id="messageInput"
+                  class="chat-textarea"
+                  placeholder="Type your message…"
+                  rows="1"
+                  onkeydown="handleKeyPress(event)"
+                  oninput="
+                    handleTyping();
+                    autoResizeTextarea(this);
+                  "
+                  aria-label="Message input"
+                ></textarea>
+              </div>
+              <button
+                class="chat-send-btn"
+                onclick="sendMessage()"
+                title="Send"
+                aria-label="Send message"
+              >
+                <i class="bi bi-send-fill" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+      <!-- /app-main -->
+    </div>
+    <!-- /app-shell -->
+
+    
+
+    <!-- ══ SCRIPTS ═════════════════════════════════════════════════════════ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    "use strict";
+
+    let _testiRating = 0;
+    const RATING_LABELS = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+
+    /* ── Load panel ── */
+    async function loadTestimonialsPanel() {
+      await Promise.all([loadEligibleTransactions(), loadMyTestimonials()]);
+    }
+
+    async function loadEligibleTransactions() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/client/testimonials/eligible`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await res.json();
+        console.log(data)
+        renderEligibleList(data.eligible || []);
+      } catch (e) {
+        console.error('Eligible fetch error:', e);
+      }
+    }
+
+    function renderEligibleList(list) {
+      const el = document.getElementById('testimonialEligibleList');
+      if (!list.length) {
+        el.innerHTML = `<div class="testi-empty"><i class="bi bi-hourglass-split"></i><p>No claimed transactions available to review yet.</p></div>`;
+        return;
+      }
+      el.innerHTML = list.map(tx => `
+        <div class="testi-eligible-card">
+          <div class="testi-eligible-info">
+            <div class="testi-eligible-service">${tx.service_name}</div>
+            <div class="testi-eligible-meta">Claimed · Transaction #${tx.transaction_id}</div>
+          </div>
+          <button class="testi-leave-btn" onclick="openTestiModal(${tx.transaction_id}, '${escapeHtml(tx.service_name)}')">
+            <i class="bi bi-star-fill"></i> Leave Review
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function loadMyTestimonials() {
+      const el = document.getElementById('myTestimonialsList');
+      el.innerHTML = `<div class="testi-empty"><i class="bi bi-arrow-repeat testi-spin"></i><p>Loading your reviews…</p></div>`;
+
+      try {
+        const res = await fetch(`${BASE_URL}/api/client/testimonials/mine`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await res.json();
+        renderMyTestimonials(data.testimonials || []);
+      } catch (e) {
+        el.innerHTML = `<div class="testi-empty"><i class="bi bi-exclamation-triangle"></i><p>Could not load your reviews.</p></div>`;
+      }
+    }
+
+    function renderMyTestimonials(list) {
+      const el = document.getElementById('myTestimonialsList');
+      if (!list.length) {
+        el.innerHTML = `<div class="testi-empty"><i class="bi bi-inbox"></i><p>No submitted reviews yet.</p></div>`;
+        return;
+      }
+      el.innerHTML = list.map(t => {
+        const stars = Array.from({length: 5}, (_, i) =>
+          `<i class="bi bi-star${i < t.rating ? '-fill' : ''}" style="color:${i < t.rating ? '#f59e0b' : 'var(--border-bright)'}; font-size:.8rem;"></i>`
+        ).join('');
+        const dateStr = t.created_at
+          ? new Date(t.created_at).toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' })
+          : '—';
+        const visibilityBadge = t.is_visible
+          ? `<span class="testi-badge testi-badge-visible"><i class="bi bi-eye-fill"></i> Published</span>`
+          : `<span class="testi-badge testi-badge-pending"><i class="bi bi-hourglass-split"></i> Pending Review</span>`;
+        return `
+          <div class="my-testi-card">
+            <div class="my-testi-head">
+              <div>
+                <div class="my-testi-service">${escapeHtml(t.service_name)}</div>
+                <div class="my-testi-meta">Tx #${t.transaction_id} · ${dateStr}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;">
+                <div class="my-testi-stars">${stars}</div>
+                ${visibilityBadge}
+              </div>
+            </div>
+            <p class="my-testi-message">"${escapeHtml(t.message)}"</p>
+          </div>`;
+      }).join('');
+    }
+
+
+    /* ── Modal ── */
+    function openTestiModal(transactionId, serviceName) {
+      document.getElementById('testiTransactionId').value = transactionId;
+      document.getElementById('testiModalSub').textContent = serviceName;
+      document.getElementById('testiMessage').value = '';
+      document.getElementById('testiCharCount').textContent = '0';
+      document.getElementById('testiModalErr').style.display = 'none';
+      setRating(0);
+
+      document.getElementById('testiModalOverlay').style.display = 'block';
+      document.getElementById('testiModal').style.display = 'flex';
+      document.getElementById('testiModal').style.flexDirection = 'column';
+    }
+
+    function closeTestiModal() {
+      document.getElementById('testiModalOverlay').style.display = 'none';
+      document.getElementById('testiModal').style.display = 'none';
+    }
+
+    /* ── Star rating ── */
+    function setRating(val) {
+      _testiRating = val;
+      document.querySelectorAll('.testi-star').forEach(s => {
+        s.classList.toggle('active', Number(s.dataset.val) <= val);
+      });
+      document.getElementById('testiRatingDesc').textContent = RATING_LABELS[val] || 'Select a rating';
+    }
+
+    /* Hover effects */
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.testi-star').forEach(s => {
+        s.addEventListener('mouseenter', () => {
+          const v = Number(s.dataset.val);
+          document.querySelectorAll('.testi-star').forEach(x => {
+            x.classList.toggle('hover', Number(x.dataset.val) <= v);
+          });
+        });
+        s.addEventListener('mouseleave', () => {
+          document.querySelectorAll('.testi-star').forEach(x => x.classList.remove('hover'));
+        });
+        s.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRating(Number(s.dataset.val)); }
+        });
+      });
+
+      const ta = document.getElementById('testiMessage');
+      if (ta) {
+        ta.addEventListener('input', () => {
+          document.getElementById('testiCharCount').textContent = ta.value.length;
+        });
+      }
+    });
+
+    /* ── Submit ── */
+    async function submitTestimonial() {
+      const transactionId = document.getElementById('testiTransactionId').value;
+      const message       = document.getElementById('testiMessage').value.trim();
+      const errEl         = document.getElementById('testiModalErr');
+      const btn           = document.getElementById('testiSubmitBtn');
+
+      errEl.style.display = 'none';
+
+      if (!_testiRating) {
+        errEl.textContent = 'Please select a rating.';
+        errEl.style.display = 'block'; return;
+      }
+      if (message.length < 10) {
+        errEl.textContent = 'Please write at least 10 characters.';
+        errEl.style.display = 'block'; return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Submitting…';
+
+      try {
+        const res = await fetch(`${BASE_URL}/api/client/testimonials`, {
+          method:  'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization:  `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({ transactionId, rating: _testiRating, message })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          closeTestiModal();
+          showNotificationMessage?.('Thank you for your review!', 'success') ||
+            alert('Thank you for your review!');
+          /* Reload eligible list */
+          loadEligibleTransactions();
+        } else {
+          errEl.textContent = data.message || 'Failed to submit. Please try again.';
+          errEl.style.display = 'block';
+        }
+      } catch (e) {
+        errEl.textContent = 'Network error. Please try again.';
+        errEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-send-fill"></i> Submit Review';
+      }
+    }
+
+    //INACTIVITY
+      function performLogout() {
+        stopInactivityWatch();
+
+        try {
+          const s = (typeof socket !== 'undefined' && socket) || window.socket;
+          if (s?.connected) s.disconnect();
+        } catch { }
+
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+
+        window.location.href = `${BASE_URL}`;
+      }
+
+    startInactivityWatch(performLogout, {
+      timeoutMs: 15 * 60 * 1000,   
+      warningMs: 14 * 60 * 1000,        
+
+      onWarning: (msRemaining) => {
+        const seconds = Math.round(msRemaining / 1000);
+
+        showNotificationMessage(
+          `You will be logged out in ${seconds} second${seconds !== 1 ? 's' : ''} due to inactivity.`,
+          'warning'
+        );
+      },
+    });
+   
+     
+
+      /* ─────────────────────────────────────────
+   THEME
+───────────────────────────────────────── */
+      const ROOT = document.documentElement;
+
+    
+      function applyTheme(t) {
+        ROOT.setAttribute("data-theme", t);
+        localStorage.setItem("rnc-theme", t);
+        const btn = document.getElementById("themeToggle");
+        if (btn)
+          btn.setAttribute(
+            "aria-label",
+            t === "dark" ? "Switch to light mode" : "Switch to dark mode",
+          );
+      }
+    
+      function toggleTheme() {
+        applyTheme(
+          ROOT.getAttribute("data-theme") === "dark" ? "light" : "dark",
+        );
+      }
+   
+      (function () {
+        const s = localStorage.getItem("rnc-theme");
+        if (s) applyTheme(s);
+        else if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme:light)").matches
+        )
+          applyTheme("light");
+        else applyTheme("dark");
+      })();
+
+      /* ─────────────────────────────────────────
+   SIDEBAR MOBILE TOGGLE
+───────────────────────────────────────── */
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("sidebar-open");
+      }
+
+      document.addEventListener("click", function (e) {
+        const sidebar = document.getElementById("sidebar");
+        const toggle = document.getElementById("sidebarToggle");
+        if (
+          sidebar.classList.contains("sidebar-open") &&
+          !sidebar.contains(e.target) &&
+          !toggle.contains(e.target)
+        ) {
+          sidebar.classList.remove("sidebar-open");
+        }
+      });
+
+      /* ─────────────────────────────────────────
+   TOAST NOTIFICATIONS
+───────────────────────────────────────── */
+      const _toastIcons = {
+        success: '<i class="bi bi-check-circle-fill toast-icon"></i>',
+        error: '<i class="bi bi-x-circle-fill toast-icon"></i>',
+        warning: '<i class="bi bi-exclamation-triangle-fill toast-icon"></i>',
+        info: '<i class="bi bi-info-circle-fill toast-icon"></i>',
+      };
+      
+      const _toastLabels = {
+        success: "Success",
+        error: "Error",
+        warning: "Warning",
+        info: "Info",
+      };
+
+      function showNotificationMessage(
+        message,
+        type = "info",
+        _ignored = null,
+        duration = 5000,
+      ) {
+        if (!["success", "error", "warning", "info"].includes(type))
+          type = "info";
+        let container = document.getElementById("global-toast-container");
+        if (!container) {
+          container = document.createElement("div");
+          container.id = "global-toast-container";
+          document.body.appendChild(container);
+        }
+        const pill = document.createElement("div");
+        pill.className = "toast-pill toast-" + type;
+        pill.setAttribute("role", "alert");
+        pill.setAttribute("aria-live", "assertive");
+        pill.setAttribute("aria-atomic", "true");
+        pill.innerHTML =
+          _toastIcons[type] +
+          '<div class="toast-body"><strong>' +
+          _toastLabels[type] +
+          "</strong>" +
+          message +
+          "</div>" +
+          '<button class="toast-close" aria-label="Dismiss">&times;</button>' +
+          '<div class="toast-progress" style="animation-duration:' +
+          duration +
+          'ms;"></div>';
+        container.appendChild(pill);
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => pill.classList.add("toast-show")),
+        );
+        function dismiss() {
+          clearTimeout(timer);
+          pill.classList.remove("toast-show");
+          pill.classList.add("toast-hide");
+          pill.addEventListener("transitionend", () => pill.remove(), {
+            once: true,
+          });
+        }
+        pill.querySelector(".toast-close").addEventListener("click", dismiss);
+        const timer = setTimeout(dismiss, duration);
+        return { dismiss };
+      }
+
+      // Alias used by existing JS
+      function showServerMessage(message, type = "error", autoHide = true) {
+        showNotificationMessage(
+          message,
+          type === "error" ? "error" : type,
+          null,
+          autoHide ? 5000 : 999999,
+        );
+      }
+      
+      /* ─────────────────────────────────────────
+   ALERT / CONFIRM MODALS
+───────────────────────────────────────── */
+      const _alertModal = new bootstrap.Modal(document.getElementById("alertModal"),);
+      const _confirmModal = new bootstrap.Modal(document.getElementById("confirmModal"),);
+
+      window.alert = function (message) {
+        showAlertModal(message, "info");
+      };
+
+      let _confirmCb = null;
+
+      window.confirm = function (message) {
+        return new Promise((resolve) => {
+          _confirmCb = resolve;
+          showConfirmModal(message);
+        });
+      };
+
+      function showAlertModal(message, type = "info") {
+        const header = document
+          .getElementById("alertModal")
+          .querySelector(".modal-header");
+        const iconEl = document.getElementById("alertModalIcon");
+        const title = document.getElementById("alertModalTitleText");
+        const msgEl = document.getElementById("alertModalMessage");
+        msgEl.textContent = message;
+        const cfg = {
+          success: {
+            bg: "rgba(52,211,153,0.12)",
+            border: "rgba(52,211,153,0.3)",
+            iconBg: "rgba(52,211,153,0.2)",
+            iconColor: "var(--success)",
+            icon: "bi-check-circle-fill",
+            label: "Success",
+          },
+          error: {
+            bg: "rgba(244,63,94,0.12)",
+            border: "rgba(244,63,94,0.3)",
+            iconBg: "rgba(244,63,94,0.2)",
+            iconColor: "var(--danger)",
+            icon: "bi-x-circle-fill",
+            label: "Error",
+          },
+          warning: {
+            bg: "rgba(251,146,60,0.12)",
+            border: "rgba(251,146,60,0.3)",
+            iconBg: "rgba(251,146,60,0.2)",
+            iconColor: "var(--warning)",
+            icon: "bi-exclamation-triangle-fill",
+            label: "Warning",
+          },
+          info: {
+            bg: "var(--gradient-soft)",
+            border: "var(--border-bright)",
+            iconBg: "rgba(99,102,241,0.15)",
+            iconColor: "var(--primary)",
+            icon: "bi-info-circle-fill",
+            label: "Information",
+          },
+        };
+        const c = cfg[type] || cfg.info;
+        header.style.background = c.bg;
+        header.style.borderColor = c.border;
+        iconEl.style.background = c.iconBg;
+        iconEl.style.color = c.iconColor;
+        iconEl.querySelector("i").className = "bi " + c.icon;
+        title.textContent = c.label;
+        _alertModal.show();
+      }
+
+      function showConfirmModal(message) {
+        document.getElementById("confirmModalMessage").textContent = message;
+        const btn = document.getElementById("confirmModalButton");
+        btn.onclick = function () {
+          if (_confirmCb) {
+            _confirmCb(true);
+            _confirmCb = null;
+          }
+          _confirmModal.hide();
+        };
+        document.getElementById("confirmModal").addEventListener(
+          "hidden.bs.modal",
+          function () {
+            if (_confirmCb) {
+              _confirmCb(false);
+              _confirmCb = null;
+            }
+          },
+          { once: true },
+        );
+        _confirmModal.show();
+      }
+
+      /* ─────────────────────────────────────────
+   BOOTSTRAP MODALS
+───────────────────────────────────────── */
+      const logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"),);
+      const changePasswordModal = new bootstrap.Modal(document.getElementById("changePasswordModal"),);
+      const updateAppointmentStatusModal = new bootstrap.Modal(document.getElementById("updateAppointmentStatusModal"),);
+      const clientTimelineModal = new bootstrap.Modal(document.getElementById("clientTimelineModal"),);
+      const cancelTransactionModal = new bootstrap.Modal(document.getElementById("cancelTransactionModal"),);
+
+      function showLogoutModal() {
+        logoutModal.show();
+      }
+      
+      function showChangePasswordModal() {
+        document.getElementById("currentPassword").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("confirmNewPassword").value = "";
+        document.getElementById("changePasswordMessage").style.display = "none";
+        changePasswordModal.show();
+      }
+
+      /* ─────────────────────────────────────────
+   SHOW SECTION
+───────────────────────────────────────── */
+      const _titleMap = {
+        dashboardPanel: "Dashboard",
+        appointmentPanel: "Appointments",
+        transactionsPanel: "Transactions",
+        testimonialsPanel: "Testimonials",
+        userProfilePanel: "My Account",
+        adminChatPanel: "Support Chat",
+      };
+
+      async function showSection(sectionName) {
+        document.querySelectorAll(".panel").forEach((p) => {
+          p.classList.remove("active");
+        });
+        document
+          .querySelectorAll(".sidebar-nav-item")
+          .forEach((i) => i.classList.remove("active"));
+
+        const panel = document.getElementById(sectionName);
+        if (panel) {
+          panel.classList.add("active");
+        }
+
+        const navItem = document.querySelector(
+          `.sidebar-nav-item[data-section="${sectionName}"]`,
+        );
+        if (navItem) navItem.classList.add("active");
+
+        const topbar = document.getElementById("topbarTitle");
+        if (topbar) topbar.textContent = _titleMap[sectionName] || "";
+
+        // Close mobile sidebar
+        document.getElementById("sidebar").classList.remove("sidebar-open");
+        
+        const _origShowSection = typeof showSection === 'function' ? showSection : null;
+
+        switch (sectionName) {
+          case "dashboardPanel":
+            await initializeDashboard();
+            break;
+          case "appointmentPanel":
+            await fetchAppointments();
+            break;
+          case "transactionsPanel":
+            let status = document.getElementById('active-filter-transaction-button').value
+            await fetchClientTransactions(status);
+            break;
+          case "userProfilePanel":
+            break;
+          case 'testimonialsPanel':
+            await loadTestimonialsPanel();
+            break;
+
+          case "adminChatPanel":
+            _clearClientChatBadge();
+            break;
+        }
+      }
+
+      /* ─────────────────────────────────────────
+   NOTIFICATIONS
+───────────────────────────────────────── */
+      async function fetchNotifications() {
+        const res = await fetch(`${BASE_URL}/api/client/notifications`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const notifications = await res.json();
+        if (res.ok) {
+          displayNotifications(notifications);
+          updateNotificationBadge(notifications);
+        }
+      }
+
+      function displayNotifications(notifications) {
+        const container = document.getElementById("notificationList");
+        if (!notifications || notifications.length === 0) {
+          container.innerHTML = '<p class="notif-empty">No notifications</p>';
+          return;
+        }
+        container.innerHTML = notifications
+          .map(
+            (n) => `
+    <div class="notif-item ${n.is_read ? "" : "unread"}" onclick="markAsRead(${n.notification_id})">
+      <div class="notif-item-header">
+        <strong>${n.title}</strong>
+        ${!n.is_read ? '<span class="notif-new-badge">New</span>' : ""}
+      </div>
+      <p class="notif-item-msg">${n.message}</p>
+      <small class="notif-item-time">${formatNotificationTime(n.created_at)}</small>
+    </div>
+  `,
+          )
+          .join("");
+      }
+
+      function updateNotificationBadge(notifications) {
+        const count = notifications.filter((n) => !n.is_read).length;
+        const badge = document.getElementById("notificationCount");
+        if (count > 0) {
+          badge.textContent = count > 9 ? "9+" : count;
+          badge.style.display = "flex";
+        } else {
+          badge.style.display = "none";
+        }
+      }
+
+      function toggleNotifications() {
+        document.getElementById("notificationPanel").classList.toggle("show");
+      }
+
+      async function markAsRead(id) {
+        await fetch(`/api/client/notifications/${id}/read`, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        fetchNotifications();
+      }
+
+      async function markAllAsRead() {
+        await fetch("/api/client/notifications/mark-all-read", {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        fetchNotifications();
+      }
+
+      function formatNotificationTime(ts) {
+        const d = new Date(ts),
+          now = new Date(),
+          diff = now - d;
+        const m = Math.floor(diff / 60000),
+          h = Math.floor(diff / 3600000),
+          dy = Math.floor(diff / 86400000);
+        if (m < 1) return "Just now";
+        if (m < 60) return m + "m ago";
+        if (h < 24) return h + "h ago";
+        if (dy < 7) return dy + "d ago";
+        return d.toLocaleDateString();
+      }
+
+      document.addEventListener("click", function (e) {
+        const panel = document.getElementById("notificationPanel");
+        const bell = document.getElementById("notifBell");
+        if (!panel.contains(e.target) && !bell.contains(e.target))
+          panel.classList.remove("show");
+      });
+
+      /* ─────────────────────────────────────────
+   TIME SLOTS
+───────────────────────────────────────── */
+      let selectedTimeSlot = null;
+
+      async function fetchAvailableTimeSlots(date) {
+        const res = await fetch(
+          `${BASE_URL}/api/client/available-time-slots?date=${date}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        const slots = await res.json();
+        if (res.ok) displayTimeSlots(slots);
+      }
+
+      function displayTimeSlots(slots) {
+        const container = document.getElementById("timeSlotContainer");
+        if (!slots || slots.length === 0) {
+          container.innerHTML =
+            '<p style="font-size:0.85rem;color:var(--text-muted);">No available time slots for this date</p>';
+          return;
+        }
+        container.innerHTML = slots
+          .map((slot) => {
+            const left = slot.max_capacity - slot.current_bookings;
+            const full = left <= 0;
+            const low = left <= 1 && !full;
+            return `
+      <div class="time-slot-chip ${full ? "slot-full" : ""} ${low ? "slot-low" : ""}"
+           data-time="${slot.appointment_time}"
+           onclick="${full ? "" : `selectTimeSlot('${slot.appointment_time}')`}"
+           role="button" tabindex="${full ? -1 : 0}"
+           aria-disabled="${full}">
+        <strong>${formatTime(slot.appointment_time)}</strong>
+        <span>${full ? "Full" : left + " left"}</span>
+      </div>
+    `;
+          })
+          .join("");
+      }
+
+      function selectTimeSlot(time) {
+        document
+          .querySelectorAll(".time-slot-chip")
+          .forEach((c) => c.classList.remove("selected"));
+        const chip = document.querySelector(`[data-time="${time}"]`);
+        if (chip && !chip.classList.contains("slot-full")) {
+          chip.classList.add("selected");
+          selectedTimeSlot = time;
+        }
+      }
+
+      function formatTime(t) {
+        const [h, m] = t.split(":");
+        const hr = parseInt(h);
+        return (hr % 12 || 12) + ":" + m + " " + (hr >= 12 ? "PM" : "AM");
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const dateInput = document.getElementById("appointmentDate");
+        if (dateInput) {
+          // Set min to tomorrow (appointments must be booked at least 1 day ahead)
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const tomorrowStr = (() => {
+            const y = tomorrow.getFullYear();
+            const m = String(tomorrow.getMonth()+1).padStart(2,'0');
+            const d = String(tomorrow.getDate()).padStart(2,'0');
+            return `${y}-${m}-${d}`;
+          })();
+          dateInput.setAttribute("min", tomorrowStr);
+
+          dateInput.addEventListener("change", function () {
+            if (!this.value) return;
+
+            // Block Sunday (0) — office is Mon–Sat only
+            const chosen = new Date(this.value + 'T00:00:00');
+            if (chosen.getDay() === 0) {
+              this.value = '';
+              this.classList.add('input-error');
+              document.getElementById("timeSlotContainer").innerHTML =
+                '<div style="display:flex;align-items:center;gap:.5rem;font-size:.84rem;color:var(--danger);background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.3);border-radius:var(--radius-md);padding:.6rem .85rem;">' +
+                '<i class="bi bi-x-circle-fill"></i>' +
+                '<span>Sundays are not available. Please choose Monday – Saturday.</span></div>';
+              selectedTimeSlot = null;
+              return;
+            }
+
+            this.classList.remove('input-error');
+            selectedTimeSlot = null;
+            fetchAvailableTimeSlots(this.value);
+          });
+        }
+      });
+      /* ─────────────────────────────────────────
+   INIT USER
+───────────────────────────────────────── */
+     async function initializeUser() {
+        const token = localStorage.getItem("token");
+        let user = JSON.parse(localStorage.getItem("user") || "null");
+
+        if (!token || !user){
+          window.location.href = "/";
+          return;
+        }
+
+       if(user.role === 'admin'){
+            window.location.href = "/pages/admin.html";
+            return;
+       }
+
+        if (!user.last_name || !user.first_name) {
+          const el = document.getElementById("setupUserModal");
+          new bootstrap.Modal(el, {
+            backdrop: "static",
+            keyboard: false,
+          }).show();
+        } else {
+          document.getElementById("user-name").textContent =
+            user.first_name + ", " + user.last_name;
+          document.getElementById("user-role").textContent = user.role;
+          document.getElementById("profileName").textContent =
+            user.first_name + " " + user.last_name;
+          document.getElementById("profile-role").textContent = user.role;
+          if (typeof populateProfilePanel === 'function') populateProfilePanel();
+          await fetchServices();
+          await fetchNotifications();
+          showSection("dashboardPanel");
+        }
+      }
+
+      /* ─────────────────────────────────────────
+   DASHBOARD
+───────────────────────────────────────── */
+      async function initializeDashboard() {
+        await Promise.all([
+          fetchDashboardStats(),
+          fetchRecentActivity(),
+          fetchUpcomingAppointments(),
+          fetchActiveTransactions(),
+          fetchMonthlyOverview(),
+        ]);
+      }
+
+      async function fetchDashboardStats() {
+        const res = await fetch(`${BASE_URL}/api/client/getDashboardStats`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (!res.ok) return;
+        const stats = await res.json();
+        [
+          "totalAppointments",
+          "totalTransactions",
+          "pendingItems",
+          "completedItems",
+        ].forEach((id) => {
+          animateCounter(id, stats[id] || 0);
+        });
+      }
+
+      async function fetchRecentActivity() {
+        const res = await fetch(`${BASE_URL}/api/client/getRecentActivity`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (!res.ok) return;
+        displayRecentActivity(await res.json());
+      }
+
+      function displayRecentActivity(activities) {
+        const c = document.getElementById("recentActivityList");
+        if (!activities || activities.length === 0) {
+          c.innerHTML =
+            '<div class="list-empty"><i class="bi bi-inbox"></i><p>No recent activity</p></div>';
+          return;
+        }
+        const icons = {
+          appointment: "calendar-check",
+          transaction: "file-earmark-check",
+          notification: "bell",
+          update: "arrow-repeat",
+          completed: "check-circle",
+          cancelled: "x-circle",
+        };
+        c.innerHTML = activities
+          .map(
+            (a) => `
+    <div class="activity-row">
+      <div class="activity-icon-chip ${a.type.toLowerCase()}">
+        <i class="bi bi-${icons[a.type.toLowerCase()] || "info-circle"}"></i>
+      </div>
+      <div class="activity-body">
+        <div class="activity-title">${a.title}</div>
+        <div class="activity-desc">${a.description}</div>
+        <div class="activity-time"><i class="bi bi-clock"></i>${formatActivityTime(a.created_at)}</div>
+      </div>
+    </div>
+  `,
+          )
+          .join("");
+      }
+
+      async function fetchUpcomingAppointments() {
+        const res = await fetch(
+          `${BASE_URL}/api/client/getUpcomingAppointments`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        if (!res.ok) return;
+        displayUpcomingAppointments(await res.json());
+      }
+
+      function displayUpcomingAppointments(appointments) {
+        const c = document.getElementById("upcomingAppointmentsList");
+        if (!appointments || appointments.length === 0) {
+          c.innerHTML =
+            '<div class="list-empty"><i class="bi bi-calendar-x"></i><p>No upcoming appointments</p></div>';
+          return;
+        }
+        c.innerHTML = appointments
+          .slice(0, 5)
+          .map(
+            (a) => `
+    <div class="compact-item">
+      <div class="compact-item-left">
+        <div class="compact-item-title">Appointment #${a.appointment_id}</div>
+        <div class="compact-item-sub">
+          ${a.services
+            .slice(0, 2)
+            .map((s) => `<span class="mini-tag">${s}</span>`)
+            .join("")}
+          ${a.services.length > 2 ? `<span class="mini-tag">+${a.services.length - 2}</span>` : ""}
+        </div>
+      </div>
+      <div class="compact-item-right">
+        <div class="compact-item-date">${new Date(a.appointment_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>
+        <div class="compact-item-time">${formatTime(a.appointment_time)}</div>
+      </div>
+    </div>
+  `,
+          )
+          .join("");
+      }
+
+      async function fetchActiveTransactions() {
+        const res = await fetch(
+          `${BASE_URL}/api/client/getActiveTransactions`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        if (!res.ok) return;
+        displayActiveTransactions(await res.json());
+      }
+
+      function displayActiveTransactions(transactions) {
+        const c = document.getElementById("activeTransactionsList");
+        if (!transactions || transactions.length === 0) {
+          c.innerHTML =
+            '<div class="list-empty"><i class="bi bi-file-earmark-x"></i><p>No active transactions</p></div>';
+          return;
+        }
+        c.innerHTML = transactions
+          .slice(0, 5)
+          .map(
+            (tx) => `
+    <div class="compact-item">
+      <div class="compact-item-left">
+        <div class="compact-item-title">Txn #${tx.transaction_id}</div>
+        <div class="compact-item-sub"><span class="mini-tag">${tx.service_name}</span></div>
+      </div>
+      <div class="compact-item-right">
+        <span class="status-chip status-${tx.status_name.toLowerCase().replace(/\s+/g, "_")}">${tx.status_name}</span>
+      </div>
+    </div>
+  `,
+          )
+          .join("");
+      }
+
+      async function fetchMonthlyOverview() {
+        const res = await fetch(`${BASE_URL}/api/client/getMonthlyOverview`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (!res.ok) return;
+        displayMonthlyOverview(await res.json());
+      }
+
+      function displayMonthlyOverview(ov) {
+        const ac = ov.monthlyAppointments || 0;
+        const tc = ov.monthlyTransactions || 0;
+        document.getElementById("monthlyAppointmentCount").textContent = ac;
+        document.getElementById("monthlyAppointmentProgress").style.width =
+          Math.min((ac / 10) * 100, 100) + "%";
+        document.getElementById("monthlyTransactionCount").textContent = tc;
+        document.getElementById("monthlyTransactionProgress").style.width =
+          Math.min((tc / 15) * 100, 100) + "%";
+      }
+
+      function animateCounter(id, target) {
+        const el = document.getElementById(id);
+        const steps = 24,
+          inc = target / steps;
+        let cur = 0;
+        const t = setInterval(() => {
+          cur += inc;
+          if (cur >= target) {
+            el.textContent = target;
+            clearInterval(t);
+          } else {
+            el.textContent = Math.floor(cur);
+          }
+        }, 1000 / steps);
+      }
+
+      function formatActivityTime(ts) {
+        const d = new Date(ts),
+          now = new Date(),
+          diff = now - d;
+        const sec = Math.floor(diff / 1000),
+          min = Math.floor(sec / 60),
+          hr = Math.floor(min / 60),
+          dy = Math.floor(hr / 24);
+        if (sec < 60) return "Just now";
+        if (min < 60) return min + "m ago";
+        if (hr < 24) return hr + "h ago";
+        if (dy < 7) return dy + "d ago";
+        return d.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      /* ─────────────────────────────────────────
+   APPOINTMENTS
+───────────────────────────────────────── */
+      async function fetchAppointments(status = "all") {
+        const res = await fetch(
+          `${BASE_URL}/api/client/getAppointments/${status}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        const appointments = await res.json();
+        const c = document.getElementById("appointment");
+
+        if (!appointments || appointments.length === 0) {
+          c.innerHTML =
+            '<div class="empty-state"><i class="bi bi-calendar-x"></i><p>No appointments found</p></div>';
+          return;
+        }
+
+        c.innerHTML = appointments
+          .map(
+            (app) => `
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-meta">
+          <span class="data-card-id">Appointment #${app.appointment_id}</span>
+          <span class="data-card-date">${new Date(app.appointment_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · ${formatTime(app.appointment_time)}</span>
+        </div>
+        <span class="status-chip status-${app.status}">${app.status}</span>
+      </div>
+      <div class="data-card-tags">
+        ${app.services.map((s) => `<span class="mini-tag">${s}</span>`).join("")}
+      </div>
+      ${app.notes ? `<p class="data-card-note"><i class="bi bi-sticky-fill"></i>${app.notes}</p>` : ""}
+      ${
+        app.status === "completed" || app.status === "cancelled"
+          ? ""
+          : `
+        <div class="data-card-actions">
+          <button class="btn-danger-sm" onclick="showUpdateAppointmentStatusModal(${app.appointment_id})">
+            <i class="bi bi-x-circle"></i> Cancel
+          </button>
+        </div>
+      `
+      }
+    </div>
+  `,
+          )
+          .join("");
+      }
+
+      function filterAppointment(status) {
+        document.querySelectorAll(".filter-strip .filter-chip").forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
+        fetchAppointments(status);
+      }
+
+      async function showUpdateAppointmentStatusModal(id) {
+        document.getElementById("updateAppointmentID").value = id;
+        document.getElementById("cancellationReason").value = "";
+        document.getElementById(
+          "updateAppointmentStatusMessageBox",
+        ).style.display = "none";
+        updateAppointmentStatusModal.show();
+      }
+
+      async function cancelAppointment() {
+        const id = document.getElementById("updateAppointmentID").value;
+        const reason = document.getElementById("cancellationReason").value;
+        if (!reason) {
+          document.getElementById(
+            "updateAppointmentStatusMessageBox",
+          ).style.display = "flex";
+          document.getElementById(
+            "updateAppointmentStatusMessage",
+          ).textContent = "Cancellation reason is required";
+          return;
+        }
+        const res = await fetch(`/api/client/cancelAppointment/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ reason }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          await fetchAppointments();
+          await fetchNotifications();
+          showNotificationMessage(data.message, "success");
+          updateAppointmentStatusModal.hide();
+        } else {
+          showNotificationMessage(data.message, "error");
+        }
+      }
+
+      function showUpdateAppointmentMessage(msg, type = "error") {
+        const box = document.getElementById(
+          "updateAppointmentStatusMessageBox",
+        );
+        const txt = document.getElementById("updateAppointmentStatusMessage");
+        box.className =
+          "rnc-alert rnc-alert-" +
+          (type === "success" ? "success" : "danger") +
+          " mb-3";
+        txt.textContent = msg;
+        box.style.display = "flex";
+        setTimeout(() => {
+          box.style.display = "none";
+        }, 4000);
+      }
+
+      async function submitAppointment(event) {
+        event.preventDefault();
+
+        let btn = document.getElementById("submitAppointmentButton");
+        btn.disabled = true;
+
+        const services = [
+          ...document.querySelectorAll('input[name="services"]:checked'),
+        ].map((c) => c.value);
+
+        if (services.length === 0) {
+          showNotificationMessage("Please select at least one service.", "error");
+          btn.disabled = false;
+          return;
+        }
+
+        if (!selectedTimeSlot) {
+          showNotificationMessage("Please select a time slot.", "error");
+          btn.disabled = false;
+          return;
+        }
+
+        if (!document.getElementById("appointmentForm").checkValidity()) {
+          document.getElementById("appointmentForm").reportValidity();
+          btn.disabled = false;
+          return;
+        }
+
+        const res = await fetch("/api/client/submitAppointment", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            services,
+            date: document.getElementById("appointmentDate").value,
+            time: selectedTimeSlot,
+            notes: document.getElementById("notes").value,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          bootstrap.Modal.getInstance(
+            document.getElementById("appointmentModal")
+          ).hide();
+
+          document.getElementById("appointmentForm").reset();
+          selectedTimeSlot = null;
+
+          document.getElementById("timeSlotContainer").innerHTML =
+            '<p style="font-size:0.85rem;color:var(--text-muted);">Please select a date first</p>';
+
+          await fetchServices();
+          await fetchAppointments();
+        }
+
+        showNotificationMessage(data.message, res.ok ? "success" : "error");
+
+        btn.disabled = false;
+      }
+      /* ─────────────────────────────────────────
+   TRANSACTIONS
+───────────────────────────────────────── */
+      let searchTimeout;
+
+      async function fetchClientTransactions(status = "all") {
+        console.log('ss')
+        const res = await fetch(
+          `${BASE_URL}/api/client/getClientTransactions/${status}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        if (!res.ok) {
+          showNotificationMessage("Failed to load transactions", "error");
+          return;
+        }
+        displayClientTransactions(await res.json());
+      }
+
+      function displayClientTransactions(transactions) {
+        const c = document.getElementById("transactionsList");
+        document.getElementById("currentTransactionCount").textContent =
+          transactions.length;
+        if (!transactions || transactions.length === 0) {
+          c.innerHTML =
+            '<div class="empty-state"><i class="bi bi-inbox"></i><p>No transactions found</p></div>';
+          return;
+        }
+        c.innerHTML = transactions
+          .map(
+            (tx) => `
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-meta">
+          <span class="data-card-id">Transaction #${tx.transaction_id}</span>
+          <span class="data-card-date">${tx.service_name}</span>
+        </div>
+        <span class="status-chip status-${tx.status_name.toLowerCase().replace(/\s+/g, "")}">${mapStatus(tx.status_name)}</span>
+
+      </div>
+      <div class="data-card-rows">
+        <div class="data-row"><span class="data-row-label">Created</span><span class="data-row-val">${new Date(tx.created_at).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })}</span></div>
+        <div class="data-row"><span class="data-row-label">Updated</span><span class="data-row-val">${new Date(tx.updated_at).toLocaleDateString("en-PH", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span></div>
+        ${tx.service_description ? `<div class="data-row"><span class="data-row-label">Notes</span><span class="data-row-val">${tx.service_description}</span></div>` : ""}
+      </div>
+      <div class="data-card-actions">
+        <button class="btn-outline-sm btn-teal" onclick="viewClientTimeline(${tx.transaction_id})">
+          <i class="bi bi-clock-history"></i> Timeline
+        </button>
+        ${
+          tx.status_name === "claimed" || tx.status_name === "completed"
+            ? `
+          <button class="btn-outline-sm btn-indigo" onclick="generateClientReceipt(${tx.transaction_id})">
+            <i class="bi bi-file-earmark-pdf"></i> Receipt
+          </button>`
+            : ""
+        }
+        
+      </div>
+    </div>
+  `,
+          )
+          .join("");
+      }
+     // ${ !["claimed", "completed", "cancelled"].includes(tx.status_name) ? `<button class="btn-danger-sm" onclick="showCancelTransactionModal(${tx.transaction_id})"><i class="bi bi-x-circle"></i> Cancel</button>`: ""}
+
+       function mapStatus(s) {
+        return (
+          {
+            submitted: "Submitted",
+            pending: "Pending",
+            ongoing: "On Going",
+            to_claim: "To Claim",
+            completed: "Completed",
+            claimed: "Claimed",
+            cancelled: "Cancelled",
+          }[s] ?? s
+        );
+      }
+
+      async function filterClientTransactions(status) {
+        document
+          .querySelectorAll("#transactionsPanel .filter-chip")
+          .forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
+        document.getElementById("active-filter-transaction-button").value =
+          status;
+        document.getElementById("transactionSearch").value = "";
+        await fetchClientTransactions(status);
+      }
+
+      async function searchDocumentTransaction() {
+        clearTimeout(searchTimeout);
+        const term = document.getElementById("transactionSearch").value.trim();
+        const status = document.getElementById(
+          "active-filter-transaction-button",
+        ).value;
+        if (term.length < 2) {
+          await fetchClientTransactions(status);
+          return;
+        }
+        searchTimeout = setTimeout(async () => {
+          const res = await fetch(
+            `${BASE_URL}/api/client/searchClientTransactions/${term}/${status}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            },
+          );
+          if (!res.ok) {
+            showNotificationMessage("Search failed", "error");
+            return;
+          }
+          displayClientTransactions(await res.json());
+        }, 300);
+      }
+
+      async function viewClientTimeline(id) {
+        const res = await fetch(
+          `${BASE_URL}/api/client/getClientTransactionTimeline/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        if (!res.ok) {
+          showNotificationMessage("Failed to load timeline", "error");
+          return;
+        }
+        displayClientTimeline(await res.json());
+        clientTimelineModal.show();
+      }
+
+      function displayClientTimeline(timeline) {
+        const c = document.getElementById("clientTimelineContent");
+        if (!timeline || timeline.length === 0) {
+          c.innerHTML =
+            '<p style="text-align:center;color:var(--text-muted);">No timeline data available</p>';
+          return;
+        }
+        c.innerHTML =
+          '<div class="timeline-list">' +
+          timeline
+            .map(
+              (item, i) => `
+    <div class="timeline-entry">
+      <div class="timeline-dot ${i === 0 ? "dot-latest" : "dot-done"}"></div>
+      <div class="timeline-body">
+        <div class="timeline-status">Status: ${item.status_name}</div>
+        <div class="timeline-date">${new Date(item.changed_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
+        <div class="timeline-by"><strong>By:</strong> ${item.changed_by_first_name} ${item.changed_by_last_name}</div>
+        ${item.remarks ? `<div class="timeline-remarks"><strong>Remarks:</strong> ${item.remarks}</div>` : ""}
+        ${
+          item.photos && item.photos.length > 0
+            ? `
+          <div class="timeline-photos">
+            ${item.photos
+              .map(
+                (p) => `
+              <a href="/${p.file_path}" target="_blank">
+                <img src="/${p.file_path}" class="timeline-photo" alt="Attachment" loading="lazy">
+              </a>`,
+              )
+              .join("")}
+          </div>`
+            : ""
+        }
+      </div>
+    </div>
+  `,
+            )
+            .join("") +
+          "</div>";
+      }
+
+      function showCancelTransactionModal(id) {
+        document.getElementById("cancelTransactionId").value = id;
+        document.getElementById("cancelReason").value = "";
+        cancelTransactionModal.show();
+      }
+
+      async function submitCancelTransaction() {
+        const id = document.getElementById("cancelTransactionId").value;
+        const reason = document.getElementById("cancelReason").value.trim();
+        if (reason.length < 10) {
+          showAlertModal(
+            "Please provide a reason with at least 10 characters.",
+            "warning",
+          );
+          return;
+        }
+        cancelTransactionModal.hide();
+        const modalEl = document.getElementById("cancelTransactionModal");
+        modalEl.addEventListener(
+          "hidden.bs.modal",
+          async function onHidden() {
+            modalEl.removeEventListener("hidden.bs.modal", onHidden);
+            const confirmed = await window.confirm(
+              "Are you sure you want to cancel this transaction? This action cannot be undone.",
+            );
+            if (!confirmed) {
+              document.getElementById("cancelReason").value = reason;
+              cancelTransactionModal.show();
+              return;
+            }
+            try {
+              const res = await fetch(
+                `${BASE_URL}/api/client/cancelClientTransaction`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                  body: JSON.stringify({ transactionId: id, reason }),
+                },
+              );
+              const data = await res.json();
+              if (res.ok) {
+                showNotificationMessage(data.message, "success");
+                await fetchClientTransactions(
+                  document.getElementById("active-filter-transaction-button")
+                    .value,
+                );
+              } else {
+                showAlertModal(
+                  data.message || "Failed to cancel transaction",
+                  "error",
+                );
+              }
+            } catch (e) {
+              showAlertModal(
+                "Failed to cancel transaction. Please try again.",
+                "error",
+              );
+            }
+          },
+          { once: true },
+        );
+      }
+
+      /* ─────────────────────────────────────────
+   RECEIPT PDF
+───────────────────────────────────────── */
+      async function generateClientReceipt(id) {
+        showNotificationMessage("Generating your receipt…", "info");
+        const res = await fetch(
+          `${BASE_URL}/api/client/getTransactionReceipt/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        if (!res.ok) {
+          const d = await res.json();
+          showNotificationMessage(d.message || "Failed", "error");
+          return;
+        }
+        await downloadReceiptAsPDF(await res.json());
+        showNotificationMessage("Receipt downloaded!", "success");
+      }
+
+      async function downloadReceiptAsPDF(data) {
+        const { transaction, timeline, appointment } = data;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          orientation: "portrait",
+          unit: "mm",
+          format: "a4",
+        });
+        const pw = doc.internal.pageSize.getWidth(),
+          margin = 15,
+          cw = pw - margin * 2;
+        let y = margin;
+        const line = (yy, w = 0.5) => {
+          doc.setLineWidth(w);
+          doc.line(margin, yy, pw - margin, yy);
+        };
+        const section = (t) => {
+          y += 8;
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin, y - 5, cw, 8, "F");
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "bold");
+          doc.text(t, margin + 2, y);
+          y += 8;
+        };
+        doc.setFillColor(37, 99, 235);
+        doc.circle(pw / 2, y + 10, 8, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("RC", pw / 2, y + 12, { align: "center" });
+        y += 25;
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+        doc.text("RandC Documentation Services", pw / 2, y, {
+          align: "center",
+        });
+        y += 6;
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text("Professional Document Processing Solutions", pw / 2, y, {
+          align: "center",
+        });
+        y += 8;
+        line(y, 1);
+        y += 8;
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.text("TRANSACTION RECEIPT", pw / 2, y, { align: "center" });
+        y += 8;
+        line(y, 0.5);
+        y += 8;
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(margin, y, cw, 20, 2, 2, "S");
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.text("Transaction ID:", margin + 5, y + 6);
+        doc.setFont("helvetica", "normal");
+        doc.text("#" + transaction.transaction_id, margin + 45, y + 6);
+        doc.setFont("helvetica", "bold");
+        doc.text("Status:", margin + 5, y + 12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(16, 185, 129);
+        doc.text(transaction.current_status.toUpperCase(), margin + 45, y + 12);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont("helvetica", "bold");
+        doc.text("Receipt Date:", margin + 5, y + 18);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          margin + 45,
+          y + 18,
+        );
+        y += 25;
+        section("CLIENT INFORMATION");
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.text("Name:", margin + 5, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          `${transaction.first_name} ${transaction.middle_name || ""} ${transaction.last_name}`,
+          margin + 35,
+          y,
+        );
+        y += 6;
+        doc.setFont("helvetica", "bold");
+        doc.text("Email:", margin + 5, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(transaction.email, margin + 35, y);
+        y += 6;
+        doc.setFont("helvetica", "bold");
+        doc.text("Contact:", margin + 5, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(transaction.phone_number || "Not provided", margin + 35, y);
+        y += 6;
+        section("SERVICE INFORMATION");
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.text("Service:", margin + 5, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(transaction.service_name, margin + 35, y);
+        y += 6;
+        if (transaction.service_description) {
+          doc.setFont("helvetica", "bold");
+          doc.text("Description:", margin + 5, y);
+          doc.setFont("helvetica", "normal");
+          const lines = doc.splitTextToSize(
+            transaction.service_description,
+            cw - 35,
+          );
+          doc.text(lines, margin + 35, y);
+          y += lines.length * 3.5 + 3;
+        }
+        section("PROCESSING TIMELINE");
+        const sub = timeline.find((t) => t.status_name === "submitted"),
+          cl = timeline.find(
+            (t) => t.status_name === "claimed" || t.status_name === "completed",
+          );
+        doc.setFontSize(9);
+        if (sub) {
+          doc.setFont("helvetica", "bold");
+          doc.text("• Submitted:", margin + 5, y);
+          doc.setFont("helvetica", "normal");
+          doc.text(
+            new Date(sub.changed_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            margin + 35,
+            y,
+          );
+          y += 5;
+        }
+        if (cl) {
+          doc.setFont("helvetica", "bold");
+          doc.text("• Claimed:", margin + 5, y);
+          doc.setFont("helvetica", "normal");
+          doc.text(
+            new Date(cl.changed_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            margin + 35,
+            y,
+          );
+          y += 5;
+        }
+        if (sub && cl) {
+          const dur = Math.ceil(
+            (new Date(cl.changed_at) - new Date(sub.changed_at)) /
+              (1000 * 60 * 60 * 24),
+          );
+          doc.setFont("helvetica", "bold");
+          doc.text("• Duration:", margin + 5, y);
+          doc.setFont("helvetica", "normal");
+          doc.text(dur + " day" + (dur !== 1 ? "s" : ""), margin + 35, y);
+          y += 5;
+        }
+        if (appointment) {
+          section("RELATED APPOINTMENT");
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
+          doc.text("Appointment ID:", margin + 5, y);
+          doc.setFont("helvetica", "normal");
+          doc.text("#" + appointment.appointment_id, margin + 45, y);
+          y += 6;
+          doc.setFont("helvetica", "bold");
+          doc.text("Date & Time:", margin + 5, y);
+          doc.setFont("helvetica", "normal");
+          doc.text(
+            new Date(appointment.appointment_date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }) +
+              " at " +
+              appointment.appointment_time,
+            margin + 45,
+            y,
+          );
+          y += 6;
+        }
+        section("IMPORTANT NOTES");
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        [
+          "This receipt confirms your document has been successfully processed and claimed.",
+          "Please keep this receipt for your records.",
+          "For inquiries, contact us with your Transaction ID.",
+          "This is a computer-generated receipt valid without signature.",
+        ].forEach((n) => {
+          const ls = doc.splitTextToSize("• " + n, cw - 5);
+          doc.text(ls, margin + 5, y);
+          y += ls.length * 3.5 + 2;
+        });
+        y += 8;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "italic");
+        doc.text(
+          "Processed by: " +
+            transaction.processed_by_first_name +
+            " " +
+            transaction.processed_by_last_name,
+          margin + 5,
+          y,
+        );
+        const ph = doc.internal.pageSize.getHeight();
+        y = ph - 25;
+        line(y, 0.5);
+        y += 5;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.text("RandC Documentation Services", pw / 2, y, {
+          align: "center",
+        });
+        y += 4;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.text("Thank you for trusting our services!", pw / 2, y, {
+          align: "center",
+        });
+        y += 4;
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(100, 100, 100);
+        doc.text(
+          "Generated: " +
+            new Date().toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            }),
+          pw / 2,
+          y,
+          { align: "center" },
+        );
+        y += 4;
+        doc.text(
+          "Reference: TR-" +
+            transaction.transaction_id +
+            "-" +
+            new Date().getFullYear(),
+          pw / 2,
+          y,
+          { align: "center" },
+        );
+        doc.save(
+          "Transaction_Receipt_" +
+            transaction.transaction_id +
+            "_" +
+            new Date().toISOString().split("T")[0] +
+            ".pdf",
+        );
+      }
+
+      /* ─────────────────────────────────────────
+   SERVICES (appointment form)
+───────────────────────────────────────── */
+      async function fetchServices() {
+        const res = await fetch(`${BASE_URL}/api/user/getServices`);
+        const services = await res.json();
+        const el = document.getElementById("services-col");
+        if (!services || services.length === 0) {
+          el.innerHTML =
+            '<p style="color:var(--text-muted);font-size:0.85rem;">No services available</p>';
+          return;
+        }
+        el.innerHTML = services
+          .map(
+            (s) => `
+    <label class="service-check-label" for="svc-${s.service_id}">
+      <input type="checkbox" id="svc-${s.service_id}" name="services" value="${s.service_id}" class="service-check-input">
+      <div class="service-check-body">
+        <strong>${s.service_name}</strong>
+        <span>${s.description}</span>
+      </div>
+    </label>
+  `,
+          )
+          .join("");
+      }
+
+      async function submitUserInfo(formData) {
+        const res = await fetch("/api/client/setupAccount", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(formData),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          localStorage.setItem("user", JSON.stringify(data.user));
+          bootstrap.Modal.getInstance(
+            document.getElementById("setupUserModal"),
+          ).hide();
+          initializeUser();
+        } else {
+          showAlertModal("An error occurred. Please try again.", "error");
+        }
+      }
+
+      document.getElementById("setupUserForm").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const fd = {
+            firstName: document.getElementById("firstName").value.trim(),
+            lastName: document.getElementById("lastName").value.trim(),
+            middleName: document.getElementById("middleName").value.trim(),
+            sex: document.getElementById("sex").value,
+          };
+          if (!fd.firstName || !fd.lastName || !fd.sex) {
+            showAlertModal("Please fill in all required fields.", "warning");
+            return;
+          }
+          await submitUserInfo(fd);
+        });
+
+      function showChangePasswordMessage(msg, type = "error") {
+        const box = document.getElementById("changePasswordMessage");
+        const txt = document.getElementById("changePasswordMsgText");
+        box.className =
+          "rnc-alert rnc-alert-" +
+          (type === "success" ? "success" : "danger") +
+          " mb-3";
+        txt.textContent = msg;
+        box.style.display = "flex";
+        setTimeout(() => {
+          box.style.display = "none";
+        }, 6000);
+      }
+
+      async function changePassword() {
+        const cur = document.getElementById("currentPassword").value;
+        const nw = document.getElementById("newPassword").value;
+        const cf = document.getElementById("confirmNewPassword").value;
+        if (nw !== cf)
+          return showChangePasswordMessage(
+            "New passwords do not match",
+            "error",
+          );
+        if (nw.length < 12 || nw.length > 24)
+          return showChangePasswordMessage(
+            "Password must be 12–24 characters",
+            "error",
+          );
+        const res = await fetch("/api/client/changePassword", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ currentPassword: cur, newPassword: nw }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showNotificationMessage(data.message, "success");
+          changePasswordModal.hide();
+        } else showChangePasswordMessage(data.message, "error");
+      }
+
+    
+      function autoResizeTextarea(el) {
+        el.style.height = "auto";
+        el.style.height = Math.min(el.scrollHeight, 140) + "px";
+      }
+
+      /* ══════════════════════════════════════════════
+         MY ACCOUNT — Profile field population
+      ══════════════════════════════════════════════ */
+      function populateProfilePanel() {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user) return;
+
+        const initials = ((user.first_name?.[0] ?? '') + (user.last_name?.[0] ?? '')).toUpperCase() || '?';
+        const avatarEl = document.getElementById('profileAvatarBig');
+        if (avatarEl) {
+          avatarEl.textContent = initials;
+          // Remove the default icon if we have real initials
+          avatarEl.innerHTML = initials;
+          avatarEl.style.fontSize = '1.1rem';
+        }
+
+        const set = (id, val) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = val || '—';
+        };
+
+        set('profileName',   `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim());
+        set('profile-role',  user.role ?? 'Client');
+        set('profileUsername', user.username);
+        set('profileEmail',    user.email);
+        set('profileSex',      user.sex ? user.sex.charAt(0).toUpperCase() + user.sex.slice(1) : '—');
+        set('profileJoined',   user.created_at
+          ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+          : '—');
+      }
+
+      /* ══════════════════════════════════════════════
+         ACCOUNT DELETION FLOW
+      ══════════════════════════════════════════════ */
+      let _deleteModal = null;
+
+      function showDeleteAccountModal() {
+        if (!_deleteModal) {
+          _deleteModal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+        }
+        // Reset state
+        document.getElementById('deleteConfirmInput').value = '';
+        document.getElementById('deleteAccountBtn').disabled = true;
+        document.getElementById('deleteAccountError').style.display = 'none';
+        document.getElementById('deleteBlockersList').style.display  = 'none';
+        document.getElementById('deleteBlockerAppointment').style.display = 'none';
+        document.getElementById('deleteBlockerTransaction').style.display  = 'none';
+        _deleteModal.show();
+      }
+
+      function onDeleteConfirmInput(input) {
+        const btn = document.getElementById('deleteAccountBtn');
+        btn.disabled = input.value !== 'Confirm Delete';
+        document.getElementById('deleteAccountError').style.display = 'none';
+      }
+
+      async function submitDeleteAccount() {
+        const confirmText = document.getElementById('deleteConfirmInput').value;
+        const errEl = document.getElementById('deleteAccountError');
+        const btn   = document.getElementById('deleteAccountBtn');
+
+        errEl.style.display = 'none';
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting…';
+
+        try {
+          const res  = await fetch('/api/user/account/delete', {
+            method:  'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization:  `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ confirmText }),
+          });
+          const data = await res.json();
+
+          if (res.ok) {
+            // Success — log out and redirect
+            _deleteModal.hide();
+            showNotificationMessage(
+              data.message || 'Account deleted. You will be logged out.',
+              'success',
+            );
+            setTimeout(() => {
+              localStorage.clear();
+              window.location.href = '/';
+            }, 2000);
+            return;
+          }
+
+          // Blocker errors
+          if (data.blocker === 'appointment') {
+            document.getElementById('deleteBlockerAppointment').style.display = 'flex';
+            document.getElementById('deleteBlockersList').style.display = 'block';
+          } else if (data.blocker === 'transaction') {
+            document.getElementById('deleteBlockerTransaction').style.display = 'flex';
+            document.getElementById('deleteBlockersList').style.display = 'block';
+          }
+
+          errEl.textContent = data.message || 'Unable to delete account.';
+          errEl.style.display = 'block';
+
+        } catch {
+          errEl.textContent = 'Network error. Please try again.';
+          errEl.style.display = 'block';
+        } finally {
+          const confirmInput = document.getElementById('deleteConfirmInput').value;
+          btn.disabled = confirmInput !== 'Confirm Delete';
+          btn.innerHTML = '<i class="bi bi-trash3-fill"></i> Delete My Account';
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        initializeUser();
+        populateProfilePanel();
+      });
+    </script>
+  </body>
+</html>
