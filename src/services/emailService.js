@@ -1,11 +1,11 @@
 import "dotenv/config";
-import nodemailer from "nodemailer";
 import { google } from "googleapis";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const OAuth2 = google.auth.OAuth2;
 
 const oauth2Client = new OAuth2(
@@ -18,43 +18,111 @@ oauth2Client.setCredentials({
   refresh_token: process.env.REFRESH_TOKEN,
 });
 
-async function createTransporter() {
-  const accessToken = await oauth2Client.getAccessToken();
-
-  return nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      type:         "OAuth2",
-      user:         process.env.EMAIL_USER,
-      clientId:     process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
-      accessToken:  accessToken.token,
-    },
-  });
-}
-
+// ─────────────────────────────────────────────────────────────────────────────
+//  LOGO
+// ─────────────────────────────────────────────────────────────────────────────
 const LOGO_CID = "randc-logo@randc.com";
 
 function getLogoAttachment() {
   const logoPath = path.join(__dirname, "..", "..", "public", "images", "randclogo.png");
-
   if (!fs.existsSync(logoPath)) {
     console.warn(`[emailService] Logo not found at: ${logoPath}. Emails will send without logo.`);
     return null;
   }
-
   return {
-    filename:    "randclogo.png",
-    path:        logoPath,
-    cid:         LOGO_CID,      
+    filename:           "randclogo.png",
+    path:               logoPath,
+    cid:                LOGO_CID,
     contentDisposition: "inline",
   };
 }
 
 const LOGO_IMG_TAG = `<img src="cid:${LOGO_CID}" alt="RandC Documentation" style="height:44px;width:auto;display:inline-block;" />`;
 
-  //  SHARED HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+//  CORE SEND — Gmail API over HTTPS (port 443)
+//  Railway blocks SMTP ports 465 & 587 on the free plan.
+//  This function builds a raw RFC-2822 MIME message and sends it via the
+//  Gmail REST API so no SMTP socket is ever opened.
+// ─────────────────────────────────────────────────────────────────────────────
+async function sendMail(mailOptions) {
+  const { from, to, subject, html, attachments = [] } = mailOptions;
+
+  const gmail = google.gmail({ version: "v1", auth: oauth2Client });
+
+  // UTF-8 encoded subject (handles ₱, accents, emoji in subject lines)
+  const encodedSubject = `=?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`;
+
+  const boundary    = `randc_boundary_${Date.now()}`;
+  const logoAttach  = getLogoAttachment();
+
+  // ── HTML part ──────────────────────────────────────────────────────────────
+  let mime = [
+    `From: ${from}`,
+    `To: ${to}`,
+    `Subject: ${encodedSubject}`,
+    `MIME-Version: 1.0`,
+    `Content-Type: multipart/related; boundary="${boundary}"`,
+    ``,
+    `--${boundary}`,
+    `Content-Type: text/html; charset="UTF-8"`,
+    `Content-Transfer-Encoding: base64`,
+    ``,
+    Buffer.from(html, "utf8").toString("base64"),
+  ].join("\r\n");
+
+  // ── Inline logo ────────────────────────────────────────────────────────────
+  if (logoAttach) {
+    try {
+      const logoData = fs.readFileSync(logoAttach.path);
+      mime += "\r\n" + [
+        `--${boundary}`,
+        `Content-Type: image/png; name="randclogo.png"`,
+        `Content-Transfer-Encoding: base64`,
+        `Content-Disposition: inline`,
+        `Content-ID: <${LOGO_CID}>`,
+        ``,
+        logoData.toString("base64"),
+      ].join("\r\n");
+    } catch {
+      // Logo file missing — email sends without it, no crash
+    }
+  }
+
+  // ── Any extra attachments (skip logo — already handled) ───────────────────
+  for (const att of attachments) {
+    if (att.cid === LOGO_CID) continue;
+    try {
+      const data = fs.readFileSync(att.path);
+      mime += "\r\n" + [
+        `--${boundary}`,
+        `Content-Type: application/octet-stream; name="${att.filename}"`,
+        `Content-Transfer-Encoding: base64`,
+        `Content-Disposition: attachment; filename="${att.filename}"`,
+        ``,
+        data.toString("base64"),
+      ].join("\r\n");
+    } catch { /* skip missing attachment */ }
+  }
+
+  mime += `\r\n--${boundary}--`;
+
+  // Gmail API requires URL-safe base64 (no +, /, or trailing =)
+  const raw = Buffer.from(mime)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  await gmail.users.messages.send({
+    userId:      "me",
+    requestBody: { raw },
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  SHARED HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
 function capitalizeStatus(str) {
   if (!str) return "";
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -97,25 +165,12 @@ function buildFooter() {
     </div>`;
 }
 
-async function sendMail(transporter, mailOptions) {
-  const logoAttachment = getLogoAttachment();
-
-  if (logoAttachment) {
-    mailOptions.attachments = [
-      ...(mailOptions.attachments || []),
-      logoAttachment,
-    ];
-  }
-
-  return transporter.sendMail(mailOptions);
-}
-
-  //  TRANSACTION STATUS UPDATE EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
+//  TRANSACTION STATUS UPDATE EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
 export async function sendClientDocumentProcessUpdate(data, clientEmail) {
   try {
-    const transporter = await createTransporter();
-
-    const statusLabel = capitalizeStatus(data.statusName).replace(/_/g, " ");
+    const statusLabel     = capitalizeStatus(data.statusName).replace(/_/g, " ");
     const isToClaimStatus = data.statusName?.toLowerCase() === "to_claim" ||
                             data.statusName?.toLowerCase() === "to claim";
 
@@ -205,9 +260,7 @@ export async function sendClientDocumentProcessUpdate(data, clientEmail) {
             <div class="email-header"
                  style="background:linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%);
                         padding:36px 40px 28px;text-align:center;">
-              <div style="display:none;">
-                ${LOGO_IMG_TAG}
-              </div>
+              <div style="display:none;">${LOGO_IMG_TAG}</div>
               <div style="font-size:34px;margin-bottom:10px;">📋</div>
               <h1 style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;
                          margin:0;line-height:1.3;font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
@@ -281,7 +334,7 @@ export async function sendClientDocumentProcessUpdate(data, clientEmail) {
       </body>
       </html>`;
 
-    await sendMail(transporter, {
+    await sendMail({
       from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
       to:      clientEmail,
       subject: `Transaction #${data.transactionId} — Status Updated to ${statusLabel}`,
@@ -296,11 +349,11 @@ export async function sendClientDocumentProcessUpdate(data, clientEmail) {
   }
 }
 
-  //  OTP EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
+//  OTP EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
 export async function sendUserOTP(OTP, email) {
   try {
-    const transporter = await createTransporter();
-
     const htmlContent = `
       <!DOCTYPE html>
       <html lang="en">
@@ -316,9 +369,7 @@ export async function sendUserOTP(OTP, email) {
                box-shadow:0 4px 24px rgba(15,23,42,0.10);border:1px solid #dde1ef;">
             <div style="background:linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%);
                         padding:36px 40px 28px;text-align:center;">
-              <div style="display:none;">
-                ${LOGO_IMG_TAG}
-              </div>
+              <div style="display:none;">${LOGO_IMG_TAG}</div>
               <div style="font-size:34px;margin-bottom:10px;">🔐</div>
               <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0;line-height:1.3;
                          font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
@@ -365,7 +416,7 @@ export async function sendUserOTP(OTP, email) {
       </body>
       </html>`;
 
-    await sendMail(transporter, {
+    await sendMail({
       from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
       to:      email,
       subject: "Your One-Time Password (OTP) — Do Not Share",
@@ -379,7 +430,9 @@ export async function sendUserOTP(OTP, email) {
   }
 }
 
-  //  APPOINTMENT EMAIL TEMPLATES
+// ─────────────────────────────────────────────────────────────────────────────
+//  APPOINTMENT EMAIL TEMPLATES
+// ─────────────────────────────────────────────────────────────────────────────
 function getAppointmentEmailTemplate(type, data) {
   const infoCard = (accentColor, borderColor, labelColor) => `
     <div style="background:#f8fffe;border:1px solid ${borderColor};border-left:4px solid ${accentColor};
@@ -411,9 +464,7 @@ function getAppointmentEmailTemplate(type, data) {
 
   const buildHeader = (gradient, icon, title) => `
     <div style="background:${gradient};padding:36px 40px 28px;text-align:center;">
-      <div style="display:none;">
-        ${LOGO_IMG_TAG}
-      </div>
+      <div style="display:none;">${LOGO_IMG_TAG}</div>
       <div style="font-size:34px;margin-bottom:10px;">${icon}</div>
       <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0;line-height:1.3;
                 font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">${title}</h1>
@@ -466,7 +517,7 @@ function getAppointmentEmailTemplate(type, data) {
     approved: {
       subject: "✓ Appointment Approved — RandC Documentation",
       html: wrapHtml(
-        buildHeader("linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%)", "", "Appointment Approved"),
+        buildHeader("linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%)", "✅", "Appointment Approved"),
         `<p style="font-size:15px;color:#0f172a;margin-bottom:6px;">
            Dear <strong>${data.firstName}</strong>,
          </p>
@@ -493,7 +544,7 @@ function getAppointmentEmailTemplate(type, data) {
     cancelled: {
       subject: "Appointment Cancelled — RandC Documentation",
       html: wrapHtml(
-        buildHeader("linear-gradient(135deg,#dc2626 0%,#ef4444 60%,#b91c1c 100%)", "", "Appointment Cancelled"),
+        buildHeader("linear-gradient(135deg,#dc2626 0%,#ef4444 60%,#b91c1c 100%)", "❌", "Appointment Cancelled"),
         `<p style="font-size:15px;color:#0f172a;margin-bottom:6px;">
            Dear <strong>${data.firstName}</strong>,
          </p>
@@ -536,7 +587,7 @@ function getAppointmentEmailTemplate(type, data) {
     completed: {
       subject: "Appointment Completed — RandC Documentation",
       html: wrapHtml(
-        buildHeader("linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%)", "", "Appointment Completed"),
+        buildHeader("linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%)", "🎉", "Appointment Completed"),
         `<p style="font-size:15px;color:#0f172a;margin-bottom:6px;">
            Dear <strong>${data.firstName}</strong>,
          </p>
@@ -602,13 +653,14 @@ function getAppointmentEmailTemplate(type, data) {
   return templates[type] || templates.pending;
 }
 
-  //  SEND APPOINTMENT EMAIL SERVICE
+// ─────────────────────────────────────────────────────────────────────────────
+//  SEND APPOINTMENT EMAIL SERVICE
+// ─────────────────────────────────────────────────────────────────────────────
 export async function sendAppointmentEmailService(type, recipientEmail, data) {
   try {
-    const transporter = await createTransporter();
-    const template    = getAppointmentEmailTemplate(type, data);
+    const template = getAppointmentEmailTemplate(type, data);
 
-    await sendMail(transporter, {
+    await sendMail({
       from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
       to:      recipientEmail,
       subject: template.subject,
@@ -622,11 +674,11 @@ export async function sendAppointmentEmailService(type, recipientEmail, data) {
   }
 }
 
-  //  APPOINTMENT COMPLETION EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
+//  APPOINTMENT COMPLETION EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
 export async function sendAppointmentCompletionEmail(data, clientEmail) {
   try {
-    const transporter = await createTransporter();
-
     const serviceListHtml = Array.isArray(data.services) && data.services.length
       ? data.services.map((s) => `
           <tr>
@@ -673,9 +725,7 @@ export async function sendAppointmentCompletionEmail(data, clientEmail) {
                box-shadow:0 4px 24px rgba(15,23,42,0.10);border:1px solid #dde1ef;">
             <div style="background:linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%);
                         padding:36px 40px 28px;text-align:center;">
-              <div style="display:none;">
-                ${LOGO_IMG_TAG}
-              </div>
+              <div style="display:none;">${LOGO_IMG_TAG}</div>
               <div style="font-size:34px;margin-bottom:10px;">🎉</div>
               <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0;line-height:1.3;
                          font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
@@ -756,7 +806,7 @@ export async function sendAppointmentCompletionEmail(data, clientEmail) {
       </body>
       </html>`;
 
-    await sendMail(transporter, {
+    await sendMail({
       from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
       to:      clientEmail,
       subject: "Appointment Completed — Document Processing Started",
@@ -771,10 +821,11 @@ export async function sendAppointmentCompletionEmail(data, clientEmail) {
   }
 }
 
-  //  READY TO CLAIM EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
+//  READY TO CLAIM EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
 export async function sendReadyToClaimEmail(clientInfo, transactionId, claimDeadline, serviceName) {
   try {
-    const transporter = await createTransporter();
     const { email, first_name, last_name } = clientInfo;
 
     let deadlineStr  = "Please check your dashboard for the deadline.";
@@ -788,8 +839,6 @@ export async function sendReadyToClaimEmail(clientInfo, transactionId, claimDead
         deadlineTime = d.toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit" });
       }
     }
-
-    const subject = `📄 Your Document is Ready to Claim — Transaction #${transactionId}`;
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -806,9 +855,7 @@ export async function sendReadyToClaimEmail(clientInfo, transactionId, claimDead
                box-shadow:0 4px 24px rgba(15,23,42,0.10);border:1px solid #dde1ef;">
             <div style="background:linear-gradient(135deg,#4f46e5 0%,#0891b2 100%);
                         padding:36px 40px 28px;text-align:center;">
-              <div style="display:none;">
-                ${LOGO_IMG_TAG}
-              </div>
+              <div style="display:none;">${LOGO_IMG_TAG}</div>
               <div style="font-size:34px;margin-bottom:10px;">📄</div>
               <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0;line-height:1.3;
                          font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
@@ -940,10 +987,10 @@ export async function sendReadyToClaimEmail(clientInfo, transactionId, claimDead
       </body>
       </html>`;
 
-    await sendMail(transporter, {
+    await sendMail({
       from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
       to:      email,
-      subject,
+      subject: `📄 Your Document is Ready to Claim — Transaction #${transactionId}`,
       html:    htmlContent,
     });
 
@@ -955,12 +1002,15 @@ export async function sendReadyToClaimEmail(clientInfo, transactionId, claimDead
   }
 }
 
-  //  VERIFY EMAIL CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
+//  VERIFY EMAIL CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
 export async function verifyEmailConfigService() {
   try {
-    const transporter = await createTransporter();
-    await transporter.verify();
-    console.log("Email server is ready to send messages");
+    // Verify OAuth2 credentials are working by getting a fresh access token
+    const { token } = await oauth2Client.getAccessToken();
+    if (!token) throw new Error("Could not obtain access token");
+    console.log("Email (Gmail API) is ready to send messages");
     return true;
   } catch (error) {
     console.error("Email configuration error:", error);
@@ -968,10 +1018,11 @@ export async function verifyEmailConfigService() {
   }
 }
 
-  //  MAGIC LINK EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
+//  MAGIC LINK EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
 export async function sendMagicLinkEmail({ email, name, magicUrl, expiresAt }) {
   try {
-    const transporter = await createTransporter();
     const displayName = name || "there";
 
     const expiresStr = expiresAt.toLocaleString("en-PH", {
@@ -998,9 +1049,7 @@ export async function sendMagicLinkEmail({ email, name, magicUrl, expiresAt }) {
                border:1px solid #dde1ef;">
             <div style="background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 60%,#1e40af 100%);
                         padding:36px 40px 28px;text-align:center;">
-              <div style="display:none;" >
-                ${LOGO_IMG_TAG}
-              </div>
+              <div style="display:none;">${LOGO_IMG_TAG}</div>
               <div style="font-size:38px;margin-bottom:10px;">🔗</div>
               <h1 style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;
                          margin:0;line-height:1.3;font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
@@ -1072,7 +1121,7 @@ export async function sendMagicLinkEmail({ email, name, magicUrl, expiresAt }) {
       </body>
       </html>`;
 
-    await sendMail(transporter, {
+    await sendMail({
       from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
       to:      email,
       subject: "🔗 Your Magic Login Link — RandC Documentation",
