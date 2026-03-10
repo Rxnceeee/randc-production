@@ -1716,7 +1716,7 @@
         const loading = document.getElementById("testimonials-loading");
 
         try {
-          const res  = await fetch( "/api/client/testimonials/public");
+          const res  = await fetch(`${BASE_URL}/api/client/testimonials/public`);
           if (!res.ok) throw new Error("fetch failed");
           const list = await res.json();
 
