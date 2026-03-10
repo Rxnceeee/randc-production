@@ -62,22 +62,26 @@ export async function createTestimonialModel(userId, transactionId, rating, mess
 }
 
 export async function getPublicTestimonialsModel(limit = 20) {
+  const safeLimit = Number(limit) || 20;
+
   const [rows] = await db.execute(
-    `SELECT
-       t.testimonial_id,
-       t.initials,
-       t.rating,
-       t.message,
-       t.created_at,
-       s.service_name
+    `SELECT 
+        t.testimonial_id,
+        t.initials,
+        t.rating,
+        t.message,
+        t.created_at,
+        s.service_name
      FROM testimonials t
-     INNER JOIN document_process_transaction dpt ON t.transaction_id = dpt.transaction_id
-     INNER JOIN services s ON dpt.service_id = s.service_id
+     INNER JOIN document_process_transaction dpt 
+        ON t.transaction_id = dpt.transaction_id
+     INNER JOIN services s 
+        ON dpt.service_id = s.service_id
      WHERE t.is_visible = 1
      ORDER BY t.created_at DESC
-     LIMIT ?`,
-    [limit]
+     LIMIT ${safeLimit}`
   );
+
   return rows;
 }
 
