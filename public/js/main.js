@@ -154,6 +154,7 @@ async function initializeClientChat() {
   const token = localStorage.getItem('token');
   socket = io(BASE_URL, {
     auth:              { token },
+     transports:        ['websocket'],
     reconnection:      true,
     reconnectionDelay: 2000,
     reconnectionAttempts: 10,
@@ -217,6 +218,7 @@ async function initializeAdminChat() {
   const token = localStorage.getItem('token');
   socket = io(BASE_URL, {
     auth:              { token },
+     transports:        ['websocket'],
     reconnection:      true,
     reconnectionDelay: 2000,
     reconnectionAttempts: 10,
