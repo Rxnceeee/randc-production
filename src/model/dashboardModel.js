@@ -159,7 +159,7 @@ export async function getRecentActivitiesModel(limit = 10) {
         FROM appointments a
         INNER JOIN users u ON a.client_id = u.id
         ORDER BY a.created_at DESC
-        LIMIT ?
+        LIMIT 10
       )
       UNION ALL
       (
@@ -173,11 +173,11 @@ export async function getRecentActivitiesModel(limit = 10) {
         INNER JOIN users u ON dpt.client_id = u.id
         INNER JOIN status s ON dpt.current_status_id = s.status_id
         ORDER BY dpt.created_at DESC
-        LIMIT ?
+        LIMIT 10
       )
       ORDER BY created_at DESC
-      LIMIT ?
-    `, [limit, limit, limit]);
+      LIMIT 10
+    `;
 
     return activities;
   } catch (error) {
