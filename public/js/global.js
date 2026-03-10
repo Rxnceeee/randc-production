@@ -1,8 +1,8 @@
 const BASE_URL = 'https://ideal-nourishment-production.up.railway.app';
 
-//  document.addEventListener("contextmenu", function (e) {
-//     e.preventDefault();
-//   });
+document.addEventListener("contextmenu", function (e) {
+e.preventDefault();
+});
 
 
 function Logout() {
