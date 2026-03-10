@@ -31,6 +31,22 @@ const io = initializeSocketIO(server);
 // Trust Railway's reverse proxy
 app.set("trust proxy", 1);
 
+// CORS 
+const allowedOrigins = IS_PROD
+  ? (process.env.ALLOWED_ORIGINS || process.env.APP_URL || '').split(',').map(o => o.trim())
+  : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow no-origin requests (Postman, mobile apps, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 
 // Body Parsing
