@@ -11,6 +11,7 @@ import {
   countRecentMagicTokensModel,
 } from '../model/magicLinkModel.js';
 
+import { insertAuditLogsModel} from '../model/auditLogModel.js';
 import {reverseAnonymizationAccountModel} from '../model/userModel.js'
 import { sendMagicLinkEmail } from '../services/emailService.js';
 import { generateJWT }        from '../middleware/auth.js';
