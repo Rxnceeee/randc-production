@@ -19,14 +19,14 @@
     <script src="../js/inactivityLogout.js"></script>
   </head>
   <body>
-    <!-- ══ GLOBAL TOAST CONTAINER ═════════════════════════════════════════ -->
+    <!-- GLOBAL TOAST CONTAINER -->
     <div
       id="global-toast-container"
       aria-live="assertive"
       aria-atomic="true"
     ></div>
 
-    <!-- ══ ALERT MODAL ════════════════════════════════════════════════════ -->
+    <!-- ALERT MODAL -->
     <div
       class="modal fade"
       id="alertModal"
@@ -111,7 +111,7 @@
       </div>
     </div>
 
-    <!-- ══ LOGOUT MODAL ═══════════════════════════════════════════════════ -->
+    <!-- LOGOUT MODAL -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 380px">
         <div class="modal-content rnc-modal">
@@ -173,7 +173,7 @@
       </div>
     </div>
 
-    <!-- ══ SETUP USER MODAL ═══════════════════════════════════════════════ -->
+    <!-- SETUP USER MODAL -->
     <div class="modal fade" id="setupUserModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 440px">
         <div class="modal-content rnc-modal">
@@ -185,7 +185,7 @@
 
             <div>
               <div class="modal-title">Complete Your Profile</div>
-              <div class="modal-subtitle">One-time setup to get started</div>
+              <div class="modal-subtitle"></div>
             </div>
           </div>
 
@@ -217,24 +217,21 @@
                 <input type="text" id="middleName" class="rnc-input" placeholder="Mabini">
               </div>
 
-              <div class="rnc-form-row">
 
-                <div class="rnc-form-group">
-                  <label class="rnc-label">Sex <span class="req">*</span></label>
-                  <select id="sex" class="rnc-input" required>
-                    <option value="">-- Select --</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
+              <div class="rnc-form-group">
+                <label class="rnc-label">Sex (as listed on Birth Certificate / PSA) <span class="req">*</span></label>
+                <div class="rnc-radio-group">
+                  <label>
+                    <input type="radio" name="sex" value="Male" required> Male
+                  </label>
+                  <label>
+                    <input type="radio" name="sex" value="Female"> Female
+                  </label>
                 </div>
-
-                <div class="rnc-form-group">
-                  <label class="rnc-label">Contact Number <span class="req">*</span></label>
-                  <input type="tel" id="contactNumber" class="rnc-input" placeholder="09123456789" required>
-                </div>
-
               </div>
 
+
+                <hr>
               <button type="submit" class="btn-submit mt-2">
                 <i class="bi bi-check-circle"></i> Save &amp; Continue
               </button>
@@ -247,7 +244,7 @@
       </div>
     </div>
 
-    <!-- ══ BOOK APPOINTMENT MODAL ═════════════════════════════════════════ -->
+    <!-- BOOK APPOINTMENT MODAL -->
     <div class="modal fade" id="appointmentModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px">
         <div class="modal-content rnc-modal">
@@ -322,7 +319,7 @@
       </div>
     </div>
 
-    <!-- ══ CANCEL APPOINTMENT MODAL ═══════════════════════════════════════ -->
+    <!-- CANCEL APPOINTMENT MODAL -->
     <div class="modal fade" id="updateAppointmentStatusModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
         <div class="modal-content rnc-modal">
@@ -376,7 +373,7 @@
       </div>
     </div>
 
-    <!-- ══ CHANGE PASSWORD MODAL ══════════════════════════════════════════ -->
+    <!-- CHANGE PASSWORD MODAL -->
     <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
         <div class="modal-content rnc-modal">
@@ -438,7 +435,7 @@
       </div>
     </div>
 
-    <!-- ══ TIMELINE MODAL ════════════════════════════════════════════════ -->
+    <!-- TIMELINE MODAL -->
     <div class="modal fade" id="clientTimelineModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px">
         <div class="modal-content rnc-modal">
@@ -466,7 +463,7 @@
       </div>
     </div>
     
-    <!-- ══ CANCEL TRANSACTION MODAL ═══════════════════════════════════════ -->
+    <!-- CANCEL TRANSACTION MODAL -->
     <div class="modal fade" id="cancelTransactionModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
         <div class="modal-content rnc-modal">
@@ -521,7 +518,7 @@
       </div>
     </div>
 
-    <!-- ══ DELETE ACCOUNT MODAL ══════════════════════════════════════════ -->
+    <!-- ANONYMIZE ACCOUNT MODAL -->
     <div class="modal fade" id="deleteAccountModal" tabindex="-1"
          aria-labelledby="deleteAccountModalLabel" aria-modal="true" role="dialog">
       <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
@@ -532,7 +529,7 @@
             </div>
             <div>
               <div class="modal-title" id="deleteAccountModalLabel" style="color:var(--danger);">
-                Delete Account
+                Anonymize Account
               </div>
               <div class="modal-subtitle">This action cannot be undone</div>
             </div>
@@ -546,7 +543,7 @@
               <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
               <div>
                 <strong>Warning — Permanent Action</strong>
-                <p>Deleting your account will permanently remove all your data, 7 days after the deletion date. You cannot recover your account after this action.</p>
+                <p>Anonymizing your account will permanently remove all your personal data, 7 days after the anonymization date. You can recover your account within 7 days after this action.</p>
               </div>
             </div>
 
@@ -558,25 +555,46 @@
               </div>
               <div class="delete-blocker-item" id="deleteBlockerTransaction" style="display:none;">
                 <i class="bi bi-file-earmark-x-fill" aria-hidden="true"></i>
-                <span>You have <strong>active transactions</strong>. Wait for them to complete before deleting.</span>
+                <span>You have <strong>active transactions</strong>. Wait for them to complete before anonymizing.</span>
               </div>
             </div>
 
             <!-- What will be deleted -->
+           <p class="text-muted">Your account will be scheduled for permanent anonymization after 7 days. During this grace period, you may still recover your account by logging in.</p>
             <ul class="delete-checklist">
-              <li><i class="bi bi-check2" aria-hidden="true"></i> Your profile and account credentials</li>
-              <li><i class="bi bi-check2" aria-hidden="true"></i> All your appointment history</li>
-              <li><i class="bi bi-check2" aria-hidden="true"></i> All your transaction records</li>
-              <li><i class="bi bi-check2" aria-hidden="true"></i> Your submitted testimonials</li>
+              <li>
+                <i class="bi bi-check2" aria-hidden="true"></i>
+                Your personal profile information (name, email, phone number) will be permanently anonymized.
+              </li>
+              <li>
+                <i class="bi bi-check2" aria-hidden="true"></i>
+                Your account will be deactivated and assigned a system-generated username.
+              </li>
+              <li>
+                <i class="bi bi-check2" aria-hidden="true"></i>
+                Your appointment history will remain in our system for operational and record-keeping purposes but will no longer be linked to your personal identity.
+              </li>
+              <li>
+                <i class="bi bi-check2" aria-hidden="true"></i>
+                Your transaction records will be retained for auditing, complaint handling, and regulatory compliance.
+              </li>
+              <li>
+                <i class="bi bi-check2" aria-hidden="true"></i>
+                Testimonials you submitted may remain visible but will no longer display personal identifying information.
+              </li>
+              <li>
+                <i class="bi bi-check2" aria-hidden="true"></i>
+                Certain records will be retained for up to five (5) years as required for legal, auditing, and complaint resolution purposes in accordance with the Data Privacy Act of 2012 and guidelines from the National Privacy Commission (NPC).
+              </li>
             </ul>
 
             <!-- Confirmation input -->
             <div class="mb-1 mt-3">
               <label class="form-label" for="deleteConfirmInput" style="font-size:.85rem;font-weight:600;">
-                Type <code class="delete-confirm-code">Confirm Delete</code> to continue
+                Type <code class="delete-confirm-code">Confirm Anonymize </code> to continue
               </label>
               <input type="text" class="form-control" id="deleteConfirmInput"
-                     placeholder="Confirm Delete"
+                     placeholder="Confirm Anonymize"
                      oninput="onDeleteConfirmInput(this)"
                      autocomplete="off" aria-required="true" />
             </div>
@@ -586,7 +604,7 @@
             <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
             <button class="btn-delete-confirm" id="deleteAccountBtn"
                     onclick="submitDeleteAccount()" disabled aria-label="Confirm account deletion">
-              <i class="bi bi-trash3-fill" aria-hidden="true"></i> Delete My Account
+              <i class="bi bi-trash3-fill" aria-hidden="true"></i>Anonymize My Account
             </button>
           </div>
         </div>
@@ -643,11 +661,9 @@
     </div>
 </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════
-     APP SHELL
-═══════════════════════════════════════════════════════════════════ -->
+    <!-- APP SHELL-->
     <div class="app-shell">
-      <!-- SIDEBAR ══════════════════════════════════════════════════════ -->
+      <!-- SIDEBAR -->
       <aside class="app-sidebar" id="sidebar" aria-label="Sidebar navigation">
         <!-- Brand -->
         <div class="sidebar-brand">
@@ -667,17 +683,7 @@
 
         <!-- Nav -->
         <nav class="sidebar-nav" aria-label="Main navigation">
-          <a
-            class="sidebar-nav-item active"
-            onclick="showSection('dashboardPanel')"
-            role="button"
-            tabindex="0"
-            data-section="dashboardPanel"
-            aria-label="Dashboard"
-          >
-            <i class="bi bi-speedometer2" aria-hidden="true"></i>
-            <span>Dashboard</span>
-          </a>
+   
           <a
             class="sidebar-nav-item"
             onclick="showSection('appointmentPanel')"
@@ -740,7 +746,8 @@
             id="themeToggle"
             onclick="toggleTheme()"
             aria-label="Toggle light/dark mode"
-          >
+            style="display: none;"
+            >
             <span class="theme-icon-dark" aria-hidden="true"
               ><i class="bi bi-sun-fill"></i
             ></span>
@@ -763,33 +770,21 @@
               <p class="sidebar-user-name" id="user-name">Loading...</p>
               <p class="sidebar-user-role" id="user-role">Client</p>
             </div>
-            <button
-              class="sidebar-logout-btn"
-              onclick="showLogoutModal()"
-              title="Logout"
-              aria-label="Logout"
-            >
+            <button class="sidebar-notif-btn" onclick="toggleNotifications()" aria-label="Notifications" id="notifBell">
+              <i class="bi bi-bell-fill" aria-hidden="true"></i>
+              <span class="notif-badge" id="notificationCount" style="display: none">0</span>
+            </button>
+            <button class="sidebar-icon-btn" onclick="showChangePasswordModal()" title="Change Password" aria-label="Change password">
+                <i class="bi bi-key-fill" aria-hidden="true"></i>
+            </button>
+            <button class="sidebar-logout-btn"onclick="showLogoutModal()"title="Logout"aria-label="Logout">
               <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
             </button>
-            <button
-            class="sidebar-notif-btn"
-            onclick="toggleNotifications()"
-            aria-label="Notifications"
-            id="notifBell"
-          >
-            <i class="bi bi-bell-fill" aria-hidden="true"></i>
-            <span
-              class="notif-badge"
-              id="notificationCount"
-              style="display: none"
-              >0</span
-            >
-          </button>
           </div>
         </div>
       </aside>
 
-      <!-- NOTIFICATION PANEL (overlay) -->
+      <!-- NOTIFICATION PANEL -->
       <div
         class="notif-panel"
         id="notificationPanel"
@@ -807,7 +802,7 @@
         <div class="notif-list" id="notificationList"></div>
       </div>
 
-      <!-- MAIN PANEL ════════════════════════════════════════════════════ -->
+      <!-- MAIN PANEL  -->
       <main class="app-main" id="mainContent" role="main">
         <!-- TOP BAR -->
         <div class="app-topbar">
@@ -819,7 +814,7 @@
           >
             <i class="bi bi-list" aria-hidden="true"></i>
           </button>
-          <div class="topbar-title" id="topbarTitle">Dashboard</div>
+          <div class="topbar-title" id="topbarTitle">Appointments</div>
           <div class="topbar-right">
             <button
               class="topbar-action-btn"
@@ -833,199 +828,16 @@
           </div>
         </div>
 
-        <!-- PANELS ════════════════════════════════════════════════════════ -->
+        <!-- PANELS  -->
 
-        <!-- DASHBOARD ════════════════════════════════════════════════════ -->
-        <div class="panel active" id="dashboardPanel">
-          <!-- Stats row -->
-          <div class="stats-row">
-            <div class="stat-chip stat-primary">
-              <div class="stat-chip-icon">
-                <i class="bi bi-calendar-check" aria-hidden="true"></i>
-              </div>
-              <div class="stat-chip-body">
-                <strong id="totalAppointments">0</strong>
-                <span>Appointments</span>
-              </div>
-            </div>
-            <div class="stat-chip stat-success">
-              <div class="stat-chip-icon">
-                <i class="bi bi-file-earmark-check" aria-hidden="true"></i>
-              </div>
-              <div class="stat-chip-body">
-                <strong id="totalTransactions">0</strong>
-                <span>Transactions</span>
-              </div>
-            </div>
-            <div class="stat-chip stat-warning">
-              <div class="stat-chip-icon">
-                <i class="bi bi-clock-history" aria-hidden="true"></i>
-              </div>
-              <div class="stat-chip-body">
-                <strong id="pendingItems">0</strong>
-                <span>Pending</span>
-              </div>
-            </div>
-            <div class="stat-chip stat-info">
-              <div class="stat-chip-icon">
-                <i class="bi bi-check-circle" aria-hidden="true"></i>
-              </div>
-              <div class="stat-chip-body">
-                <strong id="completedItems">0</strong>
-                <span>Completed</span>
-              </div>
-            </div>
-          </div>
 
-          <!-- Quick actions -->
-          <div class="section-block">
-            <div class="section-block-header">
-              <span class="section-block-title"
-                ><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
-                Quick Actions</span
-              >
-            </div>
-            <div class="quick-grid">
-              <button
-                class="quick-chip"
-                data-bs-toggle="modal"
-                data-bs-target="#appointmentModal"
-                aria-label="Book appointment"
-              >
-                <i class="bi bi-calendar-plus" aria-hidden="true"></i>
-                <span>Book Appointment</span>
-              </button>
-              <button
-                class="quick-chip"
-                onclick="showSection('transactionsPanel')"
-                aria-label="View transactions"
-              >
-                <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
-                <span>View Transactions</span>
-              </button>
-              <button
-                class="quick-chip"
-                onclick="showSection('appointmentPanel')"
-                aria-label="My appointments"
-              >
-                <i class="bi bi-calendar-event" aria-hidden="true"></i>
-                <span>My Appointments</span>
-              </button>
-              <button
-                class="quick-chip"
-                onclick="showSection('userProfilePanel')"
-                aria-label="My profile"
-              >
-                <i class="bi bi-person-circle" aria-hidden="true"></i>
-                <span>My Profile</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Two-col: Upcoming + Active -->
-          <div class="dash-two-col">
-            <div class="section-block">
-              <div class="section-block-header">
-                <span class="section-block-title"
-                  ><i class="bi bi-calendar-event" aria-hidden="true"></i>
-                  Upcoming Appointments</span
-                >
-                <a
-                  href="#"
-                  class="section-block-link"
-                  onclick="
-                    event.preventDefault();
-                    showSection('appointmentPanel');
-                  "
-                  >View All</a
-                >
-              </div>
-              <div id="upcomingAppointmentsList" class="compact-list"></div>
-            </div>
-
-            <div class="section-block">
-              <div class="section-block-header">
-                <span class="section-block-title"
-                  ><i class="bi bi-hourglass-split" aria-hidden="true"></i>
-                  Active Transactions</span
-                >
-                <a
-                  href="#"
-                  class="section-block-link"
-                  onclick="
-                    event.preventDefault();
-                    showSection('transactionsPanel');
-                  "
-                  >View All</a
-                >
-              </div>
-              <div id="activeTransactionsList" class="compact-list"></div>
-            </div>
-          </div>
-
-          <!-- Recent Activity + Monthly Overview -->
-          <div class="dash-two-col">
-            <div class="section-block">
-              <div class="section-block-header">
-                <span class="section-block-title"
-                  ><i class="bi bi-clock-history" aria-hidden="true"></i> Recent
-                  Activity</span
-                >
-              </div>
-              <div id="recentActivityList" class="activity-compact-list"></div>
-            </div>
-
-            <div class="section-block">
-              <div class="section-block-header">
-                <span class="section-block-title"
-                  ><i class="bi bi-bar-chart-fill" aria-hidden="true"></i>
-                  Monthly Overview</span
-                >
-              </div>
-              <div class="monthly-overview">
-                <div class="monthly-item">
-                  <div class="monthly-label">
-                    <span>Appointments This Month</span
-                    ><strong id="monthlyAppointmentCount">0</strong>
-                  </div>
-                  <div class="monthly-bar-track">
-                    <div
-                      class="monthly-bar-fill fill-primary"
-                      id="monthlyAppointmentProgress"
-                    ></div>
-                  </div>
-                </div>
-                <div class="monthly-item">
-                  <div class="monthly-label">
-                    <span>Transactions This Month</span
-                    ><strong id="monthlyTransactionCount">0</strong>
-                  </div>
-                  <div class="monthly-bar-track">
-                    <div
-                      class="monthly-bar-fill fill-success"
-                      id="monthlyTransactionProgress"
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- APPOINTMENTS ═════════════════════════════════════════════════ -->
+        <!-- APPOINTMENTS  -->
         <div class="panel" id="appointmentPanel">
           <div class="panel-topbar">
             <h3 class="panel-heading">
               <i class="bi bi-calendar-check" aria-hidden="true"></i> My
               Appointments
             </h3>
-            <button
-              class="btn-primary-rnc"
-              data-bs-toggle="modal"
-              data-bs-target="#appointmentModal"
-            >
-              <i class="bi bi-plus-lg" aria-hidden="true"></i> New
-            </button>
           </div>
 
           <div class="filter-strip">
@@ -1055,7 +867,7 @@
           <div id="appointment" class="cards-grid"></div>
         </div>
 
-        <!-- TRANSACTIONS ═════════════════════════════════════════════════ -->
+        <!-- TRANSACTIONS -->
         <div class="panel" id="transactionsPanel">
           <div class="panel-topbar">
             <h3 class="panel-heading">
@@ -1082,10 +894,10 @@
             <input
               type="hidden"
               id="active-filter-transaction-button"
-              value="all"
+              value="ongoing"
             />
             <button
-              class="filter-chip active"
+              class="filter-chip"
               onclick="filterClientTransactions('all', event)"
             >
               All
@@ -1103,7 +915,7 @@
               Submitted
             </button>
             <button
-              class="filter-chip"
+              class="filter-chip active"
               onclick="filterClientTransactions('ongoing', event)"
             >
               Ongoing
@@ -1177,15 +989,13 @@
           </div>
         </div>
 
-        <!-- MY ACCOUNT ═══════════════════════════════════════════════════ -->
+        <!-- MY ACCOUNT -->
         <div class="panel" id="userProfilePanel">
           <div class="panel-topbar">
             <h3 class="panel-heading">
               <i class="bi bi-person-circle" aria-hidden="true"></i> My Account
             </h3>
-            <button class="btn-primary-rnc" onclick="showChangePasswordModal()">
-              <i class="bi bi-key-fill" aria-hidden="true"></i> Change Password
-            </button>
+            
           </div>
 
           <!-- ── Profile Card ── -->
@@ -1225,24 +1035,26 @@
               <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
               <div>
                 <h6>Danger Zone</h6>
-                <p>These actions are irreversible. Please proceed with caution.</p>
+                <p>These actions are in Danger. Please proceed with caution.</p>
               </div>
             </div>
             <div class="danger-zone-body">
               <div class="danger-zone-item">
                 <div>
-                  <strong>Delete Account</strong>
-                  <p>Permanently remove your account and all associated data. You cannot undo this action.</p>
+                  <strong>Anonymize Account</strong>
+                  <p>
+                    Permanently remove your personal data. You may recover your account within 7 days after submitting the anonymization request. After 7 days, this action cannot be undone.
+                  </p>
                 </div>
                 <button class="btn-danger-zone" onclick="showDeleteAccountModal()" aria-label="Request account deletion">
-                  <i class="bi bi-trash3-fill" aria-hidden="true"></i> Delete Account
+                  <i class="bi bi-trash3-fill" aria-hidden="true"></i> Anonymize Account
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- SUPPORT CHAT CLIENT SIDE ══════════════════════════════════════════════════ -->
+        <!-- SUPPORT CHAT CLIENT SIDE -->
         <div class="panel panel-chat" id="adminChatPanel">
           <div class="chat-shell">
             <div class="chat-head">
@@ -1336,7 +1148,7 @@
 
     
 
-    <!-- ══ SCRIPTS ═════════════════════════════════════════════════════════ -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     "use strict";
@@ -1344,7 +1156,6 @@
     let _testiRating = 0;
     const RATING_LABELS = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
-    /* ── Load panel ── */
     async function loadTestimonialsPanel() {
       await Promise.all([loadEligibleTransactions(), loadMyTestimonials()]);
     }
@@ -1355,7 +1166,6 @@
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         const data = await res.json();
-        console.log(data)
         renderEligibleList(data.eligible || []);
       } catch (e) {
         console.error('Eligible fetch error:', e);
@@ -1430,7 +1240,6 @@
     }
 
 
-    /* ── Modal ── */
     function openTestiModal(transactionId, serviceName) {
       document.getElementById('testiTransactionId').value = transactionId;
       document.getElementById('testiModalSub').textContent = serviceName;
@@ -1449,7 +1258,6 @@
       document.getElementById('testiModal').style.display = 'none';
     }
 
-    /* ── Star rating ── */
     function setRating(val) {
       _testiRating = val;
       document.querySelectorAll('.testi-star').forEach(s => {
@@ -1458,7 +1266,6 @@
       document.getElementById('testiRatingDesc').textContent = RATING_LABELS[val] || 'Select a rating';
     }
 
-    /* Hover effects */
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.testi-star').forEach(s => {
         s.addEventListener('mouseenter', () => {
@@ -1483,7 +1290,6 @@
       }
     });
 
-    /* ── Submit ── */
     async function submitTestimonial() {
       const transactionId = document.getElementById('testiTransactionId').value;
       const message       = document.getElementById('testiMessage').value.trim();
@@ -1534,7 +1340,6 @@
       }
     }
 
-    //INACTIVITY
       function performLogout() {
         stopInactivityWatch();
 
@@ -1565,9 +1370,7 @@
    
      
 
-      /* ─────────────────────────────────────────
-   THEME
-───────────────────────────────────────── */
+  //  THEME
       const ROOT = document.documentElement;
 
     
@@ -1599,9 +1402,7 @@
         else applyTheme("dark");
       })();
 
-      /* ─────────────────────────────────────────
-   SIDEBAR MOBILE TOGGLE
-───────────────────────────────────────── */
+  //  SIDEBAR MOBILE TOGGLE
       function toggleSidebar() {
         document.getElementById("sidebar").classList.toggle("sidebar-open");
       }
@@ -1618,9 +1419,7 @@
         }
       });
 
-      /* ─────────────────────────────────────────
-   TOAST NOTIFICATIONS
-───────────────────────────────────────── */
+  //  TOAST NOTIFICATIONS
       const _toastIcons = {
         success: '<i class="bi bi-check-circle-fill toast-icon"></i>',
         error: '<i class="bi bi-x-circle-fill toast-icon"></i>',
@@ -1692,9 +1491,7 @@
         );
       }
       
-      /* ─────────────────────────────────────────
-   ALERT / CONFIRM MODALS
-───────────────────────────────────────── */
+  //  ALERT / CONFIRM MODALS
       const _alertModal = new bootstrap.Modal(document.getElementById("alertModal"),);
       const _confirmModal = new bootstrap.Modal(document.getElementById("confirmModal"),);
 
@@ -1786,9 +1583,7 @@
         _confirmModal.show();
       }
 
-      /* ─────────────────────────────────────────
-   BOOTSTRAP MODALS
-───────────────────────────────────────── */
+  //  BOOTSTRAP MODALS
       const logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"),);
       const changePasswordModal = new bootstrap.Modal(document.getElementById("changePasswordModal"),);
       const updateAppointmentStatusModal = new bootstrap.Modal(document.getElementById("updateAppointmentStatusModal"),);
@@ -1807,11 +1602,8 @@
         changePasswordModal.show();
       }
 
-      /* ─────────────────────────────────────────
-   SHOW SECTION
-───────────────────────────────────────── */
+  //  SHOW SECTION
       const _titleMap = {
-        dashboardPanel: "Dashboard",
         appointmentPanel: "Appointments",
         transactionsPanel: "Transactions",
         testimonialsPanel: "Testimonials",
@@ -1846,9 +1638,6 @@
         const _origShowSection = typeof showSection === 'function' ? showSection : null;
 
         switch (sectionName) {
-          case "dashboardPanel":
-            await initializeDashboard();
-            break;
           case "appointmentPanel":
             await fetchAppointments();
             break;
@@ -1868,9 +1657,7 @@
         }
       }
 
-      /* ─────────────────────────────────────────
-   NOTIFICATIONS
-───────────────────────────────────────── */
+  //  NOTIFICATIONS
       async function fetchNotifications() {
         const res = await fetch(`${BASE_URL}/api/client/notifications`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -1956,9 +1743,7 @@
           panel.classList.remove("show");
       });
 
-      /* ─────────────────────────────────────────
-   TIME SLOTS
-───────────────────────────────────────── */
+  //  TIME SLOTS
       let selectedTimeSlot = null;
 
       async function fetchAvailableTimeSlots(date) {
@@ -2020,22 +1805,58 @@
       document.addEventListener("DOMContentLoaded", function () {
         const dateInput = document.getElementById("appointmentDate");
         if (dateInput) {
-          // Set min to tomorrow (appointments must be booked at least 1 day ahead)
+          // Set min to tomorrow
           const tomorrow = new Date();
           tomorrow.setDate(tomorrow.getDate() + 1);
           const tomorrowStr = (() => {
             const y = tomorrow.getFullYear();
-            const m = String(tomorrow.getMonth()+1).padStart(2,'0');
-            const d = String(tomorrow.getDate()).padStart(2,'0');
+            const m = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const d = String(tomorrow.getDate()).padStart(2, '0');
             return `${y}-${m}-${d}`;
           })();
           dateInput.setAttribute("min", tomorrowStr);
 
+          // Set max to 1 year from today
+          const oneYearAhead = new Date();
+          oneYearAhead.setFullYear(oneYearAhead.getFullYear() + 1);
+          const maxDateStr = (() => {
+            const y = oneYearAhead.getFullYear();
+            const m = String(oneYearAhead.getMonth() + 1).padStart(2, '0');
+            const d = String(oneYearAhead.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+          })();
+          dateInput.setAttribute("max", maxDateStr);
+
           dateInput.addEventListener("change", function () {
             if (!this.value) return;
 
-            // Block Sunday (0) — office is Mon–Sat only
             const chosen = new Date(this.value + 'T00:00:00');
+
+            // Block dates before tomorrow
+            if (chosen < tomorrow) {
+              this.value = '';
+              this.classList.add('input-error');
+              document.getElementById("timeSlotContainer").innerHTML =
+                '<div style="display:flex;align-items:center;gap:.5rem;font-size:.84rem;color:var(--danger);background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.3);border-radius:var(--radius-md);padding:.6rem .85rem;">' +
+                '<i class="bi bi-x-circle-fill"></i>' +
+                '<span>You cannot choose past dates. Please select a date from tomorrow onward.</span></div>';
+              selectedTimeSlot = null;
+              return;
+            }
+
+            // Block dates after 1 year ahead
+            if (chosen > oneYearAhead) {
+              this.value = '';
+              this.classList.add('input-error');
+              document.getElementById("timeSlotContainer").innerHTML =
+                '<div style="display:flex;align-items:center;gap:.5rem;font-size:.84rem;color:var(--danger);background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.3);border-radius:var(--radius-md);padding:.6rem .85rem;">' +
+                '<i class="bi bi-x-circle-fill"></i>' +
+                '<span>You cannot choose a date more than 1 year from today.</span></div>';
+              selectedTimeSlot = null;
+              return;
+            }
+
+            // Block Sundays (office closed)
             if (chosen.getDay() === 0) {
               this.value = '';
               this.classList.add('input-error');
@@ -2053,13 +1874,11 @@
           });
         }
       });
-      /* ─────────────────────────────────────────
-   INIT USER
-───────────────────────────────────────── */
+
+  //  INIT USER
      async function initializeUser() {
         const token = localStorage.getItem("token");
         let user = JSON.parse(localStorage.getItem("user") || "null");
-
         if (!token || !user){
           window.location.href = "/";
           return;
@@ -2083,183 +1902,14 @@
           document.getElementById("profileName").textContent =
             user.first_name + " " + user.last_name;
           document.getElementById("profile-role").textContent = user.role;
+          document.getElementById("profileJoined").textContent =
+            user.created_at;
+          
           if (typeof populateProfilePanel === 'function') populateProfilePanel();
           await fetchServices();
           await fetchNotifications();
-          showSection("dashboardPanel");
+          showSection("appointmentPanel");
         }
-      }
-
-      /* ─────────────────────────────────────────
-   DASHBOARD
-───────────────────────────────────────── */
-      async function initializeDashboard() {
-        await Promise.all([
-          fetchDashboardStats(),
-          fetchRecentActivity(),
-          fetchUpcomingAppointments(),
-          fetchActiveTransactions(),
-          fetchMonthlyOverview(),
-        ]);
-      }
-
-      async function fetchDashboardStats() {
-        const res = await fetch(`${BASE_URL}/api/client/getDashboardStats`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        if (!res.ok) return;
-        const stats = await res.json();
-        [
-          "totalAppointments",
-          "totalTransactions",
-          "pendingItems",
-          "completedItems",
-        ].forEach((id) => {
-          animateCounter(id, stats[id] || 0);
-        });
-      }
-
-      async function fetchRecentActivity() {
-        const res = await fetch(`${BASE_URL}/api/client/getRecentActivity`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        if (!res.ok) return;
-        displayRecentActivity(await res.json());
-      }
-
-      function displayRecentActivity(activities) {
-        const c = document.getElementById("recentActivityList");
-        if (!activities || activities.length === 0) {
-          c.innerHTML =
-            '<div class="list-empty"><i class="bi bi-inbox"></i><p>No recent activity</p></div>';
-          return;
-        }
-        const icons = {
-          appointment: "calendar-check",
-          transaction: "file-earmark-check",
-          notification: "bell",
-          update: "arrow-repeat",
-          completed: "check-circle",
-          cancelled: "x-circle",
-        };
-        c.innerHTML = activities
-          .map(
-            (a) => `
-    <div class="activity-row">
-      <div class="activity-icon-chip ${a.type.toLowerCase()}">
-        <i class="bi bi-${icons[a.type.toLowerCase()] || "info-circle"}"></i>
-      </div>
-      <div class="activity-body">
-        <div class="activity-title">${a.title}</div>
-        <div class="activity-desc">${a.description}</div>
-        <div class="activity-time"><i class="bi bi-clock"></i>${formatActivityTime(a.created_at)}</div>
-      </div>
-    </div>
-  `,
-          )
-          .join("");
-      }
-
-      async function fetchUpcomingAppointments() {
-        const res = await fetch(
-          `${BASE_URL}/api/client/getUpcomingAppointments`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          },
-        );
-        if (!res.ok) return;
-        displayUpcomingAppointments(await res.json());
-      }
-
-      function displayUpcomingAppointments(appointments) {
-        const c = document.getElementById("upcomingAppointmentsList");
-        if (!appointments || appointments.length === 0) {
-          c.innerHTML =
-            '<div class="list-empty"><i class="bi bi-calendar-x"></i><p>No upcoming appointments</p></div>';
-          return;
-        }
-        c.innerHTML = appointments
-          .slice(0, 5)
-          .map(
-            (a) => `
-    <div class="compact-item">
-      <div class="compact-item-left">
-        <div class="compact-item-title">Appointment #${a.appointment_id}</div>
-        <div class="compact-item-sub">
-          ${a.services
-            .slice(0, 2)
-            .map((s) => `<span class="mini-tag">${s}</span>`)
-            .join("")}
-          ${a.services.length > 2 ? `<span class="mini-tag">+${a.services.length - 2}</span>` : ""}
-        </div>
-      </div>
-      <div class="compact-item-right">
-        <div class="compact-item-date">${new Date(a.appointment_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>
-        <div class="compact-item-time">${formatTime(a.appointment_time)}</div>
-      </div>
-    </div>
-  `,
-          )
-          .join("");
-      }
-
-      async function fetchActiveTransactions() {
-        const res = await fetch(
-          `${BASE_URL}/api/client/getActiveTransactions`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          },
-        );
-        if (!res.ok) return;
-        displayActiveTransactions(await res.json());
-      }
-
-      function displayActiveTransactions(transactions) {
-        const c = document.getElementById("activeTransactionsList");
-        if (!transactions || transactions.length === 0) {
-          c.innerHTML =
-            '<div class="list-empty"><i class="bi bi-file-earmark-x"></i><p>No active transactions</p></div>';
-          return;
-        }
-        c.innerHTML = transactions
-          .slice(0, 5)
-          .map(
-            (tx) => `
-    <div class="compact-item">
-      <div class="compact-item-left">
-        <div class="compact-item-title">Txn #${tx.transaction_id}</div>
-        <div class="compact-item-sub"><span class="mini-tag">${tx.service_name}</span></div>
-      </div>
-      <div class="compact-item-right">
-        <span class="status-chip status-${tx.status_name.toLowerCase().replace(/\s+/g, "_")}">${tx.status_name}</span>
-      </div>
-    </div>
-  `,
-          )
-          .join("");
-      }
-
-      async function fetchMonthlyOverview() {
-        const res = await fetch(`${BASE_URL}/api/client/getMonthlyOverview`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        if (!res.ok) return;
-        displayMonthlyOverview(await res.json());
-      }
-
-      function displayMonthlyOverview(ov) {
-        const ac = ov.monthlyAppointments || 0;
-        const tc = ov.monthlyTransactions || 0;
-        document.getElementById("monthlyAppointmentCount").textContent = ac;
-        document.getElementById("monthlyAppointmentProgress").style.width =
-          Math.min((ac / 10) * 100, 100) + "%";
-        document.getElementById("monthlyTransactionCount").textContent = tc;
-        document.getElementById("monthlyTransactionProgress").style.width =
-          Math.min((tc / 15) * 100, 100) + "%";
       }
 
       function animateCounter(id, target) {
@@ -2296,9 +1946,7 @@
         });
       }
 
-      /* ─────────────────────────────────────────
-   APPOINTMENTS
-───────────────────────────────────────── */
+  //  APPOINTMENTS
       async function fetchAppointments(status = "all") {
         const res = await fetch(
           `${BASE_URL}/api/client/getAppointments/${status}`,
@@ -2350,7 +1998,7 @@
       }
 
       function filterAppointment(status) {
-        document.querySelectorAll(".filter-strip .filter-chip").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll("#appointmentPanel .filter-chip").forEach((b) => b.classList.remove("active"));
         event.target.classList.add("active");
         fetchAppointments(status);
       }
@@ -2474,13 +2122,11 @@
 
         btn.disabled = false;
       }
-      /* ─────────────────────────────────────────
-   TRANSACTIONS
-───────────────────────────────────────── */
+
+      // TRANSACTIONS
       let searchTimeout;
 
-      async function fetchClientTransactions(status = "all") {
-        console.log('ss')
+      async function fetchClientTransactions(status = "ongoing") {
         const res = await fetch(
           `${BASE_URL}/api/client/getClientTransactions/${status}`,
           {
@@ -2541,7 +2187,6 @@
           )
           .join("");
       }
-     // ${ !["claimed", "completed", "cancelled"].includes(tx.status_name) ? `<button class="btn-danger-sm" onclick="showCancelTransactionModal(${tx.transaction_id})"><i class="bi bi-x-circle"></i> Cancel</button>`: ""}
 
        function mapStatus(s) {
         return (
@@ -2557,7 +2202,7 @@
         );
       }
 
-      async function filterClientTransactions(status) {
+      async function filterClientTransactions(status='ongoing') {
         document
           .querySelectorAll("#transactionsPanel .filter-chip")
           .forEach((b) => b.classList.remove("active"));
@@ -2720,9 +2365,7 @@
         );
       }
 
-      /* ─────────────────────────────────────────
-   RECEIPT PDF
-───────────────────────────────────────── */
+  //  RECEIPT PDF
       async function generateClientReceipt(id) {
         showNotificationMessage("Generating your receipt…", "info");
         const res = await fetch(
@@ -3011,9 +2654,7 @@
         );
       }
 
-      /* ─────────────────────────────────────────
-   SERVICES (appointment form)
-───────────────────────────────────────── */
+  //  SERVICES (appointment)
       async function fetchServices() {
         const res = await fetch(`${BASE_URL}/api/user/getServices`);
         const services = await res.json();
@@ -3065,7 +2706,7 @@
             firstName: document.getElementById("firstName").value.trim(),
             lastName: document.getElementById("lastName").value.trim(),
             middleName: document.getElementById("middleName").value.trim(),
-            sex: document.getElementById("sex").value,
+            sex: document.querySelector('input[name="sex"]:checked')?.value,
           };
           if (!fd.firstName || !fd.lastName || !fd.sex) {
             showAlertModal("Please fill in all required fields.", "warning");
@@ -3123,9 +2764,7 @@
         el.style.height = Math.min(el.scrollHeight, 140) + "px";
       }
 
-      /* ══════════════════════════════════════════════
-         MY ACCOUNT — Profile field population
-      ══════════════════════════════════════════════ */
+        //  MY ACCOUNT — Profile field population
       function populateProfilePanel() {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (!user) return;
@@ -3154,9 +2793,7 @@
           : '—');
       }
 
-      /* ══════════════════════════════════════════════
-         ACCOUNT DELETION FLOW
-      ══════════════════════════════════════════════ */
+        //  ACCOUNT DELETION FLOW
       let _deleteModal = null;
 
       function showDeleteAccountModal() {
@@ -3175,7 +2812,7 @@
 
       function onDeleteConfirmInput(input) {
         const btn = document.getElementById('deleteAccountBtn');
-        btn.disabled = input.value !== 'Confirm Delete';
+        btn.disabled = input.value !== 'Confirm Anonymize';
         document.getElementById('deleteAccountError').style.display = 'none';
       }
 
@@ -3186,10 +2823,10 @@
 
         errEl.style.display = 'none';
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting…';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Anonymizing';
 
         try {
-          const res  = await fetch('/api/user/account/delete', {
+          const res  = await fetch('/api/client/account/anonymize', {
             method:  'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -3203,7 +2840,7 @@
             // Success — log out and redirect
             _deleteModal.hide();
             showNotificationMessage(
-              data.message || 'Account deleted. You will be logged out.',
+              data.message || 'Action successful. You will be logged out.',
               'success',
             );
             setTimeout(() => {
@@ -3231,7 +2868,7 @@
         } finally {
           const confirmInput = document.getElementById('deleteConfirmInput').value;
           btn.disabled = confirmInput !== 'Confirm Delete';
-          btn.innerHTML = '<i class="bi bi-trash3-fill"></i> Delete My Account';
+          btn.innerHTML = '<i class="bi bi-trash3-fill"></i> Anonymize My Account';
         }
       }
 

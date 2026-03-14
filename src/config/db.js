@@ -9,8 +9,8 @@ export const db = mysql.createPool({
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0,
-  ...(process.env.NODE_ENV === 'production' && { ssl: { rejectUnauthorized: false } }), 
+  // queueLimit: 0,
+  // ...(process.env.NODE_ENV === 'production' && { ssl: { rejectUnauthorized: false } }), 
 });
 
 (async () => {

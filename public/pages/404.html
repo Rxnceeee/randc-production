@@ -12,35 +12,37 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
   <style>
     :root {
-      --primary:      #16a34a;
-      --primary-dark: #15803d;
-      --primary-glow: rgba(22,163,74,.18);
-      --accent:       #0891b2;
-      --gradient:     linear-gradient(135deg,#16a34a 0%,#0891b2 100%);
-      --gradient-soft:linear-gradient(135deg,rgba(22,163,74,.08) 0%,rgba(8,145,178,.05) 100%);
-      --bg-base:      #f1f3fa;
-      --bg-surface:   #ffffff;
-      --bg-elevated:  #ffffff;
-      --text-primary: #0f172a;
+      --primary:       #16a34a;
+      --primary-dark:  #15803d;
+      --primary-light: rgba(22, 163, 74, 0.10);
+      --primary-glow:  rgba(22, 163, 74, 0.18);
+
+      --bg-base:       #f9fafb;
+      --bg-surface:    #ffffff;
+
+      --text-primary:  #0a0a0a;
       --text-secondary:#374151;
-      --text-muted:   #6b7280;
-      --border:       #dde1ef;
-      --shadow-sm:    0 1px 4px rgba(0,0,0,.08);
-      --shadow-md:    0 4px 16px rgba(0,0,0,.1);
-      --shadow-lg:    0 12px 36px rgba(0,0,0,.13);
-      --shadow-glow:  0 0 20px rgba(22,163,74,.15);
-      --radius-sm:    6px;
-      --radius-md:    10px;
-      --radius-lg:    14px;
-      --radius-xl:    20px;
-      --transition:   all .2s cubic-bezier(.4,0,.2,1);
+      --text-muted:    #6b7280;
+
+      --border:        #e5e7eb;
+
+      --shadow-sm:     0 1px 4px rgba(0, 0, 0, 0.07);
+      --shadow-md:     0 4px 16px rgba(0, 0, 0, 0.09);
+      --shadow-lg:     0 12px 36px rgba(0, 0, 0, 0.11);
+
+      --radius-sm:     6px;
+      --radius-md:     10px;
+      --radius-lg:     14px;
+      --radius-xl:     20px;
+
+      --transition:    all .2s cubic-bezier(.4, 0, .2, 1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; height: 100%; }
 
     body {
-      font-family: 'Poppins', system-ui, sans-serif;
+      font-family: 'Poppins', sans-serif;
       background: var(--bg-base);
       color: var(--text-primary);
       min-height: 100vh;
@@ -53,14 +55,15 @@
 
     /* ── Background decoration ── */
     .bg-deco {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none; overflow: hidden;
     }
     .bg-deco::before {
       content: '';
       position: absolute;
       top: -20%; left: -10%;
       width: 60vw; height: 60vw;
-      background: radial-gradient(circle, rgba(22,163,74,.07) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(22, 163, 74, 0.06) 0%, transparent 70%);
       border-radius: 50%;
       animation: pulse-slow 8s ease-in-out infinite alternate;
     }
@@ -69,13 +72,13 @@
       position: absolute;
       bottom: -10%; right: -10%;
       width: 50vw; height: 50vw;
-      background: radial-gradient(circle, rgba(8,145,178,.06) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(22, 163, 74, 0.04) 0%, transparent 70%);
       border-radius: 50%;
       animation: pulse-slow 10s ease-in-out infinite alternate-reverse;
     }
     @keyframes pulse-slow {
-      from { transform: scale(1); opacity: .7; }
-      to   { transform: scale(1.15); opacity: 1; }
+      from { transform: scale(1);    opacity: .7; }
+      to   { transform: scale(1.15); opacity: 1;  }
     }
 
     /* ── Grid pattern overlay ── */
@@ -85,7 +88,7 @@
         linear-gradient(var(--border) 1px, transparent 1px),
         linear-gradient(90deg, var(--border) 1px, transparent 1px);
       background-size: 48px 48px;
-      opacity: .35;
+      opacity: .3;
     }
 
     /* ── Top bar ── */
@@ -99,11 +102,10 @@
     }
     .brand {
       font-size: 1.1rem; font-weight: 800; letter-spacing: -.02em;
-      background: var(--gradient);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      color: var(--primary);
       display: flex; align-items: center; gap: .4rem;
     }
-    .brand i { font-size: 1.1rem; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .brand i { font-size: 1.1rem; color: var(--primary); }
 
     /* ── Main content ── */
     main {
@@ -120,18 +122,16 @@
       font-weight: 900;
       line-height: 1;
       letter-spacing: -.04em;
-      background: var(--gradient);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      color: var(--primary);
       position: relative;
       animation: fade-down .6s ease both;
-      filter: drop-shadow(0 8px 32px rgba(22,163,74,.2));
+      filter: drop-shadow(0 8px 24px rgba(22, 163, 74, 0.18));
     }
     .error-number::after {
       content: '404';
       position: absolute; inset: 0;
-      background: var(--gradient);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      filter: blur(32px) opacity(.25);
+      color: var(--primary);
+      filter: blur(28px) opacity(.2);
       z-index: -1;
     }
 
@@ -149,18 +149,18 @@
     .error-card::before {
       content: '';
       position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: var(--gradient);
+      background: var(--primary);
     }
 
     .error-icon-wrap {
       width: 72px; height: 72px;
       border-radius: 50%;
-      background: var(--gradient-soft);
-      border: 1px solid rgba(22,163,74,.2);
+      background: var(--primary-light);
+      border: 1px solid rgba(22, 163, 74, 0.2);
       display: flex; align-items: center; justify-content: center;
       margin: 0 auto 1.5rem;
       font-size: 2rem; color: var(--primary);
-      animation: bounce-in .6s cubic-bezier(.34,1.56,.64,1) .3s both;
+      animation: bounce-in .6s cubic-bezier(.34, 1.56, .64, 1) .3s both;
     }
 
     .error-card h1 {
@@ -181,27 +181,28 @@
       padding: .7rem 1.4rem; border-radius: var(--radius-md);
       font-family: 'Poppins', sans-serif;
       font-size: .85rem; font-weight: 600;
-      transition: var(--transition); cursor: pointer; text-decoration: none;
-      border: none; outline: none;
+      transition: var(--transition); cursor: pointer;
+      text-decoration: none; border: none; outline: none;
     }
     .btn-primary {
-      background: var(--gradient);
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(22,163,74,.3);
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.25);
     }
     .btn-primary:hover {
+      background: var(--primary-dark);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(22,163,74,.4);
-      color: #fff;
+      box-shadow: 0 6px 20px rgba(22, 163, 74, 0.35);
+      color: #ffffff;
     }
     .btn-secondary {
-      background: var(--bg-elevated);
+      background: var(--bg-surface);
       color: var(--text-secondary);
       border: 1px solid var(--border);
     }
     .btn-secondary:hover {
-      background: #eef9f2;
-      border-color: rgba(22,163,74,.3);
+      background: var(--primary-light);
+      border-color: rgba(22, 163, 74, 0.35);
       color: var(--primary);
     }
 
@@ -223,8 +224,8 @@
     }
     .quick-link:hover {
       color: var(--primary);
-      border-color: rgba(22,163,74,.4);
-      background: #eef9f2;
+      border-color: rgba(22, 163, 74, 0.35);
+      background: var(--primary-light);
     }
     .quick-link i { font-size: .8rem; }
 
@@ -284,29 +285,13 @@
         Double-check the URL, or use one of the options below to find your way back.
       </p>
       <div class="btn-group">
-        <a href="/" class="btn btn-primary">
-          <i class="bi bi-house-door"></i> Back to Home
-        </a>
+        
         <a href="javascript:history.back()" class="btn btn-secondary">
           <i class="bi bi-arrow-left"></i> Go Back
         </a>
       </div>
     </div>
 
-    <div class="quick-links" aria-label="Quick navigation links">
-      <a href="../pages/legal.html#tos-acceptance" class="quick-link">
-        <i class="bi bi-file-text"></i> Terms of Service
-      </a>
-      <a href="../pages/legal.html#pp-collect" class="quick-link">
-        <i class="bi bi-shield-check"></i> Privacy Policy
-      </a>
-      <a href="../pages/legal.html#pp-dpa" class="quick-link">
-        <i class="bi bi-bank"></i> Data Privacy Act
-      </a>
-      <a href="../pages/index.html#faq" class="quick-link">
-        <i class="bi bi-question-circle"></i> FAQ
-      </a>
-    </div>
   </main>
 
   <!-- Footer -->

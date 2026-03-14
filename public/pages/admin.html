@@ -176,11 +176,11 @@
 
   <body>
 
-    <!-- ══ GLOBAL TOAST ══════════════════════════════════════════════ -->
+    <!-- GLOBAL TOAST -->
     <div id="global-toast-container" aria-live="assertive" aria-atomic="true"></div>
 
 
-    <!-- ══ CUSTOM CONFIRM OVERLAY ════════════════════════════════════ -->
+    <!-- CUSTOM CONFIRM OVERLAY -->
     <div class="confirm-overlay" id="confirmModalOverlay" style="display: none" role="dialog" aria-modal="true">
       <div class="confirm-box">
 
@@ -203,7 +203,7 @@
     </div>
 
 
-    <!-- ══ LOGOUT MODAL ══════════════════════════════════════════════ -->
+    <!-- LOGOUT MODAL -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 380px">
         <div class="modal-content rnc-modal">
@@ -239,7 +239,7 @@
     </div>
 
 
-    <!-- ══ CHANGE PASSWORD MODAL ═════════════════════════════════════ -->
+    <!-- CHANGE PASSWORD MODAL -->
     <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
         <div class="modal-content rnc-modal">
@@ -287,7 +287,7 @@
     </div>
 
 
-    <!-- ══ ADD / EDIT SERVICE MODAL ══════════════════════════════════ -->
+    <!-- ADD / EDIT SERVICE MODAL -->
     <div class="modal fade" id="serviceModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 440px">
         <div class="modal-content rnc-modal">
@@ -331,7 +331,7 @@
     </div>
 
 
-    <!-- ══ REMARKS MODAL ═════════════════════════════════════════════ -->
+    <!-- REMARKS MODAL -->
     <div class="modal fade" id="remarksModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
         <div class="modal-content rnc-modal">
@@ -371,7 +371,7 @@
     </div>
 
 
-    <!-- ══ MESSAGE USER MODAL ════════════════════════════════════════ -->
+    <!-- MESSAGE USER MODAL -->
     <div class="modal fade" id="messageUserModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 440px">
         <div class="modal-content rnc-modal">
@@ -415,7 +415,7 @@
     </div>
 
 
-    <!-- ══ TRANSACTION TIMELINE MODAL ════════════════════════════════ -->
+    <!-- TRANSACTION TIMELINE MODAL -->
     <div class="modal fade" id="timelineModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 540px">
         <div class="modal-content rnc-modal">
@@ -440,7 +440,7 @@
     </div>
 
 
-    <!-- ══ CANCEL APPOINTMENT MODAL ══════════════════════════════════ -->
+    <!-- CANCEL APPOINTMENT MODAL -->
     <div class="modal fade" id="appointmentReasonModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
         <div class="modal-content rnc-modal">
@@ -482,7 +482,7 @@
     </div>
 
 
-    <!-- ══ COMPLETE APPOINTMENT MODAL ════════════════════════════════ -->
+    <!-- COMPLETE APPOINTMENT MODAL -->
     <div class="modal fade" id="completeAppointmentModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 560px">
         <div class="modal-content rnc-modal">
@@ -549,7 +549,7 @@
     </div>
 
 
-    <!-- ══ UPDATE TRANSACTION STATUS MODAL ═══════════════════════════ -->
+    <!-- UPDATE TRANSACTION STATUS MODAL -->
     <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 480px">
         <div class="modal-content rnc-modal">
@@ -603,7 +603,7 @@
     </div>
 
 
-    <!-- ══ WALK-IN MODAL ═════════════════════════════════════════════ -->
+    <!-- WALK-IN MODAL -->
     <div class="confirm-overlay" id="walkInModalOverlay" style="display: none;" role="dialog" aria-modal="true">
       <div class="confirm-box" style="max-width: 520px; width: 100%;">
 
@@ -664,65 +664,172 @@
       </div>
     </div>
 
+    <!-- HOLIDAY MODAL -->
+    <div class="modal fade" id="holidayModal" tabindex="-1"
+        aria-labelledby="holidayModalLabel" aria-modal="true" role="dialog">
+      <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width:860px;">
+        <div class="modal-content hm-modal-content">
 
-    <!-- ══ BAN ACCOUNT MODAL ═════════════════════════════════════════ -->
-    <div class="modal fade" id="banModal" tabindex="-1"
-      aria-labelledby="banModalLabel" aria-modal="true" role="dialog">
-      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-        <div class="modal-content rnc-modal">
-
-          <div class="modal-header" style="border-bottom: 1px solid var(--border);">
-            <div class="modal-header-icon" style="background: rgba(244, 63, 94, .15);">
-              <i class="bi bi-slash-circle-fill" style="color: var(--danger);"></i>
+          <!-- Header -->
+          <div class="modal-header hm-header">
+            <div class="hm-header-icon" aria-hidden="true">
+              <i class="bi bi-calendar-x-fill"></i>
             </div>
             <div>
-              <div class="modal-title" id="banModalLabel" style="color: var(--danger);">Ban Account</div>
-              <div class="modal-subtitle" id="banModalClientName"
-                style="font-size: 0.78rem; color: var(--text-muted);"></div>
+              <div class="modal-title" id="holidayModalLabel">Holiday &amp; Closure Manager</div>
+              <div class="modal-subtitle">Manage dates when appointments cannot be booked</div>
             </div>
-            <button type="button" class="btn-close-rnc ms-auto" data-bs-dismiss="modal" aria-label="Close">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
           </div>
 
-          <div class="modal-body" style="padding: 1.1rem 1.25rem;">
-            <div class="ban-warning-banner">
-              <i class="bi bi-exclamation-triangle-fill"></i>
-              <span>Banning will immediately lock this client out and notify them in real-time.</span>
-            </div>
-            <div class="mb-3 mt-3">
-              <label class="form-label" style="font-size: 0.82rem; font-weight: 600;">Ban Duration</label>
-              <select class="form-select" id="banType"
-                style="background: var(--bg-elevated); color: var(--text-primary); border-color: var(--border); font-size: 0.84rem;">
-                <option value="3_days">3 Days</option>
-                <option value="30_days">30 Days</option>
-                <option value="permanent">Permanent</option>
-              </select>
-            </div>
-            <div class="mb-2">
-              <label class="form-label" style="font-size: 0.82rem; font-weight: 600;">
-                Reason <span style="color: var(--text-muted); font-weight: 400;">(optional)</span>
-              </label>
-              <textarea id="banReason" class="form-control" rows="3" maxlength="300"
-                placeholder="State the reason for this ban…"
-                style="background: var(--bg-elevated); color: var(--text-primary); border-color: var(--border); font-size: 0.83rem; resize: none;"></textarea>
-            </div>
-            <div id="banModalErr" class="delete-error-msg" style="display: none;"></div>
-          </div>
+          <div class="modal-body hm-body" style="padding:0;">
 
-          <div class="modal-footer" style="border-top: 1px solid var(--border); gap: 0.5rem; justify-content: flex-end;">
-            <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
-            <button class="btn-ban-confirm" id="banSubmitBtn" onclick="submitBanUser()">
-              <i class="bi bi-slash-circle-fill"></i> Ban Account
-            </button>
-          </div>
+            <!-- Top toolbar -->
+            <div class="hm-toolbar">
+              <div class="hm-type-filters" role="group" aria-label="Filter holidays by type">
+                <button class="hm-filter-btn active" data-filter="all"    onclick="hmFilter(this,'all')">All</button>
+                <button class="hm-filter-btn"         data-filter="regular" onclick="hmFilter(this,'regular')">
+                  <span class="hm-dot hm-dot-regular"></span> Regular
+                </button>
+                <button class="hm-filter-btn"         data-filter="special" onclick="hmFilter(this,'special')">
+                  <span class="hm-dot hm-dot-special"></span> Special
+                </button>
+                <button class="hm-filter-btn"         data-filter="custom"  onclick="hmFilter(this,'custom')">
+                  <span class="hm-dot hm-dot-custom"></span>  Custom
+                </button>
+              </div>
+              <button class="hm-add-btn" onclick="hmOpenForm()">
+                <i class="bi bi-plus-lg"></i> Add Holiday
+              </button>
+            </div>
 
+            <!-- ── Info banner ───────────────────────────────────────────── -->
+            <div class="hm-info-banner">
+              <i class="bi bi-info-circle-fill"></i>
+              <span>
+                <strong>Regular</strong> holidays recur every year automatically.&nbsp;
+                <strong>Special</strong> holidays vary annually — update the date each year.&nbsp;
+                <strong>Custom</strong> closures are one-time additions by the admin.
+                Disabled holidays are ignored during booking.
+              </span>
+            </div>
+
+            <!-- ── Holiday table ─────────────────────────────────────────── -->
+            <div class="hm-table-wrap">
+              <table class="hm-table" id="hmTable">
+                <thead>
+                  <tr>
+                    <th style="width:34%">Name</th>
+                    <th style="width:16%">Date / Schedule</th>
+                    <th style="width:11%">Type</th>
+                    <th style="width:11%">Recurring</th>
+                    <th style="width:10%">Status</th>
+                    <th style="width:18%; text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="hmTableBody">
+                  <tr class="hm-loading-row" id="hmLoadingRow">
+                    <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                      <i class="bi bi-arrow-repeat hm-spin"></i>&nbsp; Loading holidays…
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- ── Add / Edit Form (inline, toggleable) ──────────────────── -->
+            <div class="hm-form-section" id="hmFormSection" style="display:none;">
+              <div class="hm-form-header">
+                <h6 class="hm-form-title" id="hmFormTitle">Add Holiday</h6>
+                <button class="hm-form-close" onclick="hmCloseForm()" aria-label="Close form">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+
+              <div class="hm-form-grid">
+                <input type="hidden" id="hmHolidayId" value="" />
+
+                <!-- Name -->
+                <div class="hm-field hm-field--full">
+                  <label class="hm-label" for="hmName">Holiday Name *</label>
+                  <input type="text" class="form-control hm-input" id="hmName"
+                        placeholder="e.g. Barangay Fiesta" maxlength="120" />
+                </div>
+
+                <!-- Type -->
+                <div class="hm-field">
+                  <label class="hm-label" for="hmType">Type *</label>
+                  <select class="form-select hm-input" id="hmType" onchange="hmTypeChanged()">
+                    <option value="custom">Custom (one-time closure)</option>
+                    <option value="special">Special (non-working holiday)</option>
+                    <option value="regular">Regular (RA-mandated)</option>
+                  </select>
+                </div>
+
+                <!-- Recurring toggle -->
+                <div class="hm-field">
+                  <label class="hm-label" for="hmRecurring">Recurs Annually?</label>
+                  <select class="form-select hm-input" id="hmRecurring" onchange="hmRecurringChanged()">
+                    <option value="0">No — specific date only</option>
+                    <option value="1">Yes — same month &amp; day every year</option>
+                  </select>
+                </div>
+
+                <!-- Specific date (shown when NOT recurring) -->
+                <div class="hm-field" id="hmDateField">
+                  <label class="hm-label" for="hmDate">Date (YYYY-MM-DD) *</label>
+                  <input type="date" class="form-control hm-input" id="hmDate" />
+                  <div class="hm-hint">Required for one-time or variable holidays</div>
+                </div>
+
+                <!-- Month + Day (shown when IS recurring) -->
+                <div class="hm-field" id="hmMonthDayField" style="display:none;">
+                  <label class="hm-label">Month &amp; Day *</label>
+                  <div style="display:flex; gap:0.5rem;">
+                    <select class="form-select hm-input" id="hmMonth" style="flex:1;">
+                      <option value="">Month</option>
+                      <option value="1">January</option>
+                      <option value="2">February</option>
+                      <option value="3">March</option>
+                      <option value="4">April</option>
+                      <option value="5">May</option>
+                      <option value="6">June</option>
+                      <option value="7">July</option>
+                      <option value="8">August</option>
+                      <option value="9">September</option>
+                      <option value="10">October</option>
+                      <option value="11">November</option>
+                      <option value="12">December</option>
+                    </select>
+                    <input type="number" class="form-control hm-input" id="hmDay"
+                          placeholder="Day" min="1" max="31" style="flex:1;" />
+                  </div>
+                </div>
+
+                <!-- Description -->
+                <div class="hm-field hm-field--full">
+                  <label class="hm-label" for="hmDesc">Description (optional)</label>
+                  <input type="text" class="form-control hm-input" id="hmDesc"
+                        placeholder="Short note about this holiday" maxlength="255" />
+                </div>
+              </div>
+
+              <div class="hm-form-actions">
+                <button class="hm-btn-cancel" onclick="hmCloseForm()">Cancel</button>
+                <button class="hm-btn-save"   onclick="hmSaveHoliday()" id="hmSaveBtn">
+                  <i class="bi bi-check-lg"></i> Save Holiday
+                </button>
+              </div>
+            </div>
+
+          </div><!-- /.modal-body -->
         </div>
       </div>
     </div>
 
 
-    <!-- ══ CLIENT HISTORY MODAL ══════════════════════════════════════ -->
+    <!-- CLIENT HISTORY MODAL -->
     <div class="confirm-overlay" id="clientHistoryOverlay" style="display: none;" role="dialog" aria-modal="true">
       <div class="confirm-box" style="max-width: 680px; width: 100%; max-height: 85vh; overflow-y: auto;">
 
@@ -764,11 +871,7 @@
             <button class="btn-ghost" id="histChatBtn" onclick="openHistChat()">
               <i class="bi bi-chat-dots"></i> Open Chat
             </button>
-            <button class="btn-ghost" id="histBanBtn"
-              style="color: var(--danger); border-color: rgba(244, 63, 94, .3);"
-              onclick="openBanFromHistory()">
-              <i class="bi bi-slash-circle"></i> Ban Account
-            </button>
+            
           </div>
           <button class="confirm-btn-cancel" onclick="closeClientHistory()">Close</button>
         </div>
@@ -777,10 +880,10 @@
     </div>
 
 
-    <!-- ══ APP SHELL ══════════════════════════════════════════════════ -->
+    <!-- APP SHELL -->
     <div class="app-shell">
 
-      <!-- SIDEBAR ════════════════════════════════════════════════════ -->
+      <!-- SIDEBAR -->
       <aside class="app-sidebar" id="sidebar" aria-label="Admin navigation">
 
         <!-- Brand -->
@@ -824,18 +927,14 @@
           <a class="sidebar-nav-item" onclick="showAdminSection('users')"
             data-section="users" role="button" tabindex="0">
             <i class="bi bi-people" aria-hidden="true"></i>
-            <span>Clients</span>
+            <span>Accounts</span>
           </a>
-          <a class="sidebar-nav-item" onclick="showAdminSection('walkin')"
-            data-section="walkin" role="button" tabindex="0">
-            <i class="bi bi-person-walking" aria-hidden="true"></i>
-            <span>Walk-In</span>
-          </a>
+          
         </nav>
 
         <!-- Footer -->
         <div class="sidebar-footer">
-          <button class="sidebar-theme-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <button class="sidebar-theme-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme" style="display: none;">
             <span class="theme-icon-dark" aria-hidden="true"><i class="bi bi-sun-fill"></i></span>
             <span class="theme-icon-light" aria-hidden="true"><i class="bi bi-moon-fill"></i></span>
             <span class="theme-label-dark">Light Mode</span>
@@ -870,7 +969,7 @@
       </aside>
 
 
-      <!-- MAIN ═══════════════════════════════════════════════════════ -->
+      <!-- MAIN -->
       <main class="app-main" id="mainContent" role="main">
 
         <!-- TOP BAR -->
@@ -884,181 +983,337 @@
           </div>
         </div>
 
-
-        <!-- ── DASHBOARD PANEL ────────────────────────────────────── -->
         <div class="panel active" id="panel-dashboard">
+              <!-- ROW 1 — TOP KPI CARDS (8 cards, 4+4) -->
+          <div class="db-kpi-grid">
+ 
+            <div class="db-kpi-card db-kpi--primary"
+                id="kpi-today"
+                onclick="showDashboardSection('appointments-today')"
+                role="button"
+                tabindex="0"
+                title="View today's appointments">
+              <div class="db-kpi-icon">
+                <i class="bi bi-calendar-day-fill" aria-hidden="true"></i>
+              </div>
+              <div class="db-kpi-body">
+                <div class="db-kpi-value" id="kpiTodayAppt">—</div>
+                <div class="db-kpi-label">Today's Appointments</div>
+                <div class="db-kpi-sub"   id="kpiTodaySub">—</div>
+              </div>
+              <div class="db-kpi-trend"   id="kpiTodayTrend"></div>
+            </div>
+          
+            <div class="db-kpi-card db-kpi--warning"
+                id="kpi-pending"
+                onclick="showDashboardSection('pipeline-ongoing')"
+                role="button"
+                tabindex="0"
+                title="View in-progress transactions">
+              <div class="db-kpi-icon">
+                <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+              </div>
+              <div class="db-kpi-body">
+                <div class="db-kpi-value" id="kpiPendingTx">—</div>
+                <div class="db-kpi-label">In Progress</div>
+                <div class="db-kpi-sub"   id="kpiPendingSub">Being processed</div>
+              </div>
+              <div class="db-kpi-sparkline">
+                <canvas id="sparkPending" height="36" aria-hidden="true"></canvas>
+              </div>
+            </div>
+          
+            <div class="db-kpi-card db-kpi--info"
+                id="kpi-claim"
+                onclick="showDashboardSection('readyClaim')"
+                role="button"
+                tabindex="0"
+                title="View documents ready to claim">
+              <div class="db-kpi-icon">
+                <i class="bi bi-box-seam-fill" aria-hidden="true"></i>
+              </div>
+              <div class="db-kpi-body">
+                <div class="db-kpi-value" id="kpiReadyClaim">—</div>
+                <div class="db-kpi-label">Ready to Claim</div>
+                <div class="db-kpi-sub"   id="kpiClaimSub">Uncollected docs</div>
+              </div>
+              <div class="db-kpi-trend"   id="kpiClaimTrend"></div>
+            </div>
+          
+            <div class="db-kpi-card db-kpi--success"
+                id="kpi-clients"
+                onclick="showDashboardSection('clients')"
+                role="button"
+                tabindex="0"
+                title="View all clients">
+              <div class="db-kpi-icon">
+                <i class="bi bi-people-fill" aria-hidden="true"></i>
+              </div>
+              <div class="db-kpi-body">
+                <div class="db-kpi-value" id="kpiActiveClients">—</div>
+                <div class="db-kpi-label">Active Clients</div>
+                <div class="db-kpi-sub"   id="kpiClientsSub">Registered &amp; verified</div>
+              </div>
+              <div class="db-kpi-trend"   id="kpiClientsTrend"></div>
+            </div>
+          
+            <div class="db-kpi-card db-kpi--accent"
+                id="kpi-slots"
+                onclick="showDashboardSection('schedule')"
+                role="button"
+                tabindex="0"
+                title="View schedule forecast">
+              <div class="db-kpi-icon">
+                <i class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></i>
+              </div>
+              <div class="db-kpi-body">
+                <div class="db-kpi-value" id="kpiSlotUtil">—</div>
+                <div class="db-kpi-label">Slot Utilisation</div>
+                <div class="db-kpi-sub"   id="kpiSlotSub">Today's capacity</div>
+              </div>
 
-          <!-- Stats -->
-          <div class="stats-row stats-6">
-            <div class="stat-chip stat-primary">
-              <div class="stat-chip-icon"><i class="bi bi-calendar-check" aria-hidden="true"></i></div>
-              <div class="stat-chip-body">
-                <strong id="todayAppointments">0</strong>
-                <span>Today's Appts</span>
+              <div class="db-kpi-meter">
+                <div class="db-kpi-meter-fill" id="kpiSlotFill" style="width: 0%"></div>
               </div>
             </div>
-            <div class="stat-chip stat-warning">
-              <div class="stat-chip-icon"><i class="bi bi-clock-history" aria-hidden="true"></i></div>
-              <div class="stat-chip-body">
-                <strong id="pendingAppointments">0</strong>
-                <span>Pending Appts</span>
+          
+            <div class="db-kpi-card db-kpi--secondary"
+                id="kpi-proc"
+                onclick="showDashboardSection('transactions')"
+                role="button"
+                tabindex="0"
+                title="View all transactions">
+              <div class="db-kpi-icon">
+                <i class="bi bi-stopwatch-fill" aria-hidden="true"></i>
               </div>
-            </div>
-            <div class="stat-chip stat-info">
-              <div class="stat-chip-icon"><i class="bi bi-file-earmark-text" aria-hidden="true"></i></div>
-              <div class="stat-chip-body">
-                <strong id="activeTransactions">0</strong>
-                <span>Active Txns</span>
+              <div class="db-kpi-body">
+                <div class="db-kpi-value" id="kpiAvgProc">—</div>
+                <div class="db-kpi-label">Avg Processing</div>
+                <div class="db-kpi-sub">Days per transaction</div>
               </div>
+              <div class="db-kpi-trend"   id="kpiProcTrend"></div>
             </div>
-            <div class="stat-chip stat-danger">
-              <div class="stat-chip-icon"><i class="bi bi-chat-dots" aria-hidden="true"></i></div>
-              <div class="stat-chip-body">
-                <strong id="unreadMessages">0</strong>
-                <span>Unread Msgs</span>
+          
+            <div class="db-kpi-card db-kpi--danger"
+                id="kpi-penalty"
+                onclick="showDashboardSection('transactions-penalty')"
+                role="button"
+                tabindex="0"
+                title="View penalty transactions">
+              <div class="db-kpi-icon">
+                <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
               </div>
-            </div>
-            <div class="stat-chip stat-success">
-              <div class="stat-chip-icon"><i class="bi bi-people" aria-hidden="true"></i></div>
-              <div class="stat-chip-body">
-                <strong id="totalClients">0</strong>
-                <span>Total Clients</span>
+              <div class="db-kpi-body">
+                <div class="db-kpi-value" id="kpiPenaltyCount">—</div>
+                <div class="db-kpi-label">Penalty Transactions</div>
+                <div class="db-kpi-sub"   id="kpiPenaltySub">Unclaimed &gt;7 days</div>
               </div>
+              <div class="db-kpi-trend"   id="kpiPenaltyTrend"></div>
             </div>
-            <div class="stat-chip stat-secondary">
-              <div class="stat-chip-icon"><i class="bi bi-gear" aria-hidden="true"></i></div>
-              <div class="stat-chip-body">
-                <strong id="activeServices">0</strong>
-                <span>Active Services</span>
+          
+            <div class="db-kpi-card db-kpi--gold"
+                id="kpi-rating"
+                role="presentation"
+                title="Client satisfaction rating">
+              <div class="db-kpi-icon">
+                <i class="bi bi-star-fill" aria-hidden="true"></i>
               </div>
+              <div class="db-kpi-body">
+                <div class="db-kpi-value" id="kpiAvgRating">—</div>
+                <div class="db-kpi-label">Client Satisfaction</div>
+                <div class="db-kpi-sub"   id="kpiRatingSub">Avg rating / 5.0</div>
+              </div>
+              <div class="db-kpi-stars"   id="kpiStars"></div>
             </div>
+          
+          </div><!-- /.db-kpi-grid -->
+
+              <!-- ROW 2 — ALERTS + OPERATIONAL STATUS -->
+          <div class="db-alerts-row" id="dbAlertsRow">
           </div>
 
-          <!-- Processing Stats -->
-          <div class="processing-strip">
-            <div class="processing-item">
-              <div class="processing-icon">
-                <i class="bi bi-speedometer" aria-hidden="true"></i>
-              </div>
-              <div>
-                <strong id="avgProcessingTime">0</strong>
-                <span>Avg. Processing (days)</span>
-              </div>
-            </div>
-            <div class="processing-item">
-              <div class="processing-icon" style="background: rgba(52, 211, 153, 0.15); color: var(--success);">
-                <i class="bi bi-arrow-down-circle" aria-hidden="true"></i>
-              </div>
-              <div>
-                <strong id="minProcessingTime">0</strong>
-                <span>Fastest (days)</span>
-              </div>
-            </div>
-            <div class="processing-item">
-              <div class="processing-icon" style="background: rgba(244, 63, 94, 0.15); color: var(--danger);">
-                <i class="bi bi-arrow-up-circle" aria-hidden="true"></i>
-              </div>
-              <div>
-                <strong id="maxProcessingTime">0</strong>
-                <span>Longest (days)</span>
-              </div>
-            </div>
-          </div>
+          <div class="db-three-col">
 
-          <!-- Charts -->
-          <div class="dash-two-col">
-            <div class="section-block">
-              <div class="section-block-header">
-                <span class="section-block-title">
-                  <i class="bi bi-bar-chart-fill" aria-hidden="true"></i> Appointments Overview
+            <!-- Transaction Pipeline -->
+            <div class="db-section" style="grid-column: span 2;">
+              <div class="db-section-header">
+                <span class="db-section-title">
+                  <i class="bi bi-diagram-3-fill"></i> Document Processing Pipeline
                 </span>
+                <span class="db-section-sub">Live transaction flow</span>
               </div>
-              <div class="chart-wrap">
-                <canvas id="appointmentsChart"></canvas>
+
+              <!-- Funnel stages -->
+              <div class="db-pipeline">
+                <div class="db-pipe-stage db-pipe--cyan"    data-stage="pending">
+                  <div class="db-pipe-count" id="pipeIn">—</div>
+                  <div class="db-pipe-label">Pending</div>
+                  <div class="db-pipe-bar"><div class="db-pipe-fill" id="pipeInFill" style="width:0%"></div></div>
+                </div>
+                <div class="db-pipe-stage db-pipe--cyan"    data-stage="pending">
+                  <div class="db-pipe-count" id="pipeSub">-</div>
+                  <div class="db-pipe-label">Submitted</div>
+                  <div class="db-pipe-bar"><div class="db-pipe-fill" id="pipeInFill" style="width:0%"></div></div>
+                </div>
+                <div class="db-pipe-arrow"><i class="bi bi-chevron-right"></i></div>
+                <div class="db-pipe-stage db-pipe--blue"    data-stage="ongoing">
+                  <div class="db-pipe-count" id="pipeProc">—</div>
+                  <div class="db-pipe-label">On Going</div>
+                  <div class="db-pipe-bar"><div class="db-pipe-fill" id="pipeProcFill" style="width:0%"></div></div>
+                </div>
+                <div class="db-pipe-arrow"><i class="bi bi-chevron-right"></i></div>
+                <div class="db-pipe-stage db-pipe--amber"   data-stage="to_claim">
+                  <div class="db-pipe-count" id="pipeClaim">—</div>
+                  <div class="db-pipe-label">Ready to Claim</div>
+                  <div class="db-pipe-bar"><div class="db-pipe-fill" id="pipeClaimFill" style="width:0%"></div></div>
+                </div>
+                <div class="db-pipe-arrow"><i class="bi bi-chevron-right"></i></div>
+                <div class="db-pipe-stage db-pipe--green"   data-stage="claimed">
+                  <div class="db-pipe-count" id="pipeDone">—</div>
+                  <div class="db-pipe-label">Claimed</div>
+                  <div class="db-pipe-bar"><div class="db-pipe-fill" id="pipeDoneFill" style="width:0%"></div></div>
+                </div>
+                <div class="db-pipe-arrow"><i class="bi bi-chevron-right"></i></div>
+                <div class="db-pipe-stage db-pipe--red"     data-stage="cancelled">
+                  <div class="db-pipe-count" id="pipeCancel">—</div>
+                  <div class="db-pipe-label">Cancelled</div>
+                  <div class="db-pipe-bar"><div class="db-pipe-fill" id="pipeCancelFill" style="width:0%"></div></div>
+                </div>
+              </div>
+
+              <!-- Throughput metrics row -->
+              <div class="db-throughput-row">
+                <div class="db-tp-item">
+                  <span class="db-tp-val" id="tpTotal">—</span>
+                  <span class="db-tp-label">Total Transactions</span>
+                </div>
+                <div class="db-tp-divider"></div>
+                <div class="db-tp-item">
+                  <span class="db-tp-val" id="tpClaimRate">—</span>
+                  <span class="db-tp-label">Claim Rate</span>
+                </div>
+                <div class="db-tp-divider"></div>
+                <div class="db-tp-item">
+                  <span class="db-tp-val" id="tpAvgDays">—</span>
+                  <span class="db-tp-label">Avg Days to Claim</span>
+                </div>
+                <div class="db-tp-divider"></div>
+                <div class="db-tp-item">
+                  <span class="db-tp-val" id="tpCancelRate">—</span>
+                  <span class="db-tp-label">Cancel Rate</span>
+                </div>
               </div>
             </div>
-            <div class="section-block">
-              <div class="section-block-header">
-                <span class="section-block-title">
-                  <i class="bi bi-pie-chart-fill" aria-hidden="true"></i> Transaction Status
+
+            <!-- Today's Slot Capacity -->
+            <div class="db-section">
+              <div class="db-section-header">
+                <span class="db-section-title">
+                  <i class="bi bi-calendar3"></i> Today's Slots
                 </span>
+                <button class="db-link-btn" onclick="showAdminSection('schedule')">View Full →</button>
               </div>
-              <div class="chart-wrap">
-                <canvas id="transactionsChart"></canvas>
+              <div class="db-slot-list" id="dbSlotList">
+                <div class="db-slot-loading"><i class="bi bi-arrow-repeat db-spin"></i> Loading…</div>
               </div>
             </div>
-          </div>
 
-          <!-- Activity + Top Services -->
-          <div class="dash-two-col">
-            <div class="section-block">
-              <div class="section-block-header">
-                <span class="section-block-title">
-                  <i class="bi bi-activity" aria-hidden="true"></i> Recent Activities
+          </div><!-- /.db-three-col -->
+
+              <!-- ROW 4 — CHARTS ROW (Booking trend + Service demand + Appointment status) -->
+          <div class="db-charts-row">
+
+            <!-- Booking Trend (30 days) -->
+            <div class="db-section db-chart-section">
+              <div class="db-section-header">
+                <span class="db-section-title"><i class="bi bi-graph-up-arrow"></i> Booking Trend</span>
+                <span class="db-section-sub">Last 30 days</span>
+              </div>
+              <div class="db-chart-wrap">
+                <canvas id="chartBookingTrend"></canvas>
+              </div>
+            </div>
+
+            <!-- Service Demand Doughnut -->
+            <div class="db-section db-chart-section">
+              <div class="db-section-header">
+                <span class="db-section-title"><i class="bi bi-pie-chart-fill"></i> Service Demand</span>
+                <span class="db-section-sub">By transaction volume</span>
+              </div>
+              <div class="db-chart-wrap" style="height:180px;">
+                <canvas id="chartServiceDemand"></canvas>
+              </div>
+              <div class="db-service-legend" id="dbServiceLegend"></div>
+            </div>
+
+            <!-- Monthly Transaction Volume (bar) -->
+            <div class="db-section db-chart-section">
+              <div class="db-section-header">
+                <span class="db-section-title"><i class="bi bi-bar-chart-fill"></i> Monthly Volume</span>
+                <span class="db-section-sub">Last 6 months</span>
+              </div>
+              <div class="db-chart-wrap">
+                <canvas id="chartMonthlyVol"></canvas>
+              </div>
+            </div>
+
+          </div><!-- /.db-charts-row -->
+
+              <!-- ROW 5 — BOTTOM FOUR PANELS -->
+          <div class="db-bottom-grid">
+
+            <!-- Panel A: Upcoming Appointments -->
+            <div class="db-section">
+              <div class="db-section-header">
+                <span class="db-section-title">
+                  <i class="bi bi-calendar-event-fill"></i> Upcoming Appointments
                 </span>
+                <button class="db-link-btn" onclick="switchPanel('panel-appointments')">All →</button>
               </div>
-              <div id="recentActivities" class="compact-list"></div>
+              <div class="db-appt-list" id="dbUpcomingAppts">
+                <div class="db-list-loading"><i class="bi bi-arrow-repeat db-spin"></i></div>
+              </div>
             </div>
-            <div class="section-block">
-              <div class="section-block-header">
-                <span class="section-block-title">
-                  <i class="bi bi-trophy-fill" aria-hidden="true"></i> Top Services
+
+            <!-- Panel B: Top Services by Volume (replaces removed "Needs Attention") -->
+            <div class="db-section">
+              <div class="db-section-header">
+                <span class="db-section-title">
+                  <i class="bi bi-briefcase-fill" style="color:var(--accent)"></i> Top Services
                 </span>
+                <span class="db-section-sub" id="dbTopSvcPeriod">All time</span>
               </div>
-              <div id="topServices" class="compact-list"></div>
+              <div class="db-svc-rank-list" id="dbTopServicesList">
+                <div class="db-list-loading"><i class="bi bi-arrow-repeat db-spin"></i></div>
+              </div>
             </div>
-          </div>
 
-        </div>
+            <!-- Panel C: Client Reviews (unchanged) -->
+            <div class="db-section">
+              <div class="db-section-header">
+                <span class="db-section-title">
+                  <i class="bi bi-star-half" style="color:#fbbf24"></i> Recent Reviews
+                </span>
+                <span class="db-section-sub" id="dbRatingOverall">—</span>
+              </div>
+              <div class="db-rating-breakdown" id="dbRatingBreakdown"></div>
+              <div class="db-testimonial-list" id="dbTestimonialList">
+                <div class="db-list-loading"><i class="bi bi-arrow-repeat db-spin"></i></div>
+              </div>
+            </div>
 
+          </div><!-- /.db-bottom-grid -->
 
-        <!-- ── WALK-IN PANEL ──────────────────────────────────────── -->
-        <div class="panel" id="panel-walkin">
+        </div><!-- /#panel-dashboard -->
 
-          <div class="panel-topbar">
-            <h2 class="panel-heading">
-              <i class="bi bi-person-walking" aria-hidden="true"></i> Walk-In Transaction
-            </h2>
-            <button class="btn-primary-rnc" onclick="openWalkInModal()">
-              <i class="bi bi-plus-lg"></i> New Walk-In
-            </button>
-          </div>
-
-          <div class="table-wrap" style="margin-top: 0.5rem;">
-            <table class="rnc-table">
-              <thead>
-                <tr>
-                  <th>Txn#</th>
-                  <th>Client</th>
-                  <th>Service</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Penalty</th>
-                  <th>Created</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="walkinTableBody">
-                <tr>
-                  <td colspan="8" class="text-center py-4" style="color: var(--text-muted);">
-                    <i class="bi bi-inbox" style="font-size: 1.5rem; display: block; margin-bottom: 0.4rem; opacity: 0.4;"></i>
-                    No walk-in transactions yet.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-
-
-        <!-- ── APPOINTMENTS PANEL ─────────────────────────────────── -->
+        <!-- APPOINTMENTS PANEL -->
         <div class="panel" id="panel-appointments">
 
           <div class="panel-topbar">
             <h3 class="panel-heading">
               <i class="bi bi-calendar-check" aria-hidden="true"></i> Manage Appointments
             </h3>
+            
           </div>
 
           <input type="hidden" id="active-filter-appointment-button" value="today" />
@@ -1085,13 +1340,16 @@
         </div>
 
 
-        <!-- ── TRANSACTIONS PANEL ────────────────────────────────── -->
+        <!-- TRANSACTIONS PANEL -->
         <div class="panel" id="panel-transactions">
 
           <div class="panel-topbar">
             <h3 class="panel-heading">
               <i class="bi bi-file-earmark-text" aria-hidden="true"></i> Transactions
             </h3>
+            <button class="btn-primary-rnc" onclick="openWalkInModal()">
+              <i class="bi bi-plus-lg"></i> New Walk-In
+            </button>
           </div>
 
           <div class="search-strip">
@@ -1121,7 +1379,7 @@
         </div>
 
 
-        <!-- ── SERVICES PANEL ────────────────────────────────────── -->
+        <!-- SERVICES PANEL -->
         <div class="panel" id="panel-services">
 
           <div class="panel-topbar">
@@ -1146,52 +1404,103 @@
 
         </div>
 
-
-        <!-- ── CLIENTS PANEL ─────────────────────────────────────── -->
+        <!-- CLIENT/AUDIT LOGS PANEL -->
         <div class="panel" id="panel-users">
-
           <div class="panel-topbar">
             <h3 class="panel-heading">
               <i class="bi bi-people" aria-hidden="true"></i> Client Accounts
             </h3>
           </div>
 
-          <div class="search-strip">
-            <div class="search-wrap">
-              <i class="bi bi-search search-ico" aria-hidden="true"></i>
-              <input type="text" class="search-rnc" id="userSearch"
-                placeholder="Search by name or email…"
-                oninput="searchUsers()" />
+          <div class="wi-tabs" id="usersPanelTabs">
+            <button class="wi-tab active" id="usersTab-clients"
+                    onclick="switchUsersTab('clients', this)">
+              <i class="bi bi-people-fill" aria-hidden="true"></i> Clients
+            </button>
+            <button class="wi-tab" id="usersTab-audit"
+                    onclick="switchUsersTab('audit', this)">
+              <i class="bi bi-shield-lock-fill" aria-hidden="true"></i> Audit Log
+            </button>
+          </div>
+
+              <!-- TAB 1 — CLIENT ACCOUNTS   -->
+          <div id="usersSubPanel-clients">
+
+            <div class="search-strip">
+              <div class="search-wrap">
+                <i class="bi bi-search search-ico" aria-hidden="true"></i>
+                <input type="text" class="search-rnc" id="userSearch"
+                      placeholder="Search by name or email…"
+                      oninput="searchUsers()" />
+              </div>
             </div>
+
+           
+            <div class="table-wrap">
+              <table class="rnc-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Verified</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+              </table>
+            </div>
+
           </div>
 
-          <div class="filter-strip">
-            <!-- <button class="filter-chip active" onclick="filterUsers('all')">All</button>
-            <button class="filter-chip" onclick="filterUsers('client')">Clients</button>
-            <button class="filter-chip" onclick="filterUsers('staff')">Staff</button>
-            <button class="filter-chip" onclick="filterUsers('admin')">Admins</button> -->
-          </div>
+              <!-- TAB 2 — AUDIT LOG -->
+          <div id="usersSubPanel-audit" style="display:none;">
 
-          <div class="table-wrap">
-            <table class="rnc-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Verified</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="usersTableBody"></tbody>
-            </table>
-          </div>
+
+            <!-- Summary chips -->
+            <div class="filter-strip" id="auditSummaryStrip" style="flex-wrap:wrap;gap:.3rem;">
+            </div>
+
+            <!-- Log table -->
+            <div class="table-wrap">
+              <table class="rnc-table" id="auditTable">
+                <thead>
+                  <tr>
+                    <th style="width:140px;">Timestamp</th>
+                    <th style="width:80px;">Category</th>
+                    <th style="width:90px;">Actor Role</th>
+                    <th>Actor</th>
+                    <th>Target</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th style="width:100px;">IP Address</th>
+                  </tr>
+                </thead>
+                <tbody id="auditTableBody">
+                  <tr>
+                    <td colspan="8" class="table-empty">
+                      <i class="bi bi-hourglass-split" style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4;"></i>
+                      Load the audit log using the tab above.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Row count footer -->
+            <div class="audit-footer" id="auditFooter" style="display:none;">
+              Showing <strong id="auditRowCount">0</strong> log entries
+              <span id="auditFilterLabel" style="color:var(--text-muted);"></span>
+            </div>
+
+          </div><!-- /#usersSubPanel-audit -->
 
         </div>
 
 
-        <!-- ── SCHEDULE FORECAST PANEL ───────────────────────────── -->
+
+        <!-- SCHEDULE FORECAST PANEL -->
         <div class="panel" id="panel-schedule">
 
           <div class="panel-topbar">
@@ -1208,6 +1517,10 @@
               </button>
               <button class="btn-ghost" onclick="sfGoToday()" style="font-size: 0.72rem; padding: 0.3rem 0.7rem;">
                 Today
+              </button>
+              <button class="btn-ghost sf-holiday-btn" onclick="openHolidayManager()"
+                style="font-size: 0.72rem; padding: 0.3rem 0.7rem; display:flex; align-items:center; gap:0.35rem;">
+                <i class="bi bi-calendar-x"></i> Holidays
               </button>
             </div>
           </div>
@@ -1275,7 +1588,7 @@
         </div>
 
 
-        <!-- ── MESSAGES PANEL ────────────────────────────────────── -->
+        <!-- MESSAGES PANEL -->
         <div class="panel panel-chat" id="panel-chats">
           <div class="admin-chat-layout">
 
@@ -1338,13 +1651,13 @@
           </div>
         </div>
 
+
       </main>
 
     </div>
     <!-- /app-shell -->
 
 
-    <!-- ══ SCRIPTS ═══════════════════════════════════════════════════ -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
@@ -1352,6 +1665,318 @@
       "use strict";
 
 
+let hmAllHolidays = [];
+let hmCurrentFilter = 'all';
+
+async function openHolidayManager() {
+  const modal = new bootstrap.Modal(document.getElementById('holidayModal'));
+  modal.show();
+  await hmLoadHolidays();
+}
+
+async function hmLoadHolidays() {
+  const tbody = document.getElementById('hmTableBody');
+  tbody.innerHTML = `
+    <tr id="hmLoadingRow">
+      <td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted);">
+        <i class="bi bi-arrow-repeat hm-spin"></i>&nbsp; Loading…
+      </td>
+    </tr>`;
+
+  try {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const res   = await fetch('/api/admin/holidays', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Failed to fetch');
+    const data = await res.json();
+    hmAllHolidays = data.holidays || [];
+    hmRenderTable();
+  } catch (err) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;padding:2rem;color:var(--danger);">
+          <i class="bi bi-exclamation-triangle"></i> Failed to load holidays. Try again.
+        </td>
+      </tr>`;
+  }
+}
+
+function hmRenderTable() {
+  const tbody    = document.getElementById('hmTableBody');
+  const filtered = hmCurrentFilter === 'all'
+    ? hmAllHolidays
+    : hmAllHolidays.filter(h => h.holiday_type === hmCurrentFilter);
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted);">
+          No holidays found for this filter.
+        </td>
+      </tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(h => {
+    const dateLabel = h.is_recurring
+      ? `Every ${hmMonthName(h.month)} ${h.day}`
+      : (h.holiday_date
+          ? new Date(h.holiday_date + 'T00:00:00').toLocaleDateString('en-PH',
+              { year:'numeric', month:'short', day:'numeric' })
+          : '<span style="color:var(--warning);font-size:0.75rem;">⚠ Date not set</span>');
+
+    const typeBadge = `<span class="hm-badge hm-badge-${h.holiday_type}">${h.holiday_type}</span>`;
+    const recurBadge = h.is_recurring
+      ? `<span style="font-size:0.72rem;color:var(--primary);font-weight:600;">✓ Yes</span>`
+      : `<span style="font-size:0.72rem;color:var(--text-muted);">No</span>`;
+
+    const canDelete = h.holiday_type === 'custom';
+
+    return `
+      <tr class="${h.is_active ? '' : 'hm-row--inactive'}" data-id="${h.holiday_id}">
+        <td>
+          <div style="font-weight:600;color:var(--text-primary);">${hmEscape(h.holiday_name)}</div>
+          ${h.description ? `<div style="font-size:0.72rem;color:var(--text-muted);">${hmEscape(h.description)}</div>` : ''}
+        </td>
+        <td style="font-size:0.8rem;">${dateLabel}</td>
+        <td>${typeBadge}</td>
+        <td>${recurBadge}</td>
+        <td>
+          <label class="hm-status-toggle" title="${h.is_active ? 'Disable' : 'Enable'}">
+            <input type="checkbox" ${h.is_active ? 'checked' : ''}
+                   onchange="hmToggle(${h.holiday_id}, this.checked)" />
+            <span class="hm-toggle-slider"></span>
+          </label>
+        </td>
+        <td style="text-align:right;">
+          <button class="hm-action-btn" onclick="hmOpenFormEdit(${h.holiday_id})" title="Edit">
+            <i class="bi bi-pencil"></i>
+          </button>
+          ${canDelete ? `
+            <button class="hm-action-btn hm-delete-btn" onclick="hmDeleteHoliday(${h.holiday_id})"
+                    style="margin-left:0.3rem;" title="Delete">
+              <i class="bi bi-trash3"></i>
+            </button>` : ''}
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function hmFilter(btn, type) {
+  hmCloseForm()
+  document.querySelectorAll('.hm-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  hmCurrentFilter = type;
+  hmRenderTable();
+}
+
+function hmTypeChanged() {
+  // auto-set recurring for 'regular' type
+  const type = document.getElementById('hmType').value;
+  if (type === 'regular') {
+    document.getElementById('hmRecurring').value = '1';
+    hmRecurringChanged();
+  }
+}
+
+function hmRecurringChanged() {
+  const isRecurring = document.getElementById('hmRecurring').value === '1';
+  document.getElementById('hmDateField').style.display     = isRecurring ? 'none' : '';
+  document.getElementById('hmMonthDayField').style.display = isRecurring ? ''     : 'none';
+}
+
+function hmOpenForm() {
+  document.getElementById('hmHolidayId').value = '';
+  document.getElementById('hmFormTitle').textContent = 'Add Holiday';
+  document.getElementById('hmSaveBtn').innerHTML = '<i class="bi bi-plus-lg"></i> Add Holiday';
+  document.getElementById('hmName').value    = '';
+  document.getElementById('hmDesc').value    = '';
+  document.getElementById('hmDate').value    = '';
+  document.getElementById('hmMonth').value   = '';
+  document.getElementById('hmDay').value     = '';
+  document.getElementById('hmType').value      = 'custom';
+  document.getElementById('hmRecurring').value = '0';
+  hmRecurringChanged();
+  document.getElementById('hmFormSection').style.display = 'block';
+  document.getElementById('hmName').focus();
+}
+
+async function hmOpenFormEdit(id) {
+  const h = hmAllHolidays.find(x => x.holiday_id === id);
+  if (!h) return;
+
+  document.getElementById('hmHolidayId').value  = h.holiday_id;
+  document.getElementById('hmFormTitle').textContent = 'Edit Holiday';
+  document.getElementById('hmSaveBtn').innerHTML  = '<i class="bi bi-check-lg"></i> Save Changes';
+  document.getElementById('hmName').value    = h.holiday_name;
+  document.getElementById('hmDesc').value    = h.description || '';
+  document.getElementById('hmType').value      = h.holiday_type;
+  document.getElementById('hmRecurring').value = h.is_recurring ? '1' : '0';
+  document.getElementById('hmDate').value    = h.holiday_date
+    ? h.holiday_date.split('T')[0] : '';
+  document.getElementById('hmMonth').value   = h.month  || '';
+  document.getElementById('hmDay').value     = h.day    || '';
+  hmRecurringChanged();
+  document.getElementById('hmFormSection').style.display = 'block';
+  document.getElementById('hmName').focus();
+}
+
+function hmCloseForm() {
+  document.getElementById('hmFormSection').style.display = 'none';
+}
+
+async function hmSaveHoliday() {
+  const holidayId  = document.getElementById('hmHolidayId').value;
+  const isEdit     = Boolean(holidayId);
+  const isRecurring = document.getElementById('hmRecurring').value === '1';
+
+  const payload = {
+    holidayName:  document.getElementById('hmName').value.trim(),
+    holidayDate:  isRecurring ? null : (document.getElementById('hmDate').value || null),
+    month:        isRecurring ? parseInt(document.getElementById('hmMonth').value) : null,
+    day:          isRecurring ? parseInt(document.getElementById('hmDay').value)   : null,
+    isRecurring,
+    holidayType:  document.getElementById('hmType').value,
+    description:  document.getElementById('hmDesc').value.trim() || null,
+  };
+
+  if (!payload.holidayName) {
+    return showToast('Holiday name is required.', 'error');
+  }
+  if (isRecurring && (!payload.month || !payload.day)) {
+    return showToast('Month and day are required for recurring holidays.', 'error');
+  }
+  if (!isRecurring && !payload.holidayDate) {
+    return showToast('A specific date is required for non-recurring holidays.', 'error');
+  }
+
+  const btn  = document.getElementById('hmSaveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-arrow-repeat hm-spin"></i> Saving…';
+
+  try {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const url    = isEdit ? `/api/admin/holidays/${holidayId}` : '/api/admin/holidays';
+    const method = isEdit ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body:    JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Save failed');
+
+    showToast(isEdit ? 'Holiday updated.' : 'Holiday added.', 'success');
+    hmCloseForm();
+    await hmLoadHolidays();
+
+    // Refresh Schedule Forecast if visible
+    if (typeof loadScheduleForecast === 'function') loadScheduleForecast();
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check-lg"></i> ' + (isEdit ? 'Save Changes' : 'Add Holiday');
+  }
+}
+
+async function hmToggle(id, isActive) {
+  try {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const res   = await fetch(`/api/admin/holidays/${id}/toggle`, {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body:    JSON.stringify({ isActive }),
+    });
+    if (!res.ok) throw new Error('Toggle failed');
+
+    // Update local cache
+    const h = hmAllHolidays.find(x => x.holiday_id === id);
+    if (h) h.is_active = isActive ? 1 : 0;
+    hmRenderTable();
+    showToast(`Holiday ${isActive ? 'enabled' : 'disabled'}.`, 'success');
+
+    if (typeof loadScheduleForecast === 'function') loadScheduleForecast();
+  } catch (err) {
+    showToast('Failed to toggle holiday.', 'error');
+    await hmLoadHolidays(); // re-sync on error
+  }
+}
+
+async function hmDeleteHoliday(id) {
+  const h = hmAllHolidays.find(x => x.holiday_id === id);
+  if (!h) return;
+
+  if (!confirm(`Delete "${h.holiday_name}"? This cannot be undone.`)) return;
+
+  try {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const res   = await fetch(`/api/admin/holidays/${id}`, {
+      method:  'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data  = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Delete failed');
+
+    showToast('Holiday deleted.', 'success');
+    await hmLoadHolidays();
+    if (typeof loadScheduleForecast === 'function') loadScheduleForecast();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function sfOverlayHolidays(startDate, endDate) {
+  try {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const res   = await fetch(`/api/admin/holidays/range/${startDate}/${endDate}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) return;
+
+    const { holidays } = await res.json();
+    if (!holidays || holidays.length === 0) return;
+
+    holidays.forEach(h => {
+      // Find all cells whose data-date matches the resolved_date
+      const cells = document.querySelectorAll(
+        `[data-sf-date="${h.resolved_date}"]`
+      );
+      cells.forEach(cell => {
+        // Avoid duplicate badges
+        if (cell.querySelector('.sf-holiday-overlay')) return;
+
+        const badge = document.createElement('div');
+        badge.className = `sf-holiday-overlay sf-holiday-${h.holiday_type}`;
+        badge.innerHTML = `<i class="bi bi-calendar-x"></i> ${hmEscape(h.holiday_name)}`;
+        badge.title     = h.description || h.holiday_name;
+        cell.prepend(badge);
+        cell.closest('.sf-col, .sf-day-col, [role="gridcell"]')?.classList.add('sf-col--holiday');
+      });
+    });
+  } catch { /* silent — overlay is cosmetic */ }
+}
+
+function hmMonthName(n) {
+  const names = ['','January','February','March','April','May','June',
+                 'July','August','September','October','November','December'];
+  return names[n] || '—';
+}
+
+function hmEscape(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+if (typeof showToast === 'undefined') {
+  window.showToast = function(msg, type = 'info') {
+    console.log(`[${type.toUpperCase()}] ${msg}`);
+  };
+}
       /* ═══════════════════════════════════════════════════════════════
          WALK-IN MODAL
       ═══════════════════════════════════════════════════════════════ */
@@ -1564,7 +2189,6 @@
         }).join("");
       }
 
-
       /* ═══════════════════════════════════════════════════════════════
          CLIENT HISTORY MODAL
       ═══════════════════════════════════════════════════════════════ */
@@ -1663,12 +2287,7 @@
         _histClientName   = "";
       }
 
-      function openBanFromHistory() {
-        if (!_histClientId) return;
-        closeClientHistory();
-        openBanModal(_histClientId, _histClientName);
-      }
-
+     
       function switchHistTab(tab, btn) {
         document.querySelectorAll(".wi-tab").forEach((t) => t.classList.remove("active"));
         if (btn) btn.classList.add("active");
@@ -1689,9 +2308,7 @@
       }
 
 
-      /* ═══════════════════════════════════════════════════════════════
-         SCHEDULE FORECAST — sfOpenDrawer
-      ═══════════════════════════════════════════════════════════════ */
+        //  SCHEDULE FORECAST — sfOpenDrawer
 
       function sfOpenDrawer(key, dateStr, time, slot, clients) {
         _sfDrawerSlot = key;
@@ -1773,9 +2390,6 @@
         document.getElementById("sfDrawer").focus();
       }
 
-
-      /* ── Safe Date Helpers ─────────────────────────────────────── */
-
       function sfSafeDate(val) {
         if (!val) return null;
         let d;
@@ -1808,7 +2422,7 @@
       }
 
 
-      /* ── Unread Messages Badge ─────────────────────────────────── */
+      /*  Unread Messages Badge  */
 
       async function fetchAdminUnreadCount() {
         try {
@@ -2040,41 +2654,225 @@
 
       /* ── Section Navigation ────────────────────────────────────── */
 
+      // ── TITLE MAP ─────────────────────────────────────────────────────────────────
       const _titleMap = {
         dashboard:    "Dashboard",
         appointments: "Appointments",
         transactions: "Transactions",
         services:     "Services",
-        users:        "Clients",
+        users:        "Client Accounts",
         chats:        "Messages",
-        walkin:        "Walkin",
         schedule:     "Schedule Forecast",
       };
 
+
+      function switchPanel(panelId) {
+        const name = panelId.replace(/^panel-/, "");
+        showAdminSection(name);
+      }
+
+      // ── SHOW ADMIN SECTION ────────────────────────────────────────────────────────
       async function showAdminSection(name) {
         document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
         document.querySelectorAll(".sidebar-nav-item").forEach((i) => i.classList.remove("active"));
 
-        const panel   = document.getElementById("panel-" + name);
-        if (panel) panel.classList.add("active");
+        const panel = document.getElementById("panel-" + name);
+        if (panel) {
+          panel.classList.add("active");
+          panel.scrollTop = 0;
+        }
 
         const navItem = document.querySelector(`.sidebar-nav-item[data-section="${name}"]`);
         if (navItem) navItem.classList.add("active");
 
         document.getElementById("topbarTitle").textContent = _titleMap[name] || "";
-        document.getElementById("sidebar").classList.remove("sidebar-open");
 
-        if (name === "dashboard")    await initDashboardCharts();
-        if (name === "appointments") await fetchClientAppointments(document.getElementById("active-filter-appointment-button").value);
-        if (name === "transactions") await fetchDocumentTransaction(document.getElementById("active-filter-transaction-button").value);
-        if (name === "services")     await fetchServices();
-        if (name === "users")        await fetchUsers();
-        if (name === "walkin")       await loadWalkInTransactions();
-        if (name === "schedule")     await fetchScheduleForecast();
+        const sidebar = document.getElementById("sidebar");
+        if (sidebar) sidebar.classList.remove("sidebar-open");
+
+        if (name === "dashboard") {
+          await loadDashboard();
+        }
+
+        if (name === "appointments") {
+          const filterVal = document.getElementById("active-filter-appointment-button")?.value || "today";
+          await fetchClientAppointments(filterVal);
+        }
+
+        if (name === "transactions") {
+          const filterVal = document.getElementById("active-filter-transaction-button")?.value || "pending";
+          await fetchDocumentTransaction(filterVal);
+        }
+
+        if (name === "services") {
+          await fetchServices();
+        }
+
+        if (name === "tickets") {
+          ptSwitchTab('appointments');
+        }
+
+        if (name === "users") {
+          await fetchUsers();
+          toggleChatPanel()
+        }
+
+        if (name === "walkin") {
+          await loadWalkInTransactions();
+        }
+
+        if (name === "schedule") {
+          await fetchScheduleForecast();
+        }
+
+        if (name === "chats") {
+          if (typeof initializeMessages === "function") {
+            if (!socket || !socket.connected) {
+              await initializeMessages();
+            } else {
+              if (typeof loadActiveConversations === "function") {
+                await loadActiveConversations();
+              }
+            }
+          }
+          _updateAdminMsgBadge(0);
+        }
       }
 
+      function showDashboardSection(area) {
+        switch (area) {
 
-      /* ── Appointments ──────────────────────────────────────────── */
+          // ── Appointments ──────────────────────────────────────────────────────────
+          case "appointments":
+          case "appointments-today":
+            // Reset filter to today, then navigate
+            if (document.getElementById("active-filter-appointment-button")) {
+              document.getElementById("active-filter-appointment-button").value = "today";
+            }
+            showAdminSection("appointments");
+            break;
+
+          case "pendingAppointment":
+          case "appointments-pending":
+            if (document.getElementById("active-filter-appointment-button")) {
+              document.getElementById("active-filter-appointment-button").value = "pending";
+            }
+            showAdminSection("appointments");
+            setTimeout(() => {
+              const chip = document.querySelector(
+                '#panel-appointments .filter-chip[onclick*="pending"], #panel-appointments .filter-chip[data-filter="pending"]'
+              );
+              if (chip) {
+                document.querySelectorAll("#panel-appointments .filter-chip").forEach(b => b.classList.remove("active"));
+                chip.classList.add("active");
+              }
+            }, 120);
+            break;
+
+          // ── Transactions ──────────────────────────────────────────────────────────
+          case "transactions":
+            showAdminSection("transactions");
+            break;
+
+          case "readyClaim":
+          case "transactions-claim":
+            if (document.getElementById("active-filter-transaction-button")) {
+              document.getElementById("active-filter-transaction-button").value = "to_claim";
+            }
+            showAdminSection("transactions");
+            setTimeout(() => {
+              const chip = document.querySelector(
+                '#panel-transactions .filter-chip[onclick*="to_claim"], #panel-transactions .filter-chip[data-filter="to_claim"]'
+              );
+              if (chip) {
+                document.querySelectorAll("#panel-transactions .filter-chip").forEach(b => b.classList.remove("active"));
+                chip.classList.add("active");
+              }
+            }, 120);
+            break;
+
+          case "transactions-penalty":
+            if (document.getElementById("active-filter-transaction-button")) {
+              document.getElementById("active-filter-transaction-button").value = "penalty";
+            }
+            showAdminSection("transactions");
+            setTimeout(() => {
+              const chip = document.querySelector(
+                '#panel-transactions .filter-chip[onclick*="penalty"], #panel-transactions .filter-chip[data-filter="penalty"]'
+              );
+              if (chip) {
+                document.querySelectorAll("#panel-transactions .filter-chip").forEach(b => b.classList.remove("active"));
+                chip.classList.add("active");
+              }
+            }, 120);
+            break;
+
+          // ── Pipeline stage deep-links ─────────────────────────────────────────────
+          case "pipeline-pending":
+            if (document.getElementById("active-filter-transaction-button")) {
+              document.getElementById("active-filter-transaction-button").value = "pending";
+            }
+            showAdminSection("transactions");
+            break;
+
+          case "pipeline-ongoing":
+            if (document.getElementById("active-filter-transaction-button")) {
+              document.getElementById("active-filter-transaction-button").value = "ongoing";
+            }
+            showAdminSection("transactions");
+            break;
+
+          case "pipeline-claim":
+            if (document.getElementById("active-filter-transaction-button")) {
+              document.getElementById("active-filter-transaction-button").value = "to_claim";
+            }
+            showAdminSection("transactions");
+            break;
+
+          case "pipeline-done":
+            if (document.getElementById("active-filter-transaction-button")) {
+              document.getElementById("active-filter-transaction-button").value = "claimed";
+            }
+            showAdminSection("transactions");
+            break;
+
+          case "pipeline-cancel":
+            if (document.getElementById("active-filter-transaction-button")) {
+              document.getElementById("active-filter-transaction-button").value = "cancelled";
+            }
+            showAdminSection("transactions");
+            break;
+
+          case "clients":
+          case "users":
+            showAdminSection("users");
+            break;
+
+          case "slots":
+          case "schedule":
+            showAdminSection("schedule");
+            break;
+
+          case "services":
+            showAdminSection("services");
+            break;
+
+          case "chats":
+          case "chat":
+            showAdminSection("chats");
+            break;
+
+          case "walkin":
+            showAdminSection("walkin");
+            break;
+
+          default:
+            console.warn(`[showDashboardSection] Unknown area: "${area}"`);
+            break;
+        }
+      }
+      
+      /* Appointments */
 
       async function filterAppointments(status) {
         document.getElementById("active-filter-appointment-button").value = status;
@@ -2507,7 +3305,6 @@
       function removeImagePreview(index) {
         _validatedImageFiles.splice(index, 1);
 
-        // Re-render all remaining previews so indices stay consistent
         const c = document.getElementById('imagePreviewContainer');
         c.innerHTML = '';
 
@@ -2537,10 +3334,8 @@
           return;
         }
 
-        // Use the pre-validated in-memory list instead of reading the (now-reset) input
         const images = _validatedImageFiles;
 
-        // Guard: re-check count just in case (defensive)
         if (images.length > MAX_IMAGE_COUNT) {
           showStatusMessage(`Maximum ${MAX_IMAGE_COUNT} images allowed.`, 'error');
           return;
@@ -2571,9 +3366,9 @@
             _validatedImageFiles = [];
             document.getElementById('imagePreviewContainer').innerHTML = '';
             updateStatusModal.hide();
-            await fetchDocumentTransaction();
+            await fetchDocumentTransaction(document.getElementById("active-filter-transaction-button").value)
           } else {
-            // Surface the server's specific error (size, type, count, etc.)
+
             showStatusMessage(data.message || 'Failed to update. Try again.', 'error');
           }
         } catch {
@@ -2727,19 +3522,31 @@
       }
 
 
-      /* ── Users / Clients ───────────────────────────────────────── */
+      /* ──  Clients ───────────────────────────────────────── */
 
-      function filterUsers(role) {
+      async function filterUsers(role) {
         document.querySelectorAll("#panel-users .filter-chip").forEach((b) => b.classList.remove("active"));
         event.target.classList.add("active");
-        fetchUsers(role);
+        await fetchUsers(role);
       }
 
       async function fetchUsers(role = "all") {
-        const res   = await fetch(`${BASE_URL}/api/admin/getAllUsers/${role}`, {
+        try {
+          const res   = await fetch(`${BASE_URL}/api/admin/getAllUsers/${role}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        const users = await res.json();
+          });
+          const users = await res.json();
+          await renderUsers(users)
+          
+          
+        } catch (error) {
+          console.error(error)
+        }
+        
+      }
+
+      async function renderUsers(users){
+
         const tbody = document.getElementById("usersTableBody");
 
         if (!users || !users.length) {
@@ -2747,22 +3554,15 @@
           return;
         }
 
+
         tbody.innerHTML = users.map((u) => {
-          const isBanned = u.is_banned;
-          const banLabel = isBanned
-            ? (u.ban_type === "permanent"
-                ? "Permanently Banned"
-                : `Banned until ${sfFormatDate(u.ban_until, { month: "short", day: "numeric", year: "numeric" })}`)
-            : "";
           return `
             <tr>
               <td class="td-name">${u.full_name || "null"}</td>
               <td class="td-email">${u.email}</td>
               <td><span class="status-chip role-${u.role}">${u.role}</span></td>
               <td>
-                ${isBanned
-                  ? `<span class="status-chip status-cancelled" title="${banLabel}"><i class="bi bi-slash-circle"></i> Banned</span>`
-                  : `<span class="status-chip ${u.is_active ? "status-completed" : "status-cancelled"}">${u.is_active ? "Active" : "Inactive"}</span>`}
+                   <span class="status-chip ${u.is_active ? "status-completed" : "status-cancelled"}">${u.is_active ? "Active" : "Inactive"}</span>
               </td>
               <td>
                 <span class="status-chip ${u.is_verified ? "status-completed" : "status-submitted"}">
@@ -2776,14 +3576,93 @@
                 <button class="btn-outline-sm btn-teal"
                   onclick="goToClientChat(${u.id}, '${(u.full_name || "").replace(/'/g, "\\'")}', '${u.email}')"
                   title="Open Chat"><i class="bi bi-chat-dots"></i></button>
-                ${u.role === "client"
-                  ? isBanned
-                    ? `<button class="btn-outline-sm btn-teal" onclick="confirmUnbanUser(${u.id}, '${(u.full_name || "").replace(/'/g, "\\'")}')"><i class="bi bi-check-circle"></i> Unban</button>`
-                    : `<button class="btn-outline-sm" style="color: var(--danger); border-color: rgba(244,63,94,.4);" onclick="openBanModal(${u.id}, '${(u.full_name || "").replace(/'/g, "\\'")}')"><i class="bi bi-slash-circle"></i> Ban</button>`
-                  : ""}
+                
               </td>
             </tr>`;
         }).join("");
+      }
+    
+      async function openClientHistory(userId, clientName, clientEmail) {
+        _histClientId   = userId;
+        _histClientName = clientName;
+
+        document.getElementById("histModalClientName").textContent  = clientName;
+        document.getElementById("histModalClientEmail").textContent = clientEmail;
+        document.getElementById("histApptList").innerHTML =
+          `<div class="hist-empty"><i class="bi bi-hourglass-split"></i>Loading…</div>`;
+        document.getElementById("histTxList").innerHTML =
+          `<div class="hist-empty"><i class="bi bi-hourglass-split"></i>Loading…</div>`;
+        document.getElementById("clientHistoryOverlay").style.display = "flex";
+        switchHistTab("appointments", document.querySelector(".wi-tab"));
+
+        try {
+          const res  = await fetch(`${BASE_URL}/api/admin/clients/${userId}/history`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          const data = await res.json();
+          _histClientConvId = data.conversationId;
+
+          const histChatBtn = document.getElementById("histChatBtn");
+          if (histChatBtn) histChatBtn.style.display = data.conversationId ? "" : "none";
+
+          /* Appointments */
+          const appts = data.appointments || [];
+          document.getElementById("histApptList").innerHTML = appts.length
+            ? appts.map((a) => {
+                const svcLine = a.services
+                  ? `<div class="hist-card-meta"><i class="bi bi-briefcase"></i> ${a.services}</div>`
+                  : "";
+                const notes = a.notes
+                  ? `<div class="sf-notes-row"><i class="bi bi-chat-left-text"></i>${a.notes}</div>`
+                  : "";
+                return `
+                  <div class="hist-card">
+                    <div class="hist-card-head">
+                      <div>
+                        <div class="hist-card-title">
+                          ${sfFormatDate(a.appointment_date, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                          — ${formatTime12h(a.appointment_time)}
+                        </div>
+                        ${svcLine}
+                        ${notes}
+                      </div>
+                      <span class="status-chip s-${a.status}" style="font-size: 0.68rem;">${a.status}</span>
+                    </div>
+                    ${a.remarks ? `<div class="hist-card-meta" style="color: var(--text-muted); font-style: italic;">"${a.remarks}"</div>` : ""}
+                  </div>`;
+              }).join("")
+            : `<div class="hist-empty"><i class="bi bi-calendar-x"></i>No appointments found.</div>`;
+
+          /* Transactions */
+          const txs = data.transactions || [];
+          document.getElementById("histTxList").innerHTML = txs.length
+            ? txs.map((t) => {
+                const penalty   = t.has_penalty ? `<span class="wi-penalty-badge" style="margin-left: 0.4rem;">₱${t.penalty_amount} penalty</span>` : "";
+                const typeBadge = t.transaction_type === "walk_in" ? `<span class="wi-type-badge" style="margin-left: 0.4rem;">Walk-In</span>` : "";
+                return `
+                  <div class="hist-card">
+                    <div class="hist-card-head">
+                      <div>
+                        <div class="hist-card-title">${t.service_name} ${typeBadge} ${penalty}</div>
+                        <div class="hist-card-meta">
+                          Tx #${t.transaction_id} · ${sfFormatDate(t.created_at, { month: "short", day: "numeric", year: "numeric" })}
+                        </div>
+                        ${t.claim_deadline
+                          ? `<div class="hist-card-meta" style="color: var(--warning);">
+                               <i class="bi bi-clock-history"></i>
+                               Claim by ${sfFormatDate(t.claim_deadline, { month: "short", day: "numeric", year: "numeric" })}
+                             </div>`
+                          : ""}
+                      </div>
+                      <span class="status-chip s-${t.status_name}" style="font-size: 0.68rem;">${t.status_name}</span>
+                    </div>
+                  </div>`;
+              }).join("")
+            : `<div class="hist-empty"><i class="bi bi-file-x"></i>No transactions found.</div>`;
+
+        } catch (e) {
+          console.error("History load error:", e);
+        }
       }
 
       function searchUsers() {
@@ -2858,81 +3737,6 @@
         }
       }
 
-      let _banTargetId   = null;
-      let _banTargetName = "";
-
-      function openBanModal(userId, userName) {
-        _banTargetId   = userId;
-        _banTargetName = userName;
-        document.getElementById("banModalClientName").textContent = userName;
-        document.getElementById("banType").value                  = "3_days";
-        document.getElementById("banReason").value                = "";
-        document.getElementById("banModalErr").style.display      = "none";
-        bootstrap.Modal.getOrCreateInstance(document.getElementById("banModal")).show();
-      }
-
-      async function submitBanUser() {
-        const banType   = document.getElementById("banType").value;
-        const banReason = document.getElementById("banReason").value.trim();
-        const errEl     = document.getElementById("banModalErr");
-        const btn       = document.getElementById("banSubmitBtn");
-
-        errEl.style.display = "none";
-        btn.disabled        = true;
-        btn.innerHTML       = '<span class="spinner-border spinner-border-sm me-1"></span>Banning…';
-
-        try {
-          const res  = await fetch(`${BASE_URL}/api/admin/clients/${_banTargetId}/ban`, {
-            method:  "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-            body: JSON.stringify({ banType, banReason }),
-          });
-          const data = await res.json();
-
-          if (!res.ok) {
-            errEl.textContent   = data.message || "Failed to ban user.";
-            errEl.style.display = "block";
-            return;
-          }
-
-          bootstrap.Modal.getInstance(document.getElementById("banModal")).hide();
-          showNotificationMessage(`${_banTargetName} has been banned.`, "warning");
-
-          await fetchUsers("all");
-          document.querySelectorAll("#panel-users .filter-chip").forEach((b) => b.classList.remove("active"));
-          document.querySelector("#panel-users .filter-chip").classList.add("active");
-          goToClientChat(_banTargetId, _banTargetName, "");
-
-        } catch {
-          errEl.textContent   = "Network error. Please try again.";
-          errEl.style.display = "block";
-        } finally {
-          btn.disabled  = false;
-          btn.innerHTML = '<i class="bi bi-slash-circle"></i> Ban Account';
-        }
-      }
-
-      async function confirmUnbanUser(userId, userName) {
-        if (!confirm(`Lift the ban on ${userName}?`)) return;
-        try {
-          const res = await fetch(`${BASE_URL}/api/admin/clients/${userId}/unban`, {
-            method:  "POST",
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          });
-          if (res.ok) {
-            showNotificationMessage(`${userName}'s ban has been lifted.`, "success");
-            fetchUsers("all");
-          } else {
-            showNotificationMessage("Failed to unban user.", "error");
-          }
-        } catch {
-          showNotificationMessage("Network error.", "error");
-        }
-      }
-
       async function changePassword() {
         const cp = document.getElementById("currentPassword").value;
         const nw = document.getElementById("newPassword").value;
@@ -2968,7 +3772,266 @@
         }
       }
 
+      /* ──  Clients ───────────────────────────────────────── */
+      let _auditSearchTimer = null;
+let _auditAllLogs     = [];          // cache for client-side search
 
+// ── SWITCH TABS (Clients ↔ Audit Log) ─────────────────────────────────────────
+function switchUsersTab(tab, btn) {
+  // Update tab button styles
+  document.querySelectorAll('#usersPanelTabs .wi-tab')
+    .forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  // Show / hide sub-panels
+  document.getElementById('usersSubPanel-clients').style.display =
+    tab === 'clients' ? '' : 'none';
+  document.getElementById('usersSubPanel-audit').style.display =
+    tab === 'audit' ? '' : 'none';
+
+  // Update panel heading
+  const heading = document.querySelector('#panel-users .panel-heading');
+  if (heading) {
+    heading.innerHTML = tab === 'clients'
+      ? '<i class="bi bi-people" aria-hidden="true"></i> Client Accounts'
+      : '<i class="bi bi-shield-lock-fill" aria-hidden="true"></i> Audit Log';
+  }
+
+  // Auto-load audit log on first open
+  if (tab === 'audit' && _auditAllLogs.length === 0) {
+    fetchAuditLogs();
+  }
+}
+
+// ── FIX: filterUsers now accepts an explicit event param so it works when
+//    called from onclick="filterUsers('client', event)" AND from code.
+async function filterUsers(role = 'all', evt) {
+  const e = evt || (typeof event !== 'undefined' ? event : null);
+  document.querySelectorAll('#panel-users .filter-chip')
+    .forEach(b => b.classList.remove('active'));
+  if (e && e.target) e.target.classList.add('active');
+  await fetchUsers(role);
+}
+
+// ── FETCH ALL AUDIT LOGS ──────────────────────────────────────────────────────
+async function fetchAuditLogs() {
+  const tbody = document.getElementById('auditTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="8" class="table-empty">
+        <i class="bi bi-arrow-repeat db-spin" style="font-size:1.4rem;display:block;margin-bottom:.4rem;"></i>
+        Loading audit logs…
+      </td>
+    </tr>`;
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/admin/audit-logs`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    if (!res.ok) throw new Error(`${res.status}`);
+
+    const logs   = await res.json();
+    _auditAllLogs = logs;
+
+    renderAuditLogs(logs);
+    renderAuditSummary(logs);
+
+  } catch (err) {
+    console.error('[AuditLog] fetchAuditLogs error:', err);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="table-empty" style="color:var(--danger);">
+          <i class="bi bi-exclamation-triangle" style="font-size:1.4rem;display:block;margin-bottom:.4rem;"></i>
+          Failed to load audit logs. Check your connection.
+        </td>
+      </tr>`;
+  }
+}
+
+// ── APPLY ACTIVE FILTER STATE → call backend ─────────────────────────────────
+async function applyAuditFilters() {
+  const category   = document.getElementById('auditFilterCategory')?.value || '';
+  const actor_role = document.getElementById('auditFilterRole')?.value     || '';
+  const start_date = document.getElementById('auditDateFrom')?.value       || '';
+  const end_date   = document.getElementById('auditDateTo')?.value         || '';
+  const search     = document.getElementById('auditSearch')?.value.trim()  || '';
+
+  // Build query string — only include non-empty params
+  const params = new URLSearchParams();
+  if (category)   params.set('category',   category);
+  if (actor_role) params.set('actor_role', actor_role);
+  if (start_date) params.set('start_date', start_date);
+  if (end_date)   params.set('end_date',   end_date);
+  if (search)     params.set('search',     search);
+
+  const hasFilters = [...params.keys()].length > 0;
+
+  // If no filters at all, just re-use cached full list (saves a round trip)
+  if (!hasFilters && _auditAllLogs.length > 0) {
+    renderAuditLogs(_auditAllLogs);
+    renderAuditSummary(_auditAllLogs);
+    updateAuditFilterLabel('');
+    return;
+  }
+
+  const tbody = document.getElementById('auditTableBody');
+  if (tbody) tbody.innerHTML = `
+    <tr>
+      <td colspan="8" class="table-empty">
+        <i class="bi bi-arrow-repeat db-spin" style="font-size:1.4rem;display:block;margin-bottom:.4rem;"></i>
+        Filtering…
+      </td>
+    </tr>`;
+
+  try {
+    const res = await fetch(
+      `${BASE_URL}/api/admin/audit-logs/filter?${params.toString()}`,
+      { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+    );
+    if (!res.ok) throw new Error(`${res.status}`);
+
+    const logs = await res.json();
+    renderAuditLogs(logs);
+    renderAuditSummary(logs);
+
+    // Build readable label for footer
+    const parts = [];
+    if (category)   parts.push(`Category: ${category}`);
+    if (actor_role) parts.push(`Role: ${actor_role}`);
+    if (start_date) parts.push(`From: ${start_date}`);
+    if (end_date)   parts.push(`To: ${end_date}`);
+    if (search)     parts.push(`Search: "${search}"`);
+    updateAuditFilterLabel(parts.length ? `— filtered by ${parts.join(', ')}` : '');
+
+  } catch (err) {
+    console.error('[AuditLog] applyAuditFilters error:', err);
+  }
+}
+
+// ── DEBOUNCE SEARCH INPUT ─────────────────────────────────────────────────────
+function debounceAuditSearch() {
+  clearTimeout(_auditSearchTimer);
+  _auditSearchTimer = setTimeout(applyAuditFilters, 350);
+}
+
+// ── CLEAR ALL FILTERS ─────────────────────────────────────────────────────────
+function clearAuditFilters() {
+  const ids = ['auditFilterCategory', 'auditFilterRole', 'auditDateFrom', 'auditDateTo', 'auditSearch'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  if (_auditAllLogs.length > 0) {
+    renderAuditLogs(_auditAllLogs);
+    renderAuditSummary(_auditAllLogs);
+    updateAuditFilterLabel('');
+  } else {
+    fetchAuditLogs();
+  }
+}
+
+// ── RENDER ROWS ───────────────────────────────────────────────────────────────
+function renderAuditLogs(logs) {
+  const tbody = document.getElementById('auditTableBody');
+  if (!tbody) return;
+
+  const footer = document.getElementById('auditFooter');
+  const count  = document.getElementById('auditRowCount');
+
+  if (!logs || !logs.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="table-empty">
+          <i class="bi bi-shield-x" style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4;"></i>
+          No audit log entries match the current filters.
+        </td>
+      </tr>`;
+    if (footer) footer.style.display = 'none';
+    return;
+  }
+
+  tbody.innerHTML = logs.map(log => {
+    const ts        = log.created_at
+      ? new Date(log.created_at).toLocaleString('en-PH', {
+          month: 'short', day: 'numeric', year: 'numeric',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+        })
+      : '—';
+
+    const catClass  = `audit-cat-chip audit-cat--${log.category || ''}`;
+    const roleClass = `audit-role-chip audit-role--${log.actor_role || ''}`;
+
+    const actorName  = log.actor_name?.trim()  || `ID #${log.actor_id  ?? '—'}`;
+    const targetName = log.target_name?.trim() || (log.target_id ? `ID #${log.target_id}` : '—');
+    const actorEmail  = log.actor_email  ? `<br><span style="font-size:.68rem;color:var(--text-muted);">${_esc(log.actor_email)}</span>` : '';
+    const targetEmail = log.target_email ? `<br><span style="font-size:.68rem;color:var(--text-muted);">${_esc(log.target_email)}</span>` : '';
+
+    const details = log.details
+      ? `<td class="audit-details-cell" title="${_esc(log.details)}">${_esc(log.details)}</td>`
+      : `<td style="color:var(--text-muted);font-size:.73rem;">—</td>`;
+
+    return `
+      <tr>
+        <td style="font-size:.72rem;white-space:nowrap;color:var(--text-muted);">${ts}</td>
+        <td><span class="${catClass}">${log.category || '—'}</span></td>
+        <td><span class="${roleClass}">${log.actor_role || '—'}</span></td>
+        <td class="td-name" style="font-size:.78rem;">
+          ${_esc(actorName)}${actorEmail}
+        </td>
+        <td style="font-size:.78rem;color:var(--text-secondary);">
+          ${_esc(targetName)}${targetEmail}
+        </td>
+        <td style="font-size:.78rem;font-weight:600;color:var(--text-primary);">
+          ${_esc(log.action || '—')}
+        </td>
+        ${details}
+        <td class="audit-ip">${_esc(log.ip_address || '—')}</td>
+      </tr>`;
+  }).join('');
+
+  if (footer) {
+    footer.style.display = '';
+    if (count) count.textContent = logs.length.toLocaleString();
+  }
+}
+
+// ── SUMMARY CHIPS ABOVE TABLE ─────────────────────────────────────────────────
+function renderAuditSummary(logs) {
+  const strip = document.getElementById('auditSummaryStrip');
+  if (!strip || !logs) return;
+
+  if (!logs.length) { strip.innerHTML = ''; return; }
+
+  // Count by category
+  const catCounts = {};
+  logs.forEach(l => {
+    const c = l.category || 'Unknown';
+    catCounts[c] = (catCounts[c] || 0) + 1;
+  });
+
+  strip.innerHTML = Object.entries(catCounts).map(([cat, n]) =>
+    `<span class="audit-cat-chip audit-cat--${cat}" style="cursor:default;">
+       ${cat} <strong>${n}</strong>
+     </span>`
+  ).join('');
+}
+
+// ── HELPER: update footer filter label ───────────────────────────────────────
+function updateAuditFilterLabel(text) {
+  const el = document.getElementById('auditFilterLabel');
+  if (el) el.textContent = text;
+}
+
+// ── HELPER: HTML escape ───────────────────────────────────────────────────────
+function _esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
       /* ── Report PDF ────────────────────────────────────────────── */
 
       async function generateTransactionReport(transactionId) {
@@ -2983,151 +4046,608 @@
           showServerMessage("Failed to generate report", "error");
         }
       }
-
+            
       function printTransactionReport(data) {
         const { transaction, timeline, appointment } = data;
+
         const iframe = document.createElement("iframe");
-        iframe.style.cssText = "position: absolute; width: 0; height: 0; border: none;";
+        iframe.style.cssText = "position:absolute;width:0;height:0;border:none;";
         document.body.appendChild(iframe);
 
         const doc = iframe.contentWindow.document;
+
+        /* ── helpers ── */
+        const fmtDate = (d) =>
+          new Date(d).toLocaleDateString("en-US", {
+            weekday: "long", year: "numeric", month: "long", day: "numeric",
+          });
+
+        const fmtDateTime = (d) =>
+          new Date(d).toLocaleDateString("en-US", {
+            weekday: "long", year: "numeric", month: "long",
+            day: "numeric", hour: "2-digit", minute: "2-digit",
+          });
+
+        const fmtDateShort = (d) =>
+          new Date(d).toLocaleDateString("en-US", {
+            month: "short", day: "numeric", year: "numeric",
+          });
+
+        const fmtTime = (d) =>
+          new Date(d).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+
+        const fmtNow = () =>
+          new Date().toLocaleDateString("en-US", {
+            year: "numeric", month: "long", day: "numeric",
+            hour: "2-digit", minute: "2-digit",
+          });
+
+        const fmtNowLong = () =>
+          new Date().toLocaleDateString("en-US", {
+            year: "numeric", month: "long", day: "numeric",
+            hour: "2-digit", minute: "2-digit", second: "2-digit",
+          });
+
+        const refCode = `TR-${transaction.transaction_id}-${new Date().getFullYear()}`;
+
+        /* ── info row builder ── */
+        const infoRow = (label, value) => `
+          <tr>
+            <td class="lbl">${label}</td>
+            <td class="val">${value}</td>
+          </tr>`;
+
+        /* ── timeline rows ── */
+        const timelineRows = timeline.map((item, idx) => {
+          const photosHtml =
+            item.photos && item.photos.length
+              ? `<tr>
+                  <td colspan="5" class="attach-cell">
+                    <div class="attach-label">Attachments</div>
+                    <div class="photo-grid">
+                      ${item.photos
+                        .map(
+                          (p) => `
+                        <div class="photo-item">
+                          <img src="/${p.file_path}" alt="${p.file_name}" />
+                          <div class="photo-caption">${p.file_name}</div>
+                        </div>`
+                        )
+                        .join("")}
+                    </div>
+                  </td>
+                </tr>`
+              : "";
+
+          return `
+            <tr class="${idx % 2 === 1 ? "row-alt" : ""}">
+              <td class="col-num">${idx + 1}</td>
+              <td class="col-date">
+                ${fmtDateShort(item.changed_at)}<br />
+                <span class="time">${fmtTime(item.changed_at)}</span>
+              </td>
+              <td class="col-status"><strong>${item.status_name}</strong></td>
+              <td class="col-by">${item.changed_by_first_name} ${item.changed_by_last_name}</td>
+              <td class="col-remarks">${item.remarks || "—"}</td>
+            </tr>
+            ${photosHtml}`;
+        }).join("");
+
+        /* ── appointment section ── */
+        const appointmentSection = appointment
+          ? `<div class="section">
+              <div class="section-title">
+                <span class="section-num">IV</span>
+                Related Appointment
+              </div>
+              <table class="info-table">
+                ${infoRow("Appointment ID", `#${appointment.appointment_id}`)}
+                ${infoRow(
+                  "Date &amp; Time",
+                  `${fmtDate(appointment.appointment_date)} &nbsp;at&nbsp; ${appointment.appointment_time}`
+                )}
+                ${appointment.notes ? infoRow("Notes", appointment.notes) : ""}
+              </table>
+            </div>`
+          : "";
+
+        /* ── full HTML ── */
+        const html = `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Transaction Report #${transaction.transaction_id}</title>
+        <style>
+          /* ── Page setup ── */
+          @page {
+            size: A4;
+            margin: 18mm 14mm 20mm;
+          }
+
+          /* ── Reset ── */
+          *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+          /* ── Base ── */
+          body {
+            font-family: 'Times New Roman', Georgia, serif;
+            font-size: 10.5pt;
+            line-height: 1.55;
+            color: #000000;
+            background: #ffffff;
+          }
+
+          /* ── Watermark ── */
+          .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-42deg);
+            font-size: 78pt;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.04);
+            z-index: -1;
+            letter-spacing: 8px;
+            white-space: nowrap;
+          }
+
+          /* ══════════════════════════════════════
+            HEADER
+          ══════════════════════════════════════ */
+          .report-header {
+            margin-bottom: 28px;
+          }
+
+          /* Top accent bar */
+          .header-bar {
+            background: #22c55e;
+            height: 6px;
+            width: 100%;
+            margin-bottom: 20px;
+          }
+
+          .header-inner {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+          }
+
+          /* Left — branding */
+          .header-brand {}
+          .company-name {
+            font-size: 16pt;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #000000;
+            line-height: 1.2;
+            margin-bottom: 3px;
+          }
+          .company-sub {
+            font-size: 9pt;
+            color: #000000;
+            font-style: italic;
+            margin-bottom: 10px;
+          }
+          .report-title {
+            font-size: 12pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #000000;
+            margin-bottom: 2px;
+          }
+          .report-subtitle {
+            font-size: 10pt;
+            color: #000000;
+          }
+
+          /* Right — meta box */
+          .header-meta {
+            text-align: right;
+            flex-shrink: 0;
+          }
+          .meta-ref {
+            display: inline-block;
+            border: 2px solid #22c55e;
+            padding: 6px 14px;
+            font-size: 9pt;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #000000;
+            margin-bottom: 6px;
+          }
+          .meta-generated {
+            font-size: 8.5pt;
+            color: #000000;
+          }
+          .meta-generated strong { font-weight: bold; }
+
+          /* Bottom separator */
+          .header-divider {
+            margin-top: 16px;
+            border: none;
+            border-top: 2px solid #000000;
+          }
+          .header-accent-line {
+            border: none;
+            border-top: 3px solid #22c55e;
+            margin-top: 3px;
+            width: 60px;
+          }
+
+          /* ══════════════════════════════════════
+            SECTIONS
+          ══════════════════════════════════════ */
+          .section {
+            margin-bottom: 24px;
+            page-break-inside: avoid;
+          }
+          .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 10.5pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #000000;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #000000;
+            margin-bottom: 12px;
+          }
+          .section-num {
+            background: #22c55e;
+            color: #ffffff;
+            font-size: 8pt;
+            font-weight: bold;
+            padding: 2px 7px;
+            letter-spacing: 0.5px;
+          }
+
+          /* ══════════════════════════════════════
+            INFO TABLE
+          ══════════════════════════════════════ */
+          .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+          }
+          .info-table tr { border-bottom: 1px solid #000000; }
+          .info-table tr:last-child { border-bottom: 2px solid #000000; }
+          .info-table td {
+            padding: 6px 10px;
+            vertical-align: top;
+            font-size: 10pt;
+          }
+          .info-table .lbl {
+            width: 32%;
+            font-weight: bold;
+            color: #000000;
+            border-right: 1px solid #000000;
+          }
+          .info-table .val {
+            width: 68%;
+            color: #000000;
+          }
+
+          /* Info table outer border */
+          .info-table-wrap {
+            border: 1px solid #000000;
+            border-bottom: none;
+          }
+
+          /* Status badge */
+          .status-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border: 2px solid #22c55e;
+            font-weight: bold;
+            font-size: 9.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #000000;
+          }
+
+          /* ══════════════════════════════════════
+            TIMELINE TABLE
+          ══════════════════════════════════════ */
+          .timeline-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5pt;
+          }
+          .timeline-table thead tr {
+            background: #000000;
+            color: #ffffff;
+          }
+          .timeline-table th {
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 9pt;
+            border: 1px solid #000000;
+            letter-spacing: 0.4px;
+          }
+          .timeline-table th:first-child { text-align: center; }
+          .timeline-table td {
+            padding: 7px 8px;
+            border: 1px solid #000000;
+            vertical-align: top;
+            color: #000000;
+          }
+          .row-alt { background: #f7f7f7; }
+          .col-num   { text-align: center; font-weight: bold; width: 5%; }
+          .col-date  { width: 14%; white-space: nowrap; }
+          .col-status{ width: 18%; }
+          .col-by    { width: 18%; }
+          .col-remarks { width: 45%; }
+          .time { font-size: 8.5pt; color: #333333; }
+
+          /* Attachments row */
+          .attach-cell {
+            background: #f2f2f2;
+            padding: 10px 12px;
+            border: 1px solid #000000;
+          }
+          .attach-label {
+            font-weight: bold;
+            font-size: 9pt;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+          .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+          }
+          .photo-item {
+            border: 1px solid #000000;
+            padding: 4px;
+            text-align: center;
+          }
+          .photo-item img {
+            max-width: 100%;
+            max-height: 140px;
+            display: block;
+            margin: 0 auto;
+          }
+          .photo-caption {
+            font-size: 7.5pt;
+            margin-top: 4px;
+            word-break: break-all;
+            color: #333333;
+          }
+
+          /* ══════════════════════════════════════
+            CERTIFICATION / SIGNATURES
+          ══════════════════════════════════════ */
+          .cert-text {
+            font-size: 10pt;
+            text-align: justify;
+            margin-bottom: 48px;
+            line-height: 1.65;
+          }
+
+          .signature-row {
+            display: table;
+            width: 100%;
+          }
+          .signature-box {
+            display: table-cell;
+            width: 50%;
+            text-align: center;
+            vertical-align: bottom;
+          }
+          .signature-box:first-child { padding-right: 30px; }
+          .signature-box:last-child  { padding-left:  30px; }
+
+          .signature-line-wrap {
+            margin-top: 52px;
+            border-top: 2px solid #000000;
+            padding-top: 7px;
+          }
+          .signature-name  { font-weight: bold; font-size: 10.5pt; }
+          .signature-label { font-size: 8.5pt; color: #444444; margin-top: 3px; font-style: italic; }
+
+          /* Green accent under the section heading */
+          .signature-accent {
+            width: 40px;
+            border: none;
+            border-top: 3px solid #22c55e;
+            margin: 0 auto 16px;
+          }
+
+          /* ══════════════════════════════════════
+            FOOTER
+          ══════════════════════════════════════ */
+          .report-footer {
+            margin-top: 36px;
+            padding-top: 12px;
+            border-top: 2px solid #000000;
+            text-align: center;
+          }
+          .footer-bar {
+            background: #22c55e;
+            height: 4px;
+            width: 100%;
+            margin-bottom: 12px;
+          }
+          .footer-company  { font-weight: bold; font-size: 10pt; letter-spacing: 0.5px; }
+          .footer-sub      { font-size: 8.5pt; color: #000000; margin-top: 2px; }
+          .footer-ref      { font-size: 8pt; color: #333333; font-style: italic; margin-top: 6px; }
+
+          /* ── Print ── */
+          @media print {
+            body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            .section { page-break-inside: avoid; }
+            .timeline-table { page-break-before: always; }
+          }
+        </style>
+      </head>
+      <body>
+
+        <div class="watermark">OFFICIAL</div>
+
+        <!-- ══════════════════════════════════════
+            HEADER
+        ══════════════════════════════════════ -->
+        <div class="report-header">
+          <div class="header-bar"></div>
+          <div class="header-inner">
+            <div class="header-brand">
+              <div class="company-name">RANDC DOCUMENTATION SERVICES</div>
+              <div class="company-sub">Professional Document Processing Solutions</div>
+              <div class="report-title">Document Processing Transaction Report</div>
+              <div class="report-subtitle">Transaction ID: &nbsp;<strong>#${transaction.transaction_id}</strong></div>
+            </div>
+            <div class="header-meta">
+              <div class="meta-ref">REF: ${refCode}</div>
+              <div class="meta-generated">
+                <strong>Generated:</strong><br />${fmtNow()}
+              </div>
+            </div>
+          </div>
+          <hr class="header-divider" />
+          <hr class="header-accent-line" />
+        </div>
+
+        <!-- ══════════════════════════════════════
+            I. CLIENT INFORMATION
+        ══════════════════════════════════════ -->
+        <div class="section">
+          <div class="section-title">
+            <span class="section-num">I</span>
+            Client Information
+          </div>
+          <div class="info-table-wrap">
+            <table class="info-table">
+              ${infoRow("Full Name",   `${transaction.first_name} ${transaction.middle_name || ""} ${transaction.last_name}`.replace(/\s+/g, " ").trim())}
+              ${infoRow("Email Address", transaction.email)}
+              ${infoRow("Contact Number", transaction.phone_number || "Not Provided")}
+              ${infoRow("Sex", transaction.sex || "Not Specified")}
+              ${infoRow("Client ID", `#${transaction.client_id}`)}
+            </table>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+            II. SERVICE DETAILS
+        ══════════════════════════════════════ -->
+        <div class="section">
+          <div class="section-title">
+            <span class="section-num">II</span>
+            Service Details
+          </div>
+          <div class="info-table-wrap">
+            <table class="info-table">
+              ${infoRow("Service Name",  transaction.service_name)}
+              ${infoRow("Description",   transaction.service_description || "N/A")}
+              ${infoRow("Current Status", `<span class="status-badge">${transaction.current_status}</span>`)}
+            </table>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+            III. TRANSACTION INFORMATION
+        ══════════════════════════════════════ -->
+        <div class="section">
+          <div class="section-title">
+            <span class="section-num">III</span>
+            Transaction Information
+          </div>
+          <div class="info-table-wrap">
+            <table class="info-table">
+              ${infoRow("Transaction ID",  `#${transaction.transaction_id}`)}
+              ${infoRow("Date Initiated",  fmtDateTime(transaction.transaction_created_at))}
+              ${infoRow("Last Updated",    fmtDateTime(transaction.transaction_updated_at))}
+              ${infoRow("Processed By",    `${transaction.created_by_first_name} ${transaction.created_by_last_name}`)}
+            </table>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+            IV. RELATED APPOINTMENT (conditional)
+        ══════════════════════════════════════ -->
+        ${appointmentSection}
+
+        <!-- ══════════════════════════════════════
+            V. PROCESSING TIMELINE
+        ══════════════════════════════════════ -->
+        <div class="section" style="page-break-before: always;">
+          <div class="section-title">
+            <span class="section-num">V</span>
+            Processing Timeline
+          </div>
+          <table class="timeline-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Date &amp; Time</th>
+                <th>Status</th>
+                <th>Updated By</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${timelineRows}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ══════════════════════════════════════
+            VI. CERTIFICATION & SIGNATURES
+        ══════════════════════════════════════ -->
+        <div class="section">
+          <div class="section-title">
+            <span class="section-num">VI</span>
+            Certification
+          </div>
+          <p class="cert-text">
+            This certifies that the information contained in this report accurately
+            reflects the document processing transaction as recorded in the RandC
+            Documentation Services system as of the date of generation. Both parties
+            acknowledge the completeness and accuracy of the details herein.
+          </p>
+
+          <hr class="signature-accent" />
+
+          <div class="signature-row">
+            <div class="signature-box">
+              <div class="signature-line-wrap">
+                <div class="signature-name">${transaction.first_name} ${transaction.last_name}</div>
+                <div class="signature-label">Client Signature &nbsp;/&nbsp; Date</div>
+              </div>
+            </div>
+            <div class="signature-box">
+              <div class="signature-line-wrap">
+                <div class="signature-name">Authorized Officer</div>
+                <div class="signature-label">RandC Documentation Services &nbsp;/&nbsp; Date</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+            FOOTER
+        ══════════════════════════════════════ -->
+        <div class="report-footer">
+          <div class="footer-bar"></div>
+          <div class="footer-company">RANDC DOCUMENTATION SERVICES</div>
+          <div class="footer-sub">Professional Document Processing Solutions</div>
+          <div class="footer-ref">
+            Official computer-generated report &nbsp;&mdash;&nbsp; Reference: ${refCode}<br />
+            Generated: ${fmtNowLong()}
+          </div>
+        </div>
+
+      </body>
+      </html>`;
+
         doc.open();
-        doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report #${transaction.transaction_id}</title>
-<style>
-  @page { size: A4; margin: 20mm 15mm; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.5; color: #000; background: #fff; }
-  .report-header { text-align: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 3px double #000; }
-  .company-name { font-size: 18pt; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px; }
-  .company-tagline { font-size: 10pt; font-style: italic; margin-bottom: 15px; }
-  .report-title { font-size: 16pt; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
-  .report-subtitle { font-size: 12pt; margin-bottom: 5px; }
-  .report-date { font-size: 9pt; color: #333; }
-  .section { margin-bottom: 25px; page-break-inside: avoid; }
-  .section-title { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 5px; border-bottom: 2px solid #000; letter-spacing: 1px; }
-  .info-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-  .info-table td { padding: 6px 10px; border: 1px solid #000; vertical-align: top; }
-  .info-table .label { width: 35%; font-weight: bold; background: #f5f5f5; }
-  .info-table .value { width: 65%; }
-  .timeline-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  .timeline-table th { background: #000; color: #fff; padding: 8px; text-align: left; font-size: 10pt; font-weight: bold; border: 1px solid #000; }
-  .timeline-table td { padding: 8px; border: 1px solid #000; font-size: 10pt; vertical-align: top; }
-  .timeline-table tr:nth-child(even) { background: #f9f9f9; }
-  .status-box { display: inline-block; padding: 4px 12px; border: 2px solid #000; font-weight: bold; text-transform: uppercase; font-size: 10pt; }
-  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-  .photo-item { text-align: center; border: 1px solid #000; padding: 5px; }
-  .photo-item img { max-width: 100%; max-height: 150px; display: block; margin: 0 auto; }
-  .photo-caption { font-size: 8pt; margin-top: 5px; word-break: break-all; }
-  .signature-section { margin-top: 50px; }
-  .signature-row { display: table; width: 100%; margin-top: 40px; }
-  .signature-box { display: table-cell; width: 48%; text-align: center; }
-  .signature-box:first-child { padding-right: 4%; }
-  .signature-line { border-top: 2px solid #000; margin-top: 60px; padding-top: 8px; font-weight: bold; }
-  .signature-label { font-size: 9pt; margin-top: 5px; color: #555; }
-  .footer { margin-top: 40px; padding-top: 15px; border-top: 2px solid #000; text-align: center; font-size: 9pt; }
-  .footer-note { font-style: italic; margin-top: 5px; color: #555; }
-  .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80pt; color: rgba(0,0,0,0.05); z-index: -1; font-weight: bold; }
-  @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
-</style></head>
-<body>
-<div class="watermark">OFFICIAL</div>
-<div class="report-header">
-  <div class="company-name">RANDC DOCUMENTATION SERVICES</div>
-  <div class="company-tagline">Professional Document Processing Solutions</div>
-  <div class="report-title">Document Processing Transaction Report</div>
-  <div class="report-subtitle">Transaction ID: #${transaction.transaction_id}</div>
-  <div class="report-date">Report Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
-</div>
-<div class="section">
-  <div class="section-title">I. Client Information</div>
-  <table class="info-table">
-    <tr><td class="label">Full Name</td><td class="value">${transaction.first_name} ${transaction.middle_name || ""} ${transaction.last_name}</td></tr>
-    <tr><td class="label">Email</td><td class="value">${transaction.email}</td></tr>
-    <tr><td class="label">Contact</td><td class="value">${transaction.phone_number || "Not Provided"}</td></tr>
-    <tr><td class="label">Sex</td><td class="value">${transaction.sex || "Not Specified"}</td></tr>
-    <tr><td class="label">Client ID</td><td class="value">#${transaction.client_id}</td></tr>
-  </table>
-</div>
-<div class="section">
-  <div class="section-title">II. Service Details</div>
-  <table class="info-table">
-    <tr><td class="label">Service Name</td><td class="value">${transaction.service_name}</td></tr>
-    <tr><td class="label">Description</td><td class="value">${transaction.service_description || "N/A"}</td></tr>
-    <tr><td class="label">Current Status</td><td class="value"><span class="status-box">${transaction.current_status}</span></td></tr>
-  </table>
-</div>
-<div class="section">
-  <div class="section-title">III. Transaction Information</div>
-  <table class="info-table">
-    <tr><td class="label">Transaction ID</td><td class="value">#${transaction.transaction_id}</td></tr>
-    <tr><td class="label">Date Initiated</td><td class="value">${new Date(transaction.transaction_created_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</td></tr>
-    <tr><td class="label">Last Updated</td><td class="value">${new Date(transaction.transaction_updated_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</td></tr>
-    <tr><td class="label">Processed By</td><td class="value">${transaction.created_by_first_name} ${transaction.created_by_last_name}</td></tr>
-  </table>
-</div>
-${appointment ? `
-<div class="section">
-  <div class="section-title">IV. Related Appointment</div>
-  <table class="info-table">
-    <tr><td class="label">Appointment ID</td><td class="value">#${appointment.appointment_id}</td></tr>
-    <tr><td class="label">Date & Time</td><td class="value">${new Date(appointment.appointment_date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })} at ${appointment.appointment_time}</td></tr>
-    ${appointment.notes ? `<tr><td class="label">Notes</td><td class="value">${appointment.notes}</td></tr>` : ""}
-  </table>
-</div>` : ""}
-<div class="section" style="page-break-before: always;">
-  <div class="section-title">V. Processing Timeline</div>
-  <table class="timeline-table">
-    <thead>
-      <tr><th>#</th><th>Date & Time</th><th>Status</th><th>Updated By</th><th>Remarks</th></tr>
-    </thead>
-    <tbody>
-      ${timeline.map((item, idx) => `
-        <tr>
-          <td style="text-align: center; font-weight: bold;">${idx + 1}</td>
-          <td>
-            ${new Date(item.changed_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}<br>
-            <small>${new Date(item.changed_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</small>
-          </td>
-          <td><strong>${item.status_name}</strong></td>
-          <td>${item.changed_by_first_name} ${item.changed_by_last_name}</td>
-          <td>${item.remarks || "No remarks"}</td>
-        </tr>
-        ${item.photos && item.photos.length
-          ? `<tr><td colspan="5" style="background: #f0f0f0; padding: 10px;"><strong>Attachments:</strong>
-               <div class="photo-grid">${item.photos.map((p) =>
-                 `<div class="photo-item"><img src="/${p.file_path}" alt="${p.file_name}"><div class="photo-caption">${p.file_name}</div></div>`
-               ).join("")}</div></td></tr>`
-          : ""}`
-      ).join("")}
-    </tbody>
-  </table>
-</div>
-<div class="signature-section">
-  <div class="section-title">VI. Certification</div>
-  <p style="margin-bottom: 20px; text-align: justify; font-size: 10pt;">
-    This certifies that the information in this report is true and accurate as of the date of generation.
-  </p>
-  <div class="signature-row">
-    <div class="signature-box">
-      <div class="signature-line">${transaction.first_name} ${transaction.last_name}</div>
-      <div class="signature-label">Client Signature / Date</div>
-    </div>
-    <div class="signature-box">
-      <div class="signature-line">Authorized Officer</div>
-      <div class="signature-label">RandC Documentation Services / Date</div>
-    </div>
-  </div>
-</div>
-<div class="footer">
-  <strong>RANDC DOCUMENTATION SERVICES</strong><br>
-  Professional Document Processing Solutions<br>
-  <div class="footer-note">
-    Official computer-generated report — Reference: TR-${transaction.transaction_id}-${new Date().getFullYear()}<br>
-    Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-  </div>
-</div>
-</body></html>`);
+        doc.write(html);
         doc.close();
+
         iframe.contentWindow.onload = () => {
           setTimeout(() => {
             iframe.contentWindow.focus();
@@ -3136,8 +4656,7 @@ ${appointment ? `
           }, 250);
         };
       }
-
-
+        
       /* ═══════════════════════════════════════════════════════════════
          SCHEDULE FORECAST
       ═══════════════════════════════════════════════════════════════ */
@@ -3400,168 +4919,117 @@ ${appointment ? `
         if (e.key === "Escape") sfCloseDrawer();
       });
 
+        //  SCHEDULE FORECAST — sfOpenDrawer
 
-      /* ═══════════════════════════════════════════════════════════════
-         DASHBOARD CHARTS
-      ═══════════════════════════════════════════════════════════════ */
+      function sfOpenDrawer(key, dateStr, time, slot, clients) {
+        _sfDrawerSlot = key;
 
-      let apptChart = null;
-      let txChart   = null;
+        const date   = new Date(dateStr + "T00:00:00");
+        const dLabel = date.toLocaleDateString("en-US", {
+          weekday: "long", month: "long", day: "numeric", year: "numeric",
+        });
+        document.getElementById("sfDrawerTitle").textContent = SF_TIME_LABELS[time] || time;
+        document.getElementById("sfDrawerSub").textContent   = dLabel;
 
-      const CHART_COLORS = {
-        pending:   "#fb923c",
-        approved:  "#22d3ee",
-        completed: "#34d399",
-        cancelled: "#f43f5e",
-        submitted: "#a78bfa",
-        ongoing:   "#fbbf24",
-        to_claim:  "#38bdf8",
-        claimed:   "#6ee7b7",
-      };
+        /* Meter */
+        const booked = slot.actual_bookings || 0;
+        const cap    = slot.max_capacity    || 3;
+        document.getElementById("sfMeterVal").textContent  = `${booked} / ${cap}`;
+        document.getElementById("sfMeterFill").style.width = `${Math.round((booked / cap) * 100)}%`;
 
-      async function initDashboardCharts() {
-        try {
-          const token = localStorage.getItem("token");
-          if (!token) return;
-          const headers = { Authorization: `Bearer ${token}` };
-
-          // Fetch counts
-          const apptStatuses = ["pending", "approved", "completed", "cancelled"];
-          const apptCounts   = await Promise.all(
-            apptStatuses.map((status) =>
-              fetch(`/api/admin/filterAppointments/${status}`, { headers })
-                .then((r) => (r.ok ? r.json() : []))
-                .then((d) => (Array.isArray(d) ? d.length : 0))
-                .catch(() => 0)
-            )
-          );
-
-          const txStatuses = ["pending", "submitted", "ongoing", "completed", "to_claim", "claimed", "cancelled"];
-          const txCounts   = await Promise.all(
-            txStatuses.map((status) =>
-              fetch(`${BASE_URL}/api/admin/getDocumentTransactions/${status}`, { headers })
-                .then((r) => (r.ok ? r.json() : []))
-                .then((d) => (Array.isArray(d) ? d.length : 0))
-                .catch(() => 0)
-            )
-          );
-
-          // Update stat chips
-          const todayRes = await fetch(`/api/admin/filterAppointments/today`, { headers }).catch(() => null);
-          if (todayRes && todayRes.ok) {
-            const d = await todayRes.json();
-            document.getElementById("todayAppointments").textContent = Array.isArray(d) ? d.length : 0;
-          }
-          document.getElementById("pendingAppointments").textContent = apptCounts[0];
-          document.getElementById("activeTransactions").textContent  = txCounts[txStatuses.indexOf("ongoing")] || 0;
-
-          // Theme colours
-          const isDark = document.documentElement.getAttribute("data-theme") !== "light";
-          const gridColor    = isDark ? "#232f4a" : "#e5e7eb";
-          const labelColor   = isDark ? "#8a97b4" : "#6b7280";
-          const tooltipBg    = isDark ? "#141e33" : "#ffffff";
-          const tooltipText  = isDark ? "#e8edf7" : "#0f172a";
-          const tooltipBody  = isDark ? "#8a97b4" : "#374151";
-          const tooltipBorder = isDark ? "#2e3f60" : "#dde1ef";
-
-          // Appointments bar chart
-          const apptCanvas = document.getElementById("appointmentsChart");
-          if (apptCanvas) {
-            const existing = Chart.getChart(apptCanvas);
-            if (existing) existing.destroy();
-            apptChart = new Chart(apptCanvas, {
-              type: "bar",
-              data: {
-                labels:   apptStatuses.map((s) => s.charAt(0).toUpperCase() + s.slice(1)),
-                datasets: [{
-                  label:           "Appointments",
-                  data:            apptCounts,
-                  backgroundColor: apptStatuses.map((s) => CHART_COLORS[s] + "33"),
-                  borderColor:     apptStatuses.map((s) => CHART_COLORS[s]),
-                  borderWidth:     2,
-                  borderRadius:    6,
-                  borderSkipped:   false,
-                }],
-              },
-              options: {
-                responsive:          true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend:  { display: false },
-                  tooltip: {
-                    backgroundColor: tooltipBg,
-                    titleColor:      tooltipText,
-                    bodyColor:       tooltipBody,
-                    borderColor:     tooltipBorder,
-                    borderWidth:     1,
-                    padding:         10,
-                    cornerRadius:    8,
-                  },
-                },
-                scales: {
-                  x: { grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 11 } } },
-                  y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 11 }, stepSize: 1 }, beginAtZero: true },
-                },
-              },
-            });
-          }
-
-          // Transactions doughnut chart
-          const txCanvas = document.getElementById("transactionsChart");
-          if (txCanvas) {
-            const existing = Chart.getChart(txCanvas);
-            if (existing) existing.destroy();
-
-            const filtered = txStatuses
-              .map((s, i) => ({ label: mapStatus(s), count: txCounts[i], color: CHART_COLORS[s] || "#6366f1" }))
-              .filter((d) => d.count > 0);
-            const hasData = filtered.length > 0;
-
-            txChart = new Chart(txCanvas, {
-              type: "doughnut",
-              data: {
-                labels:   hasData ? filtered.map((d) => d.label) : ["No Data"],
-                datasets: [{
-                  data:            hasData ? filtered.map((d) => d.count) : [1],
-                  backgroundColor: hasData ? filtered.map((d) => d.color + "88") : ["#2e3f60"],
-                  borderColor:     hasData ? filtered.map((d) => d.color)        : ["#2e3f60"],
-                  borderWidth:     2,
-                  hoverOffset:     6,
-                }],
-              },
-              options: {
-                responsive:          true,
-                maintainAspectRatio: false,
-                cutout:              "62%",
-                plugins: {
-                  legend: {
-                    position: "bottom",
-                    labels: {
-                      color:           labelColor,
-                      font:            { size: 11 },
-                      padding:         12,
-                      usePointStyle:   true,
-                      pointStyleWidth: 10,
-                    },
-                  },
-                  tooltip: {
-                    backgroundColor: tooltipBg,
-                    titleColor:      tooltipText,
-                    bodyColor:       tooltipBody,
-                    borderColor:     tooltipBorder,
-                    borderWidth:     1,
-                    padding:         10,
-                    cornerRadius:    8,
-                  },
-                },
-              },
-            });
-          }
-        } catch (error) {
-
-
-          console.error("Chart init error:", error);
+        /* Status chips */
+        const statusEl = document.getElementById("sfDrawerStatus");
+        const availEl  = document.getElementById("sfDrawerAvail");
+        if (booked >= cap) {
+          statusEl.textContent  = "Full";
+          statusEl.style.cssText = "background:rgba(244,63,94,.18);color:var(--danger);border-color:var(--danger)";
+        } else if (booked > 0) {
+          statusEl.textContent  = "Partial";
+          statusEl.style.cssText = "background:rgba(251,146,60,.18);color:var(--warning);border-color:var(--warning)";
+        } else {
+          statusEl.textContent  = "Open";
+          statusEl.style.cssText = "background:rgba(52,211,153,.18);color:var(--success);border-color:var(--success)";
         }
+        availEl.textContent = slot.is_available ? "Available" : "Unavailable";
+
+        /* Booked clients */
+        const listEl = document.getElementById("sfDrawerClients");
+        if (!clients.length) {
+          listEl.innerHTML = `<div class="sf-empty-drawer"><i class="bi bi-calendar-x"></i>No bookings for this slot</div>`;
+        } else {
+          listEl.innerHTML = clients.map((c) => {
+            const initials    = ((c.first_name || "")[0] || "") + ((c.last_name || "")[0] || "");
+            const statusCls   = `sf-client-status sf-status-${(c.status || "pending").toLowerCase()}`;
+            const phone       = c.phone_number
+              ? `<span style="margin-left: 0.5rem;"><i class="bi bi-telephone"></i> ${c.phone_number}</span>`
+              : "";
+            const services    = c.services
+              ? `<div class="sf-client-services"><i class="bi bi-briefcase-fill"></i>${c.services}</div>`
+              : "";
+            const notes       = c.notes
+              ? `<div class="sf-notes-row"><i class="bi bi-chat-left-text"></i>${escapeHtml(c.notes)}</div>`
+              : "";
+            const lapsedBadge = c.status === "lapsed"
+              ? `<span style="font-size: 0.62rem; margin-left: 0.3rem; color: #94a3b8; background: rgba(100,116,139,.15); padding: 0.1rem 0.4rem; border-radius: 999px; border: 1px solid rgba(100,116,139,.3);">Lapsed</span>`
+              : "";
+
+            return `
+              <div class="sf-client-row"
+                onclick="openClientHistory(${c.client_id || c.id}, '${escapeHtml((c.first_name || "") + " " + (c.last_name || ""))}', '${escapeHtml(c.email || "")}')">
+                <div class="sf-client-avatar">${initials.toUpperCase()}</div>
+                <div class="sf-client-info" style="flex: 1; min-width: 0;">
+                  <div class="sf-client-name">${c.first_name} ${c.last_name}${lapsedBadge}</div>
+                  <div class="sf-client-detail">
+                    <i class="bi bi-envelope"></i> ${c.email || "—"}${phone}
+                  </div>
+                  ${services}
+                  ${notes}
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; flex-shrink: 0;">
+                  <span class="${statusCls}" style="font-size: 0.66rem;">${c.status}</span>
+                  <button class="btn-ghost" style="font-size: 0.66rem; padding: 0.15rem 0.5rem;"
+                    onclick="event.stopPropagation(); openClientHistory(${c.client_id || c.id}, '${escapeHtml((c.first_name || "") + " " + (c.last_name || ""))}', '${escapeHtml(c.email || "")}')">
+                    <i class="bi bi-clock-history"></i> History
+                  </button>
+                </div>
+              </div>`;
+          }).join("");
+        }
+
+        document.getElementById("sfDrawerOverlay").classList.add("sf-drawer-vis");
+        document.getElementById("sfDrawer").classList.add("sf-drawer-open");
+        document.getElementById("sfDrawer").focus();
+      }
+
+      function sfSafeDate(val) {
+        if (!val) return null;
+        let d;
+        if (typeof val === "string") {
+          if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+            d = new Date(val + "T00:00:00");
+          } else if (val.includes("T")) {
+            d = new Date(val.slice(0, 10) + "T00:00:00");
+          } else {
+            d = new Date(val);
+          }
+        } else {
+          d = new Date(val);
+        }
+        return (d instanceof Date && !isNaN(d)) ? d : null;
+      }
+
+      function sfFormatDate(val, opts, locale = "en-PH") {
+        const d = sfSafeDate(val);
+        if (!d) return "—";
+        return d.toLocaleDateString(locale, opts);
+      }
+
+      function formatTime12h(t) {
+        if (!t) return "—";
+        const [h, m] = t.split(":").map(Number);
+        const ampm   = h >= 12 ? "PM" : "AM";
+        const h12    = h % 12 || 12;
+        return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
       }
 
       function initializeUser() {
@@ -3581,7 +5049,7 @@ ${appointment ? `
         document.getElementById("user-name").textContent =`${user.first_name}, ${user.last_name}`;
         document.getElementById("user-role").textContent = user.role;
         fetchServices();
-        initDashboardCharts();
+       
         fetchAdminUnreadCount()
       }
 

@@ -21,7 +21,9 @@ oauth2Client.setCredentials({
 // ─────────────────────────────────────────────────────────────────────────────
 //  LOGO
 // ─────────────────────────────────────────────────────────────────────────────
-const LOGO_CID = "randc-logo@randc.com";
+const LOGO_CID     = "randc-logo@randc.com";
+const LOGO_IMG_TAG = `<img src="cid:${LOGO_CID}" alt="RandC" height="36"
+  style="height:36px;width:auto;display:inline-block;" />`;
 
 function getLogoAttachment() {
   const logoPath = path.join(__dirname, "..", "..", "public", "images", "randclogo.png");
@@ -37,26 +39,17 @@ function getLogoAttachment() {
   };
 }
 
-const LOGO_IMG_TAG = `<img src="cid:${LOGO_CID}" alt="RandC Documentation" style="height:44px;width:auto;display:inline-block;" />`;
-
 // ─────────────────────────────────────────────────────────────────────────────
-//  CORE SEND — Gmail API over HTTPS (port 443)
-//  Railway blocks SMTP ports 465 & 587 on the free plan.
-//  This function builds a raw RFC-2822 MIME message and sends it via the
-//  Gmail REST API so no SMTP socket is ever opened.
+//  TRANSPORT
 // ─────────────────────────────────────────────────────────────────────────────
 async function sendMail(mailOptions) {
   const { from, to, subject, html, attachments = [] } = mailOptions;
 
-  const gmail = google.gmail({ version: "v1", auth: oauth2Client });
-
-  // UTF-8 encoded subject (handles ₱, accents, emoji in subject lines)
+  const gmail          = google.gmail({ version: "v1", auth: oauth2Client });
   const encodedSubject = `=?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`;
+  const boundary       = `randc_boundary_${Date.now()}`;
+  const logoAttach     = getLogoAttachment();
 
-  const boundary    = `randc_boundary_${Date.now()}`;
-  const logoAttach  = getLogoAttachment();
-
-  // ── HTML part ──────────────────────────────────────────────────────────────
   let mime = [
     `From: ${from}`,
     `To: ${to}`,
@@ -71,7 +64,6 @@ async function sendMail(mailOptions) {
     Buffer.from(html, "utf8").toString("base64"),
   ].join("\r\n");
 
-  // ── Inline logo ────────────────────────────────────────────────────────────
   if (logoAttach) {
     try {
       const logoData = fs.readFileSync(logoAttach.path);
@@ -84,12 +76,9 @@ async function sendMail(mailOptions) {
         ``,
         logoData.toString("base64"),
       ].join("\r\n");
-    } catch {
-      // Logo file missing — email sends without it, no crash
-    }
+    } catch { /* logo missing — skip silently */ }
   }
 
-  // ── Any extra attachments (skip logo — already handled) ───────────────────
   for (const att of attachments) {
     if (att.cid === LOGO_CID) continue;
     try {
@@ -102,243 +91,453 @@ async function sendMail(mailOptions) {
         ``,
         data.toString("base64"),
       ].join("\r\n");
-    } catch { /* skip missing attachment */ }
+    } catch { /* attachment missing — skip silently */ }
   }
 
   mime += `\r\n--${boundary}--`;
 
-  // Gmail API requires URL-safe base64 (no +, /, or trailing =)
   const raw = Buffer.from(mime)
     .toString("base64")
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/, "");
 
-  await gmail.users.messages.send({
-    userId:      "me",
-    requestBody: { raw },
-  });
+  await gmail.users.messages.send({ userId: "me", requestBody: { raw } });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  SHARED HELPERS
+//  SHARED DESIGN SYSTEM
+//  Palette: #000000 · #ffffff · #22c55e  — no gradients, no radius, no shadows
 // ─────────────────────────────────────────────────────────────────────────────
+
+const FONT_LINK = `<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />`;
+
+const BASE_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  body, table, td, a { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+  table  { border-collapse:collapse !important; }
+  img    { border:0; display:block; height:auto; line-height:100%; outline:none; text-decoration:none; }
+  a      { text-decoration:none; }
+  body   { font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;
+           background:#f0f0f0; margin:0; padding:0; }
+  h1,h2,h3,p,td,li,span {
+    font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif !important;
+  }
+  @media only screen and (max-width:620px) {
+    .ow  { padding:16px 8px !important; }
+    .ec  { width:100% !important; }
+    .hc  { padding:28px 20px 24px !important; }
+    .bc  { padding:28px 20px !important; }
+    .fc  { padding:20px !important; }
+    .pc  { padding:14px 16px !important; }
+    .cta { display:block !important; width:100% !important;
+           text-align:center !important; padding:16px 20px !important; }
+    .fu  { font-size:11px !important; word-break:break-all !important; }
+    .ir  { display:block !important; }
+    .iv  { text-align:left !important; margin-top:2px; display:block !important; }
+  }
+`;
+
+/** Thin horizontal rule */
+function hr() {
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:28px 0;">
+      <tr><td style="height:1px;background:#000000;font-size:0;line-height:0;">&nbsp;</td></tr>
+    </table>`;
+}
+
+/** Subtle separator used between table rows */
+const ROW_BORDER = "border-bottom:1px solid #e5e5e5;";
+
+/**
+ * Full email wrapper
+ * @param {string} headerHtml   — rendered <tr> content for the green header band
+ * @param {string} bodyHtml     — rendered content inside white body cell
+ */
+function wrapEmail(headerHtml, bodyHtml) {
+  const supportEmail = process.env.SUPPORT_EMAIL || "support@randc.com";
+  const year         = new Date().getFullYear();
+
+  return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="format-detection" content="telephone=no" />
+  ${FONT_LINK}
+  <style>${BASE_CSS}</style>
+</head>
+<body>
+<div class="ow" style="background:#f0f0f0;padding:40px 16px;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+<tr><td align="center">
+
+  <table class="ec" width="600" cellpadding="0" cellspacing="0" role="presentation"
+         style="background:#ffffff;width:600px;max-width:100%;">
+
+    <!-- GREEN HEADER -->
+    <tr>
+      <td class="hc" style="background:#22c55e;padding:36px 48px 28px;text-align:center;">
+        ${headerHtml}
+      </td>
+    </tr>
+
+    <!-- WHITE BODY -->
+    <tr>
+      <td class="bc" style="background:#ffffff;padding:40px 48px 36px;">
+        ${bodyHtml}
+        ${hr()}
+        <p style="font-size:13px;color:#000000;line-height:1.75;margin:0;">
+          Best regards,<br />
+          <strong style="color:#000000;">The&nbsp;<span style="color:#22c55e;">RandC</span>&nbsp;Documentation Team</strong>
+        </p>
+      </td>
+    </tr>
+
+    <!-- BLACK FOOTER -->
+    <tr>
+      <td class="fc" style="background:#000000;padding:24px 48px;text-align:center;">
+        <p style="font-size:12px;color:#ffffff;line-height:1.75;margin:0 0 6px;">
+          Questions?&nbsp;
+          <a href="mailto:${supportEmail}"
+             style="color:#22c55e;font-weight:500;text-decoration:none;">${supportEmail}</a>
+        </p>
+        <p style="font-size:11px;color:rgba(255,255,255,0.50);line-height:1.65;margin:0 0 4px;">
+          267 De Vega Compound, Silangan St. Caingin, Meycauayan, Bulacan 3020
+        </p>
+        <p style="font-size:11px;color:rgba(255,255,255,0.35);line-height:1.6;margin:0;">
+          This is an automated message. Do not reply directly to this email.<br />
+          &copy; ${year} RandC Documentation Services. All rights reserved.
+        </p>
+      </td>
+    </tr>
+
+  </table>
+
+</td></tr>
+</table>
+</div>
+</body>
+</html>`;
+}
+
+/**
+ * Standard green header block (logo + title + subtitle)
+ */
+function buildHeader(title, subtitle) {
+  return `
+    ${LOGO_IMG_TAG}
+    <h1 style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;
+               line-height:1.25;margin:18px 0 8px;">
+      ${title}
+    </h1>
+    <p style="color:rgba(255,255,255,0.88);font-size:13px;font-weight:400;
+              line-height:1.5;margin:0;">
+      ${subtitle}
+    </p>`;
+}
+
+/**
+ * Info table panel — black border, green label text
+ * rows: [{ label, value, valueColor? }]
+ */
+function infoPanel(rows) {
+  const rowsHtml = rows.map((r, i) => `
+    <tr>
+      <td class="ir" style="font-size:11px;font-weight:700;text-transform:uppercase;
+                 letter-spacing:0.07em;color:#22c55e;width:130px;
+                 padding:10px 0;${i < rows.length - 1 ? ROW_BORDER : ""}">
+        ${r.label}
+      </td>
+      <td class="iv" style="font-size:13px;font-weight:600;
+                 color:${r.valueColor || "#000000"};
+                 text-align:right;padding:10px 0;
+                 ${i < rows.length - 1 ? ROW_BORDER : ""}">
+        ${r.value}
+      </td>
+    </tr>`).join("");
+
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+           style="border:1px solid #000000;margin-bottom:24px;">
+      <tr>
+        <td class="pc" style="padding:16px 20px;">
+          <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+            ${rowsHtml}
+          </table>
+        </td>
+      </tr>
+    </table>`;
+}
+
+/**
+ * Labelled notice panel — black border, green label
+ */
+function noticePanel(label, contentHtml, marginBottom = "24px") {
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+           style="border:1px solid #000000;margin-bottom:${marginBottom};">
+      <tr>
+        <td class="pc" style="padding:16px 20px;">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;
+                    letter-spacing:0.09em;color:#22c55e;margin:0 0 8px;">
+            ${label}
+          </p>
+          ${contentHtml}
+        </td>
+      </tr>
+    </table>`;
+}
+
+/**
+ * CTA button row
+ */
+function ctaButton(href, label) {
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+           style="margin-bottom:32px;">
+      <tr>
+        <td align="center">
+          <a href="${href}" class="cta"
+             style="display:inline-block;background:#22c55e;color:#ffffff;
+                    font-size:15px;font-weight:700;letter-spacing:0.02em;
+                    line-height:1;padding:18px 52px;text-decoration:none;">
+            ${label}
+          </a>
+        </td>
+      </tr>
+    </table>`;
+}
+
+/**
+ * Bullet list helper (em-dash style, no colored backgrounds)
+ */
+function bulletList(items) {
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+      ${items.map((item) => `
+        <tr>
+          <td width="16" valign="top"
+              style="font-size:13px;color:#000000;padding-top:1px;padding-right:8px;
+                     line-height:1.65;">
+            &mdash;
+          </td>
+          <td style="font-size:13px;color:#000000;line-height:1.65;padding-bottom:6px;">
+            ${item}
+          </td>
+        </tr>`).join("")}
+    </table>`;
+}
+
+/** Utility */
 function capitalizeStatus(str) {
   if (!str) return "";
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
-const FONT_IMPORT = `<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />`;
+// ─────────────────────────────────────────────────────────────────────────────
+//  1.  OTP EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
+export async function sendUserOTP(OTP, email) {
+  try {
+    const header = buildHeader(
+      "One-Time Password",
+      "Verify your email address to continue"
+    );
 
-const BASE_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body, table, td, a { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
-  table { border-collapse:collapse !important; }
-  img   { border:0; height:auto; line-height:100%; outline:none; text-decoration:none; }
-  a     { text-decoration:none; }
-  body  { font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif; background:#f1f3fa; margin:0; padding:0; }
-  @media only screen and (max-width:620px){
-    .email-card   { border-radius:0!important; }
-    .email-header { padding:24px 20px 20px!important; }
-    .email-body   { padding:24px 20px!important; }
-    .email-footer { padding:18px 20px!important; }
-    .info-row     { display:block!important; }
-    .info-value   { text-align:left!important; margin-top:2px; }
-    .cta-btn      { padding:13px 20px!important; font-size:13px!important; }
+    const body = `
+      <p style="font-size:15px;font-weight:600;color:#000000;line-height:1.5;margin:0 0 8px;">
+        Hello,
+      </p>
+      <p style="font-size:14px;color:#000000;line-height:1.75;margin:0 0 32px;">
+        We received a request to verify your email address.
+        Use the code below to continue. Do not share it with anyone.
+      </p>
+
+      <!-- OTP display -->
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+             style="border:1px solid #000000;margin-bottom:24px;">
+        <tr>
+          <td style="padding:28px 20px;text-align:center;">
+            <p style="font-size:10px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:0.09em;color:#22c55e;margin:0 0 12px;">
+              Your One-Time Password
+            </p>
+            <p style="font-size:44px;font-weight:700;color:#000000;
+                      letter-spacing:12px;margin:0;line-height:1;">
+              ${OTP}
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      ${noticePanel("Security Notice", bulletList([
+        "This OTP is valid for <strong>5 minutes only</strong>.",
+        "Do not share this code with anyone.",
+        "If you did not request this, ignore this email — your account is safe.",
+      ]))}`;
+
+    await sendMail({
+      from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
+      to:      email,
+      subject: "Your One-Time Password (OTP) — Do Not Share",
+      html:    wrapEmail(header, body),
+    });
+
+    console.log(`OTP email sent to ${email}`);
+  } catch (error) {
+    console.error("Error sending OTP email:", error);
+    throw error;
   }
-`;
-
-function buildFooter() {
-  return `
-    <div style="background:#f1f3fa;border-top:1px solid #dde1ef;padding:22px 40px;text-align:center;">
-      <p style="font-size:12px;color:#374151;margin-bottom:8px;">
-        Questions? Contact us at
-        <a href="mailto:${process.env.SUPPORT_EMAIL || "support@randc.com"}" style="color:#16a34a;font-weight:500;">${process.env.SUPPORT_EMAIL || "support@randc.com"}</a>
-        &nbsp;·&nbsp;
-        267 De Vega Compound, Silangan St. Caingin, Meycauayan, Bulacan 3020
-      </p>
-      <p style="font-size:11px;color:#9ca3af;line-height:1.6;">
-        This is an automated message. Please do not reply directly to this email.<br/>
-        &copy; ${new Date().getFullYear()} RandC Documentation Services. All rights reserved.
-      </p>
-    </div>`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  TRANSACTION STATUS UPDATE EMAIL
+//  2.  MAGIC LINK EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
+export async function sendMagicLinkEmail({ email, name, magicUrl, expiresAt, deleted_at }) {
+  try {
+    const displayName  = name || "there";
+    const isRestoring  = Boolean(deleted_at);
+    const ctaLabel     = isRestoring ? "Restore Account Access" : "Sign In to My Account";
+    const headerTitle  = isRestoring ? "Restore Your Account"   : "Magic Login Link";
+    const headerSub    = isRestoring
+      ? "One click to restore access — no password required"
+      : "One click to sign in — no password required";
+    const bodyIntro    = isRestoring
+      ? `Your account was previously anonymized. Clicking the button below will restore your access to <strong>RandC Documentation Services</strong> and reactivate your account.`
+      : `We received a sign-in request for your <strong>RandC Documentation Services</strong> account. Click the button below to log in securely — no password needed.`;
+
+    const expiresStr = expiresAt.toLocaleString("en-PH", {
+      month: "short", day: "numeric", year: "numeric",
+      hour: "numeric", minute: "2-digit", hour12: true,
+      timeZone: "Asia/Manila",
+    });
+
+    const header = buildHeader(headerTitle, headerSub);
+
+    const body = `
+      <p style="font-size:15px;font-weight:600;color:#000000;line-height:1.5;margin:0 0 8px;">
+        Hi ${displayName},
+      </p>
+      <p style="font-size:14px;color:#000000;line-height:1.75;margin:0 0 32px;">
+        ${bodyIntro}
+      </p>
+
+      ${ctaButton(magicUrl, ctaLabel)}
+      ${hr()}
+
+      ${noticePanel("Link Expiry", `
+        <p style="font-size:13px;font-weight:600;color:#000000;line-height:1.5;margin:0 0 3px;">
+          ${expiresStr}
+        </p>
+        <p style="font-size:12px;color:#000000;line-height:1.5;margin:0;">
+          Valid for <strong>15 minutes</strong> from the time it was sent.
+        </p>`, "16px")}
+
+      ${noticePanel("Security Notice", bulletList([
+        "This link works <strong>once only</strong> and expires in 15 minutes.",
+        "Never share this link with anyone.",
+        "Didn't request this? Ignore this email — your account is safe.",
+      ]))}
+      `;
+
+    await sendMail({
+      from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
+      to:      email,
+      subject: isRestoring
+        ? "Restore Your Account — RandC Documentation"
+        : "Your Magic Login Link — RandC Documentation",
+      html:    wrapEmail(header, body),
+    });
+
+    console.log(`Magic link email sent to ${email}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error sending magic link email:", error);
+    throw error;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  3.  TRANSACTION STATUS UPDATE EMAIL
 // ─────────────────────────────────────────────────────────────────────────────
 export async function sendClientDocumentProcessUpdate(data, clientEmail) {
   try {
     const statusLabel     = capitalizeStatus(data.statusName).replace(/_/g, " ");
-    const isToClaimStatus = data.statusName?.toLowerCase() === "to_claim" ||
-                            data.statusName?.toLowerCase() === "to claim";
+    const isToClaimStatus = ["to_claim", "to claim"].includes(data.statusName?.toLowerCase());
+    const appUrl          = `${process.env.APP_URL}/pages/client.html`;
+
+    const header = buildHeader(
+      "Transaction Status Update",
+      "Your document processing status has changed"
+    );
+
+    // status badge row
+    const statusBadge = `
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+             style="margin-bottom:28px;">
+        <tr>
+          <td align="center">
+            <span style="display:inline-block;background:#000000;color:#22c55e;
+                         font-size:11px;font-weight:700;letter-spacing:0.09em;
+                         text-transform:uppercase;padding:7px 24px;">
+              ${statusLabel}
+            </span>
+          </td>
+        </tr>
+      </table>`;
+
+    const txRows = [
+      { label: "Transaction ID", value: `#${data.transactionId}` },
+      { label: "Service",        value: data.serviceName },
+      { label: "New Status",     value: statusLabel, valueColor: "#22c55e" },
+      ...(data.hasImages
+        ? [{ label: "Attachments", value: "Update includes attached documentation" }]
+        : []),
+    ];
 
     const remarksBlock = data.remarks
-      ? `
-        <div style="background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;
-                    border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;
-                      color:#b45309;margin-bottom:6px;">📝 &nbsp;Remarks</div>
-          <p style="font-size:13.5px;color:#374151;line-height:1.65;margin:0;">${data.remarks}</p>
-        </div>`
+      ? noticePanel("Remarks", `
+          <p style="font-size:13px;color:#000000;line-height:1.65;margin:0;">${data.remarks}</p>`)
       : "";
 
     const deadlineBlock = isToClaimStatus && data.claimDeadline
-      ? `
-        <div style="background:#fff7ed;border:1px solid #fed7aa;border-left:4px solid #f97316;
-                    border-radius:10px;padding:14px 20px;margin-bottom:24px;">
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td width="32" valign="middle" style="font-size:22px;padding-right:12px;">⏰</td>
-              <td valign="middle">
-                <div style="font-size:11px;font-weight:700;text-transform:uppercase;
-                            letter-spacing:0.06em;color:#c2410c;margin-bottom:2px;">Claim Deadline</div>
-                <div style="font-size:14px;font-weight:700;color:#ea580c;">${data.claimDeadline}</div>
-              </td>
-            </tr>
-          </table>
-        </div>
-        <div style="background:#fef2f2;border:1px solid #fecaca;border-left:4px solid #ef4444;
-                    border-radius:10px;padding:14px 20px;margin-bottom:24px;">
-          <div style="font-size:12px;font-weight:700;color:#b91c1c;margin-bottom:4px;">⚠️ &nbsp;Penalty Notice</div>
-          <p style="font-size:13px;color:#7f1d1d;line-height:1.6;margin:0;">
-            Documents not claimed within <strong>7 days</strong> from the ready date will incur
-            a <strong>₱200.00 penalty fee</strong>. Please claim before the deadline to avoid this charge.
-          </p>
-        </div>`
+      ? noticePanel("Claim Deadline", `
+          <p style="font-size:14px;font-weight:700;color:#000000;margin:0 0 4px;">${data.claimDeadline}</p>
+          <p style="font-size:12px;color:#000000;line-height:1.6;margin:0;">
+            Documents not claimed within <strong>7 days</strong> will incur
+            a <strong>&#8369;200.00 penalty fee</strong>.
+          </p>`)
       : "";
 
-    const ctaBlock = isToClaimStatus
-      ? `
-        <div style="text-align:center;margin:28px 0 8px;">
-          <a href="${process.env.APP_URL || "http://localhost:3000"}/pages/client.html"
-             style="display:inline-block;background:linear-gradient(135deg,#16a34a 0%,#22c55e 100%);
-                    color:#ffffff;font-size:14px;font-weight:700;letter-spacing:0.02em;
-                    padding:14px 36px;border-radius:10px;text-decoration:none;
-                    box-shadow:0 4px 14px rgba(22,163,74,0.30);">
-            View Your Document Status
-          </a>
-        </div>`
-      : `
-        <div style="text-align:center;margin:28px 0 8px;">
-          <a href="${process.env.APP_URL || "http://localhost:3000"}/pages/client.html"
-             style="display:inline-block;background:linear-gradient(135deg,#16a34a 0%,#22c55e 100%);
-                    color:#ffffff;font-size:14px;font-weight:700;letter-spacing:0.02em;
-                    padding:14px 36px;border-radius:10px;text-decoration:none;
-                    box-shadow:0 4px 14px rgba(22,163,74,0.30);">
-            View My Transactions
-          </a>
-        </div>`;
+    const ctaLabel = isToClaimStatus ? "View Your Document Status" : "View My Transactions";
 
-    const attachmentsRow = data.hasImages
-      ? `<tr class="info-row" style="border-bottom:1px solid #dcfce7;">
-           <td style="font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;
-                      letter-spacing:0.05em;width:115px;padding:8px 0;">Attachments/Files</td>
-           <td class="info-value" style="font-size:13.5px;color:#0f172a;font-weight:500;
-                      text-align:right;padding:8px 0;">📎 Update includes attached documentation</td>
-         </tr>`
-      : "";
-
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <title>Transaction Update — RandC Documentation</title>
-        ${FONT_IMPORT}
-        <style>${BASE_STYLES}</style>
-      </head>
-      <body>
-        <div style="background:#f1f3fa;padding:32px 16px;">
-          <div class="email-card" style="max-width:600px;margin:0 auto;background:#ffffff;
-               border-radius:16px;overflow:hidden;
-               box-shadow:0 4px 24px rgba(15,23,42,0.10),0 1px 4px rgba(15,23,42,0.06);
-               border:1px solid #dde1ef;">
-            <div class="email-header"
-                 style="background:linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%);
-                        padding:36px 40px 28px;text-align:center;">
-              <div style="display:none;">${LOGO_IMG_TAG}</div>
-              <div style="font-size:34px;margin-bottom:10px;">📋</div>
-              <h1 style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;
-                         margin:0;line-height:1.3;font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
-                Transaction Status Update
-              </h1>
-              <p style="color:rgba(255,255,255,0.82);font-size:13px;font-weight:400;margin-top:6px;">
-                Your document processing status has changed
-              </p>
-            </div>
-            <div style="text-align:center;padding:18px 40px 0;">
-              <span style="display:inline-block;background:#ffffff;color:#16a34a;
-                           font-size:12px;font-weight:700;letter-spacing:0.08em;
-                           text-transform:uppercase;padding:6px 22px;border-radius:999px;
-                           border:2px solid #16a34a;box-shadow:0 2px 10px rgba(22,163,74,0.18);">
-                ${statusLabel}
-              </span>
-            </div>
-            <div class="email-body" style="padding:30px 40px 28px;">
-              <p style="font-size:15px;color:#0f172a;font-weight:400;margin-bottom:6px;">
-                Dear <strong>${data.clientName}</strong>,
-              </p>
-              <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:24px;">
-                We'd like to inform you that the status of your document transaction has been updated.
-                Please review the details below and take any necessary action.
-              </p>
-              <div style="background:#f8fffe;border:1px solid #bbf7d0;border-left:4px solid #22c55e;
-                          border-radius:10px;padding:20px 24px;margin-bottom:24px;">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                  <tr class="info-row" style="border-bottom:1px solid #dcfce7;">
-                    <td style="font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;
-                               letter-spacing:0.05em;width:115px;padding:8px 0;">Transaction ID</td>
-                    <td class="info-value" style="font-size:13.5px;color:#0f172a;font-weight:500;
-                               text-align:right;padding:8px 0;">#${data.transactionId}</td>
-                  </tr>
-                  <tr class="info-row" style="border-bottom:1px solid #dcfce7;">
-                    <td style="font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;
-                               letter-spacing:0.05em;width:115px;padding:8px 0;">Service</td>
-                    <td class="info-value" style="font-size:13.5px;color:#0f172a;font-weight:500;
-                               text-align:right;padding:8px 0;">${data.serviceName}</td>
-                  </tr>
-                  <tr class="info-row" style="border-bottom:1px solid #dcfce7;">
-                    <td style="font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;
-                               letter-spacing:0.05em;width:115px;padding:8px 0;">New Status</td>
-                    <td class="info-value" style="font-size:13.5px;color:#16a34a;font-weight:700;
-                               text-align:right;padding:8px 0;">${statusLabel}</td>
-                  </tr>
-                  ${attachmentsRow}
-                </table>
-              </div>
-              ${remarksBlock}
-              ${deadlineBlock}
-              ${ctaBlock}
-              <div style="height:1px;background:#dde1ef;margin:24px 0;"></div>
-              <div style="font-size:13.5px;color:#374151;line-height:1.7;">
-                <p>If you have questions or need assistance, please don't hesitate to
-                  <a href="mailto:${process.env.SUPPORT_EMAIL || "support@randc.com"}"
-                     style="color:#16a34a;font-weight:500;">contact our support team</a>.
-                </p>
-                <br/>
-                <p>Best regards,<br/>
-                  <strong style="color:#0f172a;">The
-                    <span style="color:#16a34a;font-weight:700;">RandC</span>
-                    Documentation Team
-                  </strong>
-                </p>
-              </div>
-            </div>
-            ${buildFooter()}
-          </div>
-        </div>
-      </body>
-      </html>`;
+    const body = `
+      <p style="font-size:15px;font-weight:600;color:#000000;line-height:1.5;margin:0 0 8px;">
+        Dear ${data.clientName},
+      </p>
+      <p style="font-size:14px;color:#000000;line-height:1.75;margin:0 0 24px;">
+        The status of your document transaction has been updated.
+        Please review the details below and take any necessary action.
+      </p>
+      ${statusBadge}
+      ${infoPanel(txRows)}
+      ${remarksBlock}
+      ${deadlineBlock}
+      ${ctaButton(appUrl, ctaLabel)}
+      <p style="font-size:13px;color:#000000;line-height:1.75;margin:0;">
+        If you have questions, please
+        <a href="mailto:${process.env.SUPPORT_EMAIL}"
+           style="color:#22c55e;font-weight:500;">contact our support team</a>.
+      </p>`;
 
     await sendMail({
       from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
       to:      clientEmail,
       subject: `Transaction #${data.transactionId} — Status Updated to ${statusLabel}`,
-      html:    htmlContent,
+      html:    wrapEmail(header, body),
     });
 
     console.log(`Status update email sent to ${clientEmail} [${statusLabel}]`);
@@ -350,323 +549,120 @@ export async function sendClientDocumentProcessUpdate(data, clientEmail) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  OTP EMAIL
+//  4.  APPOINTMENT EMAILS  (approved / cancelled / completed / pending)
 // ─────────────────────────────────────────────────────────────────────────────
-export async function sendUserOTP(OTP, email) {
-  try {
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        ${FONT_IMPORT}
-        <style>${BASE_STYLES}</style>
-      </head>
-      <body>
-        <div style="background:#f1f3fa;padding:32px 16px;">
-          <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;
-               box-shadow:0 4px 24px rgba(15,23,42,0.10);border:1px solid #dde1ef;">
-            <div style="background:linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%);
-                        padding:36px 40px 28px;text-align:center;">
-              <div style="display:none;">${LOGO_IMG_TAG}</div>
-              <div style="font-size:34px;margin-bottom:10px;">🔐</div>
-              <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0;line-height:1.3;
-                         font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
-                One-Time Password
-              </h1>
-              <p style="color:rgba(255,255,255,0.82);font-size:13px;margin-top:6px;">
-                Verify your email address
-              </p>
-            </div>
-            <div style="padding:32px 40px 28px;">
-              <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:24px;">
-                We received a request to verify your email address. Use the OTP below to continue.
-              </p>
-              <div style="background:#f8fffe;border:1px solid #bbf7d0;border-left:4px solid #22c55e;
-                          border-radius:10px;padding:28px 24px;margin-bottom:24px;text-align:center;">
-                <p style="font-size:12px;color:#16a34a;font-weight:600;text-transform:uppercase;
-                           letter-spacing:0.07em;margin-bottom:10px;">Your One-Time Password</p>
-                <p style="font-size:40px;font-weight:700;color:#16a34a;letter-spacing:10px;
-                           margin:0;font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
-                  ${OTP}
-                </p>
-              </div>
-              <div style="background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;
-                          border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-                <div style="font-size:12px;font-weight:700;color:#b45309;margin-bottom:6px;">
-                  ⚠️ &nbsp;Security Notice
-                </div>
-                <ul style="font-size:13px;color:#374151;line-height:1.8;padding-left:16px;margin:0;">
-                  <li>This OTP is valid for <strong>5 minutes only</strong></li>
-                  <li>Do not share this code with anyone</li>
-                  <li>If you didn't request this, please ignore this email</li>
-                </ul>
-              </div>
-              <p style="font-size:13.5px;color:#374151;">
-                Best regards,<br/>
-                <strong style="color:#0f172a;">
-                  The <span style="color:#16a34a;font-weight:700;">RandC</span> Support Team
-                </strong>
-              </p>
-            </div>
-            ${buildFooter()}
-          </div>
-        </div>
-      </body>
-      </html>`;
-
-    await sendMail({
-      from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
-      to:      email,
-      subject: "Your One-Time Password (OTP) — Do Not Share",
-      html:    htmlContent,
-    });
-
-    console.log(`OTP email sent to ${email}`);
-  } catch (error) {
-    console.error("Error sending OTP email:", error);
-    throw error;
-  }
+function buildAppointmentInfoPanel(data, accentColor = "#22c55e") {
+  return infoPanel([
+    { label: "Date",     value: data.date },
+    { label: "Time",     value: data.time },
+    { label: "Services", value: data.services || "—" },
+  ]);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  APPOINTMENT EMAIL TEMPLATES
-// ─────────────────────────────────────────────────────────────────────────────
 function getAppointmentEmailTemplate(type, data) {
-  const infoCard = (accentColor, borderColor, labelColor) => `
-    <div style="background:#f8fffe;border:1px solid ${borderColor};border-left:4px solid ${accentColor};
-                border-radius:10px;padding:20px 24px;margin-bottom:24px;">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr style="border-bottom:1px solid ${borderColor};">
-          <td style="font-size:12px;font-weight:600;color:${labelColor};text-transform:uppercase;
-                     letter-spacing:0.05em;width:90px;padding:8px 0;">Date</td>
-          <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-            ${data.date}
-          </td>
-        </tr>
-        <tr style="border-bottom:1px solid ${borderColor};">
-          <td style="font-size:12px;font-weight:600;color:${labelColor};text-transform:uppercase;
-                     letter-spacing:0.05em;padding:8px 0;">Time</td>
-          <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-            ${data.time}
-          </td>
-        </tr>
-        <tr>
-          <td style="font-size:12px;font-weight:600;color:${labelColor};text-transform:uppercase;
-                     letter-spacing:0.05em;padding:8px 0;">Services</td>
-          <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-            ${data.services || "—"}
-          </td>
-        </tr>
-      </table>
-    </div>`;
+  const appUrl = `${process.env.APP_URL}/pages/client.html`;
 
-  const buildHeader = (gradient, icon, title) => `
-    <div style="background:${gradient};padding:36px 40px 28px;text-align:center;">
-      <div style="display:none;">${LOGO_IMG_TAG}</div>
-      <div style="font-size:34px;margin-bottom:10px;">${icon}</div>
-      <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0;line-height:1.3;
-                font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">${title}</h1>
-      <p style="color:rgba(255,255,255,0.82);font-size:13px;margin-top:6px;">
-        RandC Documentation Services
-      </p>
-    </div>`;
-
-  const remarksBlock = (bg, border, labelColor, bodyColor, title) =>
-    data.remarks
-      ? `<div style="background:${bg};border:1px solid ${border};border-left:4px solid ${border};
-                    border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-           <div style="font-size:11px;font-weight:700;text-transform:uppercase;
-                       color:${labelColor};margin-bottom:6px;">${title}</div>
-           <p style="font-size:13.5px;color:${bodyColor};line-height:1.65;margin:0;">${data.remarks}</p>
-         </div>`
-      : "";
-
-  const wrapHtml = (header, body) => `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8"/>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-      ${FONT_IMPORT}
-      <style>${BASE_STYLES}</style>
-    </head>
-    <body>
-      <div style="background:#f1f3fa;padding:32px 16px;">
-        <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;
-             box-shadow:0 4px 24px rgba(15,23,42,0.10);border:1px solid #dde1ef;">
-          ${header}
-          <div style="padding:32px 40px 28px;">
-            ${body}
-            <div style="height:1px;background:#dde1ef;margin:24px 0;"></div>
-            <p style="font-size:13.5px;color:#374151;">
-              Best regards,<br/>
-              <strong style="color:#0f172a;">
-                The <span style="color:#16a34a;font-weight:700;">RandC</span> Documentation Team
-              </strong>
-            </p>
-          </div>
-          ${buildFooter()}
-        </div>
-      </div>
-    </body>
-    </html>`;
-
-  const templates = {
+  const configs = {
     approved: {
-      subject: "✓ Appointment Approved — RandC Documentation",
-      html: wrapHtml(
-        buildHeader("linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%)", "✅", "Appointment Approved"),
-        `<p style="font-size:15px;color:#0f172a;margin-bottom:6px;">
-           Dear <strong>${data.firstName}</strong>,
-         </p>
-         <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:24px;">
-           Great news! Your appointment has been <strong style="color:#16a34a;">approved</strong>.
-           Please see the details below and make sure to be prepared on your scheduled date.
-         </p>
-         ${infoCard("#22c55e", "#bbf7d0", "#16a34a")}
-         <div style="background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;
-                     border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-           <div style="font-size:12px;font-weight:700;color:#b45309;margin-bottom:8px;">
-             ⚠️ &nbsp;Important Reminders
-           </div>
-           <ul style="font-size:13px;color:#374151;line-height:1.8;padding-left:16px;margin:0;">
-             <li>Arrive 10–15 minutes before your scheduled time</li>
-             <li>Bring all required documents</li>
-             <li>Bring a valid government-issued ID</li>
-             <li>Contact us at least 24 hours in advance to reschedule</li>
-           </ul>
-         </div>
-         ${remarksBlock("#dbeafe", "#93c5fd", "#1d4ed8", "#1e3a5f", "📝 &nbsp;Additional Notes")}`
-      ),
+      subject:  "Appointment Approved — RandC Documentation",
+      title:    "Appointment Approved",
+      subtitle: "Your appointment has been confirmed",
+      body: () => `
+        <p style="font-size:15px;font-weight:600;color:#000000;line-height:1.5;margin:0 0 8px;">
+          Dear ${data.firstName},
+        </p>
+        <p style="font-size:14px;color:#000000;line-height:1.75;margin:0 0 24px;">
+          Your appointment has been <strong style="color:#22c55e;">approved</strong>.
+          Please review the details below and be prepared on your scheduled date.
+        </p>
+        ${buildAppointmentInfoPanel(data)}
+        ${noticePanel("Important Reminders", bulletList([
+          "Arrive 10–15 minutes before your scheduled time.",
+          "Bring all required documents.",
+          "Bring a valid government-issued ID.",
+          "Notify us at least 24 hours in advance to reschedule.",
+        ]))}
+        ${data.remarks ? noticePanel("Additional Notes", `
+          <p style="font-size:13px;color:#000000;line-height:1.65;margin:0;">${data.remarks}</p>`) : ""}
+        ${ctaButton(appUrl, "View My Appointment")}`,
     },
+
     cancelled: {
-      subject: "Appointment Cancelled — RandC Documentation",
-      html: wrapHtml(
-        buildHeader("linear-gradient(135deg,#dc2626 0%,#ef4444 60%,#b91c1c 100%)", "❌", "Appointment Cancelled"),
-        `<p style="font-size:15px;color:#0f172a;margin-bottom:6px;">
-           Dear <strong>${data.firstName}</strong>,
-         </p>
-         <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:24px;">
-           We regret to inform you that your appointment has been <strong style="color:#dc2626;">cancelled</strong>.
-         </p>
-         <div style="background:#fef2f2;border:1px solid #fecaca;border-left:4px solid #ef4444;
-                     border-radius:10px;padding:20px 24px;margin-bottom:24px;">
-           <table width="100%" cellpadding="0" cellspacing="0">
-             <tr style="border-bottom:1px solid #fecaca;">
-               <td style="font-size:12px;font-weight:600;color:#dc2626;text-transform:uppercase;
-                          letter-spacing:0.05em;width:90px;padding:8px 0;">Date</td>
-               <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                 ${data.date}
-               </td>
-             </tr>
-             <tr style="border-bottom:1px solid #fecaca;">
-               <td style="font-size:12px;font-weight:600;color:#dc2626;text-transform:uppercase;
-                          letter-spacing:0.05em;padding:8px 0;">Time</td>
-               <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                 ${data.time}
-               </td>
-             </tr>
-             <tr>
-               <td style="font-size:12px;font-weight:600;color:#dc2626;text-transform:uppercase;
-                          letter-spacing:0.05em;padding:8px 0;">Services</td>
-               <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                 ${data.services || "—"}
-               </td>
-             </tr>
-           </table>
-         </div>
-         ${remarksBlock("#fef2f2", "#ef4444", "#b91c1c", "#7f1d1d", "📋 &nbsp;Reason for Cancellation")}
-         <p style="font-size:13.5px;color:#374151;line-height:1.7;margin-bottom:8px;">
-           If you would like to reschedule, please book a new appointment through your dashboard.
-           We apologize for any inconvenience caused.
-         </p>`
-      ),
+      subject:  "Appointment Cancelled — RandC Documentation",
+      title:    "Appointment Cancelled",
+      subtitle: "Your appointment has been cancelled",
+      body: () => `
+        <p style="font-size:15px;font-weight:600;color:#000000;line-height:1.5;margin:0 0 8px;">
+          Dear ${data.firstName},
+        </p>
+        <p style="font-size:14px;color:#000000;line-height:1.75;margin:0 0 24px;">
+          We regret to inform you that your appointment has been <strong>cancelled</strong>.
+        </p>
+        ${buildAppointmentInfoPanel(data)}
+        ${data.remarks ? noticePanel("Reason for Cancellation", `
+          <p style="font-size:13px;color:#000000;line-height:1.65;margin:0;">${data.remarks}</p>`) : ""}
+        <p style="font-size:13px;color:#000000;line-height:1.75;margin:0;">
+          To reschedule, please book a new appointment through your dashboard.
+          We apologize for the inconvenience.
+        </p>`,
     },
+
     completed: {
-      subject: "Appointment Completed — RandC Documentation",
-      html: wrapHtml(
-        buildHeader("linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%)", "🎉", "Appointment Completed"),
-        `<p style="font-size:15px;color:#0f172a;margin-bottom:6px;">
-           Dear <strong>${data.firstName}</strong>,
-         </p>
-         <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:24px;">
-           Thank you for visiting us! Your appointment has been successfully completed.
-         </p>
-         ${infoCard("#22c55e", "#bbf7d0", "#16a34a")}
-         ${remarksBlock("#d1fae5", "#22c55e", "#15803d", "#374151", "📝 &nbsp;Notes")}`
-      ),
+      subject:  "Appointment Completed — RandC Documentation",
+      title:    "Appointment Completed",
+      subtitle: "Thank you for visiting RandC Documentation",
+      body: () => `
+        <p style="font-size:15px;font-weight:600;color:#000000;line-height:1.5;margin:0 0 8px;">
+          Dear ${data.firstName},
+        </p>
+        <p style="font-size:14px;color:#000000;line-height:1.75;margin:0 0 24px;">
+          Thank you for visiting us. Your appointment has been successfully completed.
+        </p>
+        ${buildAppointmentInfoPanel(data)}
+        ${data.remarks ? noticePanel("Notes", `
+          <p style="font-size:13px;color:#000000;line-height:1.65;margin:0;">${data.remarks}</p>`) : ""}
+        ${ctaButton(appUrl, "View My Transactions")}`,
     },
+
     pending: {
-      subject: "Appointment Request Received — RandC Documentation",
-      html: wrapHtml(
-        buildHeader("linear-gradient(135deg,#1d4ed8 0%,#3b82f6 60%,#1e40af 100%)", "📋", "Appointment Request Received"),
-        `<p style="font-size:15px;color:#0f172a;margin-bottom:6px;">
-           Dear <strong>${data.firstName}</strong>,
-         </p>
-         <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:24px;">
-           Thank you for booking an appointment. We have received your request and it is currently
-           <strong style="color:#2563eb;">under review</strong>.
-         </p>
-         <div style="background:#eff6ff;border:1px solid #bfdbfe;border-left:4px solid #3b82f6;
-                     border-radius:10px;padding:20px 24px;margin-bottom:24px;">
-           <table width="100%" cellpadding="0" cellspacing="0">
-             <tr style="border-bottom:1px solid #bfdbfe;">
-               <td style="font-size:12px;font-weight:600;color:#2563eb;text-transform:uppercase;
-                          letter-spacing:0.05em;width:90px;padding:8px 0;">Date</td>
-               <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                 ${data.date}
-               </td>
-             </tr>
-             <tr style="border-bottom:1px solid #bfdbfe;">
-               <td style="font-size:12px;font-weight:600;color:#2563eb;text-transform:uppercase;
-                          letter-spacing:0.05em;padding:8px 0;">Time</td>
-               <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                 ${data.time}
-               </td>
-             </tr>
-             <tr>
-               <td style="font-size:12px;font-weight:600;color:#2563eb;text-transform:uppercase;
-                          letter-spacing:0.05em;padding:8px 0;">Services</td>
-               <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                 ${data.services || "—"}
-               </td>
-             </tr>
-           </table>
-         </div>
-         <div style="background:#eff6ff;border:1px solid #bfdbfe;border-left:4px solid #3b82f6;
-                     border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-           <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:8px;">
-             🔔 &nbsp;What's Next?
-           </div>
-           <ul style="font-size:13px;color:#374151;line-height:1.8;padding-left:16px;margin:0;">
-             <li>We will review your request within 24 hours</li>
-             <li>You'll receive a confirmation email once approved</li>
-             <li>Track your appointment status in your dashboard</li>
-           </ul>
-         </div>`
-      ),
+      subject:  "Appointment Request Received — RandC Documentation",
+      title:    "Appointment Request Received",
+      subtitle: "We have received your booking request",
+      body: () => `
+        <p style="font-size:15px;font-weight:600;color:#000000;line-height:1.5;margin:0 0 8px;">
+          Dear ${data.firstName},
+        </p>
+        <p style="font-size:14px;color:#000000;line-height:1.75;margin:0 0 24px;">
+          Thank you for booking an appointment. Your request is currently
+          <strong>under review</strong>.
+        </p>
+        ${buildAppointmentInfoPanel(data)}
+        ${noticePanel("What's Next?", bulletList([
+          "We will review your request within 24 hours.",
+          "You will receive a confirmation email once approved.",
+          "Track your appointment status through your dashboard.",
+        ]))}`,
     },
   };
 
-  return templates[type] || templates.pending;
+  const cfg = configs[type] || configs.pending;
+  const header = buildHeader(cfg.title, cfg.subtitle);
+
+  return {
+    subject: cfg.subject,
+    html:    wrapEmail(header, cfg.body()),
+  };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  SEND APPOINTMENT EMAIL SERVICE
-// ─────────────────────────────────────────────────────────────────────────────
 export async function sendAppointmentEmailService(type, recipientEmail, data) {
   try {
     const template = getAppointmentEmailTemplate(type, data);
-
     await sendMail({
       from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
       to:      recipientEmail,
       subject: template.subject,
       html:    template.html,
     });
-
     console.log(`${type} appointment email sent to: ${recipientEmail}`);
   } catch (error) {
     console.error(`Error sending ${type} appointment email:`, error);
@@ -675,31 +671,10 @@ export async function sendAppointmentEmailService(type, recipientEmail, data) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  APPOINTMENT COMPLETION EMAIL
+//  5.  APPOINTMENT COMPLETION EMAIL
 // ─────────────────────────────────────────────────────────────────────────────
 export async function sendAppointmentCompletionEmail(data, clientEmail) {
   try {
-    const serviceListHtml = Array.isArray(data.services) && data.services.length
-      ? data.services.map((s) => `
-          <tr>
-            <td style="padding:8px 12px;background:#f0fdf4;border-radius:6px;
-                       font-size:13.5px;color:#0f172a;margin-bottom:6px;">
-              <span style="color:#22c55e;font-weight:700;margin-right:8px;">✓</span>${s}
-            </td>
-          </tr>
-          <tr><td style="height:6px;"></td></tr>`).join("")
-      : `<tr><td style="font-size:13px;color:#374151;padding:8px 0;">No services listed.</td></tr>`;
-
-    const remarksBlock = data.remarks
-      ? `<div style="background:#dbeafe;border:1px solid #93c5fd;border-left:4px solid #3b82f6;
-                    border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-           <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#1d4ed8;margin-bottom:6px;">
-             📝 &nbsp;Additional Notes
-           </div>
-           <p style="font-size:13.5px;color:#374151;line-height:1.65;margin:0;">${data.remarks}</p>
-         </div>`
-      : "";
-
     let formattedDate = data.appointmentDate;
     if (data.appointmentDate) {
       const d = new Date(data.appointmentDate);
@@ -710,107 +685,70 @@ export async function sendAppointmentCompletionEmail(data, clientEmail) {
       }
     }
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        ${FONT_IMPORT}
-        <style>${BASE_STYLES}</style>
-      </head>
-      <body>
-        <div style="background:#f1f3fa;padding:32px 16px;">
-          <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;
-               box-shadow:0 4px 24px rgba(15,23,42,0.10);border:1px solid #dde1ef;">
-            <div style="background:linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#15803d 100%);
-                        padding:36px 40px 28px;text-align:center;">
-              <div style="display:none;">${LOGO_IMG_TAG}</div>
-              <div style="font-size:34px;margin-bottom:10px;">🎉</div>
-              <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0;line-height:1.3;
-                         font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
-                Appointment Completed
-              </h1>
-              <p style="color:rgba(255,255,255,0.82);font-size:13px;margin-top:6px;">
-                Document processing has been initiated
-              </p>
-            </div>
-            <div style="padding:32px 40px 28px;">
-              <p style="font-size:15px;color:#0f172a;margin-bottom:6px;">
-                Dear <strong>${data.clientName}</strong>,
-              </p>
-              <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:24px;">
-                Thank you for visiting us! Your appointment has been successfully completed and
-                document processing has started.
-              </p>
-              <div style="background:#f8fffe;border:1px solid #bbf7d0;border-left:4px solid #22c55e;
-                          border-radius:10px;padding:20px 24px;margin-bottom:24px;">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                  <tr style="border-bottom:1px solid #dcfce7;">
-                    <td style="font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;
-                               letter-spacing:0.05em;width:130px;padding:8px 0;">Appointment ID</td>
-                    <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                      #${data.appointmentId}
-                    </td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #dcfce7;">
-                    <td style="font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;
-                               letter-spacing:0.05em;padding:8px 0;">Date</td>
-                    <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                      ${formattedDate}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;
-                               letter-spacing:0.05em;padding:8px 0;">Time</td>
-                    <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                      ${data.appointmentTime}
-                    </td>
-                  </tr>
-                </table>
-              </div>
-              <div style="background:#d1fae5;border:1px solid #22c55e;border-left:4px solid #16a34a;
-                          border-radius:10px;padding:14px 20px;margin-bottom:20px;">
-                <div style="font-size:12px;font-weight:700;color:#15803d;margin-bottom:4px;">
-                  📄 &nbsp;Document Processing Initiated
-                </div>
-                <p style="font-size:13px;color:#166534;line-height:1.6;margin:0;">
-                  We have created <strong>${data.transactionCount}</strong> document processing
-                  transaction(s) for your selected services.
-                </p>
-              </div>
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-                ${serviceListHtml}
-              </table>
-              ${remarksBlock}
-              <div style="text-align:center;margin:28px 0 8px;">
-                <a href="${process.env.APP_URL || "http://localhost:3000"}/pages/client.html"
-                   style="display:inline-block;background:linear-gradient(135deg,#16a34a 0%,#22c55e 100%);
-                          color:#ffffff;font-size:14px;font-weight:700;padding:14px 36px;
-                          border-radius:10px;text-decoration:none;
-                          box-shadow:0 4px 14px rgba(22,163,74,0.30);">
-                  View My Transactions
-                </a>
-              </div>
-              <div style="height:1px;background:#dde1ef;margin:24px 0;"></div>
-              <p style="font-size:13.5px;color:#374151;">
-                Best regards,<br/>
-                <strong style="color:#0f172a;">
-                  The <span style="color:#16a34a;font-weight:700;">RandC</span> Documentation Team
-                </strong>
-              </p>
-            </div>
-            ${buildFooter()}
-          </div>
-        </div>
-      </body>
-      </html>`;
+    const serviceListHtml = Array.isArray(data.services) && data.services.length
+      ? data.services.map((s) => `
+          <tr>
+            <td style="font-size:13px;color:#000000;line-height:1.65;
+                       padding:7px 0;${ROW_BORDER}">
+              <span style="color:#22c55e;font-weight:700;margin-right:8px;">&#10003;</span>${s}
+            </td>
+          </tr>`).join("")
+      : `<tr><td style="font-size:13px;color:#000000;padding:7px 0;">No services listed.</td></tr>`;
+
+    const remarksBlock = data.remarks
+      ? noticePanel("Additional Notes", `
+          <p style="font-size:13px;color:#000000;line-height:1.65;margin:0;">${data.remarks}</p>`)
+      : "";
+
+    const header = buildHeader(
+      "Appointment Completed",
+      "Document processing has been initiated"
+    );
+
+    const body = `
+      <p style="font-size:15px;font-weight:600;color:#000000;line-height:1.5;margin:0 0 8px;">
+        Dear ${data.clientName},
+      </p>
+      <p style="font-size:14px;color:#000000;line-height:1.75;margin:0 0 24px;">
+        Your appointment has been successfully completed and document processing has started.
+      </p>
+
+      ${infoPanel([
+        { label: "Appointment ID", value: `#${data.appointmentId}` },
+        { label: "Date",           value: formattedDate },
+        { label: "Time",           value: data.appointmentTime },
+      ])}
+
+      ${noticePanel("Processing Initiated", `
+        <p style="font-size:13px;color:#000000;line-height:1.65;margin:0;">
+          We have created <strong>${data.transactionCount}</strong> document processing
+          transaction(s) for your selected services.
+        </p>`)}
+
+      <!-- Service list -->
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+             style="border:1px solid #000000;margin-bottom:24px;">
+        <tr>
+          <td class="pc" style="padding:16px 20px;">
+            <p style="font-size:10px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:0.09em;color:#22c55e;margin:0 0 10px;">
+              Services
+            </p>
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+              ${serviceListHtml}
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      ${remarksBlock}
+      ${ctaButton(`${process.env.APP_URL}/pages/client.html`, "View My Transactions")}`;
 
     await sendMail({
       from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
       to:      clientEmail,
       subject: "Appointment Completed — Document Processing Started",
-      html:    htmlContent,
+      html:    wrapEmail(header, body),
     });
 
     console.log(`Appointment completion email sent to ${clientEmail}`);
@@ -822,7 +760,7 @@ export async function sendAppointmentCompletionEmail(data, clientEmail) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  READY TO CLAIM EMAIL
+//  6.  READY TO CLAIM EMAIL
 // ─────────────────────────────────────────────────────────────────────────────
 export async function sendReadyToClaimEmail(clientInfo, transactionId, claimDeadline, serviceName) {
   try {
@@ -840,158 +778,74 @@ export async function sendReadyToClaimEmail(clientInfo, transactionId, claimDead
       }
     }
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        ${FONT_IMPORT}
-        <style>${BASE_STYLES}</style>
-      </head>
-      <body>
-        <div style="background:#f1f3fa;padding:32px 16px;">
-          <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;
-               box-shadow:0 4px 24px rgba(15,23,42,0.10);border:1px solid #dde1ef;">
-            <div style="background:linear-gradient(135deg,#4f46e5 0%,#0891b2 100%);
-                        padding:36px 40px 28px;text-align:center;">
-              <div style="display:none;">${LOGO_IMG_TAG}</div>
-              <div style="font-size:34px;margin-bottom:10px;">📄</div>
-              <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0;line-height:1.3;
-                         font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
-                Document Ready to Claim
-              </h1>
-              <p style="color:rgba(255,255,255,0.82);font-size:13px;margin-top:6px;">
-                RandC Documentation Services
-              </p>
-            </div>
-            <div style="text-align:center;padding:18px 40px 0;">
-              <span style="display:inline-block;background:#ffffff;color:#16a34a;font-size:12px;
-                           font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
-                           padding:6px 22px;border-radius:999px;border:2px solid #16a34a;
-                           box-shadow:0 2px 10px rgba(22,163,74,0.18);">
-                Ready to Claim
-              </span>
-            </div>
-            <div style="padding:30px 40px 28px;">
-              <p style="font-size:15px;color:#0f172a;margin-bottom:6px;">
-                Dear <strong>${first_name} ${last_name}</strong>,
-              </p>
-              <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:24px;">
-                Great news! Your document has been processed and is now ready for pickup at our office.
-              </p>
-              <div style="background:#f8fffe;border:1px solid #bbf7d0;border-left:4px solid #22c55e;
-                          border-radius:10px;padding:20px 24px;margin-bottom:24px;">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                  <tr style="border-bottom:1px solid #dcfce7;">
-                    <td style="font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;
-                               letter-spacing:0.05em;width:130px;padding:8px 0;">Service</td>
-                    <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                      ${serviceName || "Document Processing Service"}
-                    </td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #dcfce7;">
-                    <td style="font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;
-                               letter-spacing:0.05em;padding:8px 0;">Transaction ID</td>
-                    <td style="font-size:13.5px;color:#0f172a;font-weight:500;text-align:right;padding:8px 0;">
-                      #${transactionId}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;
-                               letter-spacing:0.05em;padding:8px 0;">Status</td>
-                    <td style="font-size:13.5px;color:#16a34a;font-weight:700;text-align:right;padding:8px 0;">
-                      Ready to Claim
-                    </td>
-                  </tr>
-                </table>
-              </div>
-              <div style="background:#fff7ed;border:1px solid #fed7aa;border-left:4px solid #f97316;
-                          border-radius:10px;padding:14px 20px;margin-bottom:20px;">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td width="32" valign="middle" style="font-size:22px;padding-right:12px;">⏰</td>
-                    <td valign="middle">
-                      <div style="font-size:11px;font-weight:700;text-transform:uppercase;
-                                  letter-spacing:0.06em;color:#c2410c;margin-bottom:2px;">Claim Deadline</div>
-                      <div style="font-size:14px;font-weight:700;color:#ea580c;">
-                        ${deadlineStr}${deadlineTime ? " · " + deadlineTime : ""}
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-              </div>
-              <div style="background:#fef2f2;border:1px solid #fecaca;border-left:4px solid #ef4444;
-                          border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-                <div style="font-size:12px;font-weight:700;color:#b91c1c;margin-bottom:6px;">
-                  ⚠️ &nbsp;Penalty Notice
-                </div>
-                <p style="font-size:13px;color:#7f1d1d;line-height:1.6;margin:0;">
-                  Documents not claimed within <strong>7 days</strong> from the ready date will incur
-                  a <strong>₱200.00 penalty fee</strong>. Please claim before the deadline to avoid this charge.
-                </p>
-              </div>
-              <div style="background:#f8fafc;border:1px solid #dde1ef;border-radius:10px;
-                          padding:18px 20px;margin-bottom:24px;">
-                <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px;">
-                  📍 &nbsp;Office Information
-                </div>
-                <table width="100%" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td width="22" valign="top" style="font-size:14px;padding-right:10px;">📌</td>
-                    <td style="font-size:13px;color:#374151;line-height:1.6;padding-bottom:8px;">
-                      <strong>Address:</strong><br/>
-                      267 De Vega Compound, Silangan St. Caingin,<br/>
-                      Meycauayan, Bulacan 3020
-                    </td>
-                  </tr>
-                  <tr>
-                    <td valign="top" style="font-size:14px;padding-right:10px;">🕐</td>
-                    <td style="font-size:13px;color:#374151;line-height:1.6;padding-bottom:8px;">
-                      <strong>Office Hours:</strong><br/>
-                      Mon – Sat: 8:00 AM – 5:00 PM<br/>
-                      Sunday: Closed
-                    </td>
-                  </tr>
-                  <tr>
-                    <td valign="top" style="font-size:14px;padding-right:10px;">📞</td>
-                    <td style="font-size:13px;color:#374151;line-height:1.6;">
-                      <strong>Contact:</strong> +63 917 123 4567
-                    </td>
-                  </tr>
-                </table>
-              </div>
-              <div style="text-align:center;margin:28px 0 8px;">
-                <a href="${process.env.APP_URL || "http://localhost:3000"}/pages/client.html"
-                   style="display:inline-block;background:linear-gradient(135deg,#16a34a 0%,#22c55e 100%);
-                          color:#ffffff;font-size:14px;font-weight:700;padding:14px 36px;
-                          border-radius:10px;text-decoration:none;
-                          box-shadow:0 4px 14px rgba(22,163,74,0.30);">
-                  View Your Document
-                </a>
-              </div>
-              <p style="font-size:13px;color:#374151;line-height:1.65;margin-top:20px;">
-                Please bring a valid government-issued ID when claiming your document.
-              </p>
-              <div style="height:1px;background:#dde1ef;margin:24px 0;"></div>
-              <p style="font-size:13.5px;color:#374151;">
-                Best regards,<br/>
-                <strong style="color:#0f172a;">
-                  The <span style="color:#16a34a;font-weight:700;">RandC</span> Documentation Team
-                </strong>
-              </p>
-            </div>
-            ${buildFooter()}
-          </div>
-        </div>
-      </body>
-      </html>`;
+    const header = buildHeader(
+      "Document Ready to Claim",
+      "Your processed document is available for pickup"
+    );
+
+    const body = `
+      <p style="font-size:15px;font-weight:600;color:#000000;line-height:1.5;margin:0 0 8px;">
+        Dear ${first_name} ${last_name},
+      </p>
+      <p style="font-size:14px;color:#000000;line-height:1.75;margin:0 0 24px;">
+        Your document has been processed and is now ready for pickup at our office.
+      </p>
+
+      ${infoPanel([
+        { label: "Service",        value: serviceName || "Document Processing Service" },
+        { label: "Transaction ID", value: `#${transactionId}` },
+        { label: "Status",         value: "Ready to Claim", valueColor: "#22c55e" },
+      ])}
+
+      ${noticePanel("Claim Deadline", `
+        <p style="font-size:14px;font-weight:700;color:#000000;margin:0 0 3px;">
+          ${deadlineStr}${deadlineTime ? " &middot; " + deadlineTime : ""}
+        </p>
+        <p style="font-size:12px;color:#000000;line-height:1.6;margin:0;">
+          Documents not claimed within <strong>7 days</strong> will incur
+          a <strong>&#8369;200.00 penalty fee</strong>.
+        </p>`, "16px")}
+
+      ${noticePanel("Penalty Notice", `
+        <p style="font-size:13px;color:#000000;line-height:1.65;margin:0;">
+          To avoid the penalty, please claim your document before the deadline shown above.
+        </p>`)}
+
+      ${noticePanel("Office Information", `
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td style="font-size:13px;color:#000000;line-height:1.65;
+                       padding:6px 0;${ROW_BORDER}">
+              <strong>Address:</strong><br />
+              267 De Vega Compound, Silangan St. Caingin,<br />
+              Meycauayan, Bulacan 3020
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size:13px;color:#000000;line-height:1.65;
+                       padding:6px 0;${ROW_BORDER}">
+              <strong>Office Hours:</strong><br />
+              Mon – Sat: 8:00 AM – 5:00 PM &nbsp;|&nbsp; Sunday: Closed
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size:13px;color:#000000;line-height:1.65;padding:6px 0;">
+              <strong>Contact:</strong> +63 917 123 4567
+            </td>
+          </tr>
+        </table>`)}
+
+      ${ctaButton(`${process.env.APP_URL}/pages/client.html`, "View Your Document")}
+
+      <p style="font-size:12px;color:#000000;line-height:1.65;margin:0;">
+        Please bring a valid government-issued ID when claiming your document.
+      </p>`;
 
     await sendMail({
       from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
       to:      email,
-      subject: `📄 Your Document is Ready to Claim — Transaction #${transactionId}`,
-      html:    htmlContent,
+      subject: `Your Document is Ready to Claim — Transaction #${transactionId}`,
+      html:    wrapEmail(header, body),
     });
 
     console.log(`Ready-to-claim email sent to ${email} [Tx #${transactionId}]`);
@@ -1003,135 +857,16 @@ export async function sendReadyToClaimEmail(clientInfo, transactionId, claimDead
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  VERIFY EMAIL CONFIG
+//  7.  VERIFY EMAIL CONFIG
 // ─────────────────────────────────────────────────────────────────────────────
 export async function verifyEmailConfigService() {
   try {
-    // Verify OAuth2 credentials are working by getting a fresh access token
     const { token } = await oauth2Client.getAccessToken();
     if (!token) throw new Error("Could not obtain access token");
-    console.log("Email (Gmail API) is ready to send messages");
+    console.log("Gmail API is ready to send messages");
     return true;
   } catch (error) {
     console.error("Email configuration error:", error);
     return false;
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  MAGIC LINK EMAIL
-// ─────────────────────────────────────────────────────────────────────────────
-export async function sendMagicLinkEmail({ email, name, magicUrl, expiresAt }) {
-  try {
-    const displayName = name || "there";
-
-    const expiresStr = expiresAt.toLocaleString("en-PH", {
-      month: "short", day: "numeric", year: "numeric",
-      hour: "numeric", minute: "2-digit", hour12: true,
-      timeZone: "Asia/Manila",
-    });
-
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <title>Your Magic Login Link — RandC Documentation</title>
-        ${FONT_IMPORT}
-        <style>${BASE_STYLES}</style>
-      </head>
-      <body>
-        <div style="background:#f1f3fa;padding:32px 16px;">
-          <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;
-               box-shadow:0 4px 24px rgba(15,23,42,0.10),0 1px 4px rgba(15,23,42,0.06);
-               border:1px solid #dde1ef;">
-            <div style="background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 60%,#1e40af 100%);
-                        padding:36px 40px 28px;text-align:center;">
-              <div style="display:none;">${LOGO_IMG_TAG}</div>
-              <div style="font-size:38px;margin-bottom:10px;">🔗</div>
-              <h1 style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;
-                         margin:0;line-height:1.3;font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;">
-                Your Magic Login Link
-              </h1>
-              <p style="color:rgba(255,255,255,0.82);font-size:13px;font-weight:400;margin-top:6px;">
-                One click to sign in — no password needed
-              </p>
-            </div>
-            <div style="padding:30px 40px 28px;">
-              <p style="font-size:15px;color:#0f172a;margin-bottom:6px;">
-                Hi <strong>${displayName}</strong>,
-              </p>
-              <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:28px;">
-                We received a request to sign in to your <strong>RandC Documentation Services</strong>
-                account using your Gmail address. Click the button below to log in instantly.
-              </p>
-              <div style="text-align:center;margin:0 0 28px;">
-                <a href="${magicUrl}"
-                   style="display:inline-block;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);
-                          color:#ffffff;font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;
-                          font-size:15px;font-weight:700;letter-spacing:0.02em;
-                          padding:16px 48px;border-radius:12px;text-decoration:none;
-                          box-shadow:0 4px 16px rgba(37,99,235,0.35);">
-                  ✉️&nbsp;&nbsp;Sign In to My Account
-                </a>
-              </div>
-              <div style="background:#eff6ff;border:1px solid #bfdbfe;border-left:4px solid #2563eb;
-                          border-radius:10px;padding:14px 20px;margin-bottom:22px;">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td width="28" valign="middle" style="font-size:20px;padding-right:10px;">⏰</td>
-                    <td valign="middle">
-                      <div style="font-size:11px;font-weight:700;text-transform:uppercase;
-                                  letter-spacing:0.06em;color:#1d4ed8;margin-bottom:2px;">Link Expires</div>
-                      <div style="font-size:13.5px;font-weight:600;color:#1e3a8a;">
-                        ${expiresStr}&nbsp;·&nbsp;valid for 15 minutes
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-              </div>
-              <div style="background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;
-                          border-radius:10px;padding:14px 20px;margin-bottom:24px;">
-                <div style="font-size:12px;font-weight:700;color:#b45309;margin-bottom:5px;">
-                  🔒&nbsp;&nbsp;Security Notice
-                </div>
-                <ul style="margin:0;padding-left:18px;font-size:13px;color:#78350f;line-height:1.8;">
-                  <li>This link can only be used <strong>once</strong>.</li>
-                  <li>It expires in <strong>15 minutes</strong>.</li>
-                  <li>If you did not request this, you can safely ignore this email — your account remains secure.</li>
-                </ul>
-              </div>
-              <p style="font-size:12px;color:#64748b;line-height:1.7;word-break:break-all;">
-                If the button above doesn't work, copy and paste this URL into your browser:<br/>
-                <span style="color:#2563eb;">${magicUrl}</span>
-              </p>
-              <div style="height:1px;background:#dde1ef;margin:24px 0;"></div>
-              <p style="font-size:13.5px;color:#374151;line-height:1.7;">
-                Best regards,<br/>
-                <strong style="color:#0f172a;">
-                  The&nbsp;<span style="color:#16a34a;font-weight:700;">RandC</span> Documentation Team
-                </strong>
-              </p>
-            </div>
-            ${buildFooter()}
-          </div>
-        </div>
-      </body>
-      </html>`;
-
-    await sendMail({
-      from:    `"RandC Documentation" <${process.env.EMAIL_USER}>`,
-      to:      email,
-      subject: "🔗 Your Magic Login Link — RandC Documentation",
-      html:    htmlContent,
-    });
-
-    console.log(`Magic link email sent to ${email}`);
-    return { success: true };
-  } catch (error) {
-    console.error("Error sending magic link email:", error);
-    throw error;
   }
 }

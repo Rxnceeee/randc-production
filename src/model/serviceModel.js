@@ -201,7 +201,7 @@ switch (status) {
   return Object.values(grouped);
 }
 
-// ========== ADMIN APPOINTMENT MANAGEMENT ==========
+// ADMIN APPOINTMENT MANAGEMENT
 
 export async function getAllAppointmentsModel(status, date, page, limit) {
   const offset = (page - 1) * limit;
@@ -311,7 +311,7 @@ export async function updateAppointmentStatusModel( appointmentId, status, remar
   return result.affectedRows;
 }
 
-// ========== TIME SLOT MANAGEMENT (ADMIN) ==========
+// TIME SLOT MANAGEMENT (ADMIN)
 
 export async function getTimeSlotsByDateModel(date) {
   const query = `

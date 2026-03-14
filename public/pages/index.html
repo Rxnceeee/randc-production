@@ -177,14 +177,218 @@
 
     <!-- Scripts -->
     <script src="../js/global.js" defer></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+
+<style id="publicTicketStyles">
+  :root {
+    --pt-accent:  #6366f1;
+    --pt-accent2: #8b5cf6;
+    --pt-success: #059669;
+    --pt-danger:  #ef4444;
+    --pt-bg:      #0f172a;
+    --pt-surface: #1e293b;
+    --pt-border:  rgba(99,102,241,.25);
+    --pt-text:    #e2e8f0;
+    --pt-muted:   #94a3b8;
+  }
+
+  /* ── Modal shell ── */
+  .pub-ticket-modal {
+    background: #0f172a;
+    border: 1px solid var(--pt-border);
+    border-radius: 20px !important;
+    overflow: hidden;
+    color: var(--pt-text);
+  }
+  .pub-ticket-header {
+    background: linear-gradient(135deg, var(--pt-accent) 0%, var(--pt-accent2) 100%);
+    border-bottom: none;
+    padding: 24px 28px;
+  }
+  .pub-ticket-header .modal-title {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pub-ticket-subtitle {
+    color: rgba(255,255,255,.7);
+    font-size: 13px;
+    margin-top: 4px;
+    margin-bottom: 0;
+  }
+  .pub-ticket-body  { padding: 28px; background: #0f172a; }
+  .pub-ticket-footer {
+    background: #0f172a;
+    border-top: 1px solid var(--pt-border);
+    padding: 16px 28px;
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+
+  /* ── Info banner ── */
+  .pt-info-banner {
+    background: rgba(99,102,241,.1);
+    border: 1px solid rgba(99,102,241,.25);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--pt-muted);
+    margin-bottom: 20px;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .pt-info-banner i { color: var(--pt-accent); margin-top: 1px; flex-shrink: 0; }
+
+  /* ── Form elements ── */
+  .pt-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pt-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .pt-req { color: var(--pt-accent); }
+  .pt-input {
+    width: 100%;
+    background: #1e293b;
+    border: 1px solid rgba(99,102,241,.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--pt-text);
+    font-size: 14px;
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .pt-input:focus {
+    border-color: var(--pt-accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.18);
+  }
+  .pt-input option { background: #1e293b; }
+  .pt-err { display: block; font-size: 12px; color: var(--pt-danger); margin-top: 4px; min-height: 16px; }
+
+  /* ── Global error ── */
+  .pt-global-err {
+    background: rgba(239,68,68,.1);
+    border: 1px solid rgba(239,68,68,.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #fca5a5;
+    margin-top: 16px;
+  }
+
+  /* ── Buttons ── */
+  .pt-btn-primary {
+    background: linear-gradient(135deg, var(--pt-accent), var(--pt-accent2));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: opacity .2s;
+    text-decoration: none;
+  }
+  .pt-btn-primary:hover { opacity: .88; }
+  .pt-btn-ghost {
+    background: rgba(99,102,241,.1);
+    color: var(--pt-text);
+    border: 1px solid var(--pt-border);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background .2s;
+  }
+  .pt-btn-ghost:hover { background: rgba(99,102,241,.2); }
+
+  /* ── OTP step ── */
+  .pt-otp-wrapper { text-align: center; padding: 12px 0; }
+  .pt-otp-icon {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--pt-accent), var(--pt-accent2));
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 26px; color: #fff; margin-bottom: 16px;
+  }
+  .pt-otp-desc  { font-size: 15px; color: var(--pt-text);  margin-bottom: 4px; }
+  .pt-otp-hint  { font-size: 13px; color: var(--pt-muted); margin-bottom: 20px; }
+  .pt-otp-boxes { display: flex; gap: 8px; justify-content: center; }
+  .pt-otp-box {
+    width: 48px; height: 56px;
+    text-align: center;
+    font-size: 22px; font-weight: 700; font-family: monospace;
+    background: #1e293b;
+    border: 2px solid rgba(99,102,241,.25);
+    border-radius: 10px;
+    color: var(--pt-text);
+    caret-color: var(--pt-accent);
+    outline: none;
+    transition: border-color .2s;
+  }
+  .pt-otp-box:focus { border-color: var(--pt-accent); }
+
+  /* ── Success step ── */
+  .pt-success-wrapper { text-align: center; padding: 12px 0; }
+  .pt-success-icon {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, #059669, #0d9488);
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 30px; color: #fff; margin-bottom: 16px;
+  }
+  .pt-success-msg  { font-size: 15px; color: var(--pt-text); margin-bottom: 16px; }
+  .pt-success-qr img {
+    width: 160px; height: 160px;
+    border: 4px solid var(--pt-accent);
+    border-radius: 12px;
+    background: #fff;
+    padding: 4px;
+  }
+  .pt-success-hint { font-size: 13px; color: var(--pt-muted); margin-top: 12px; }
+
+  /* ── Service card extra button ── */
+  .btn-service-public {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    background: transparent;
+    border: 1px solid rgba(99,102,241,.4);
+    border-radius: 8px;
+    color: #a5b4fc;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+    text-align: left;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-service-public:hover {
+    background: rgba(99,102,241,.15);
+    color: #fff;
+  }
+</style>
+
   </head>
 
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <!-- ══ HEADER ════════════════════════════════════════════════════ -->
+    <!-- HEADER -->
     <header role="banner">
       <nav class="navbar navbar-expand-lg fixed-top" role="navigation" aria-label="Main navigation">
         <div class="container">
@@ -234,10 +438,10 @@
     </header>
 
 
-    <!-- ══ MAIN ══════════════════════════════════════════════════════ -->
+    <!-- MAIN -->
     <main id="main-content" role="main">
 
-      <!-- ── HERO ─────────────────────────────────────────────────── -->
+      <!-- HERO -->
       <section id="home" class="hero" aria-labelledby="hero-heading">
         <div class="hero-orb2" aria-hidden="true"></div>
         <div class="container hero-content">
@@ -291,7 +495,7 @@
       </section>
 
 
-      <!-- ── SERVICES ─────────────────────────────────────────────── -->
+      <!-- SERVICES -->
       <section id="services" aria-labelledby="services-heading">
         <div class="container">
           <div class="section-title">
@@ -301,12 +505,15 @@
             <h2 id="services-heading">Our <span>Services</span></h2>
             <p>Comprehensive document processing solutions tailored to your property and legal needs in the Philippines.</p>
           </div>
+          <div class="">
+        </div>
           <div class="row g-4" id="service-section" role="list" aria-label="Available services"></div>
         </div>
+        
       </section>
 
 
-      <!-- ── TESTIMONIALS ─────────────────────────────────────────── -->
+      <!-- TESTIMONIALS -->
       <section id="testimonials" aria-labelledby="testimonials-heading">
         <div class="container">
           <div class="section-title">
@@ -317,7 +524,7 @@
             <p>Hear from property owners and businesses who trusted RandC to handle their documents.</p>
           </div>
           <div class="row g-4" id="testimonials-row" role="list" aria-label="Client testimonials">
-            <!-- Loaded dynamically from /api/client/testimonials/public -->
+
             <div class="col-12 text-center" id="testimonials-loading" aria-live="polite">
               <div style="padding: 2rem 0; color: var(--text-muted); font-size: 0.9rem;">
                 <style>
@@ -333,7 +540,7 @@
       </section>
 
 
-      <!-- ── WHY US ────────────────────────────────────────────────── -->
+      <!-- WHY US -->
       <section id="why-us" aria-labelledby="why-us-heading">
         <div class="container">
           <div class="why-us-grid">
@@ -458,7 +665,7 @@
       </section>
 
 
-      <!-- ── MISSION & VISION ──────────────────────────────────────── -->
+      <!-- MISSION & VISION -->
       <section id="mission-vision" aria-labelledby="mv-heading">
         <div class="container">
           <div class="section-title">
@@ -495,7 +702,7 @@
       </section>
 
 
-      <!-- ── FAQ ──────────────────────────────────────────────────── -->
+      <!-- FAQ -->
       <section id="faq" aria-labelledby="faq-heading">
         <div class="container">
           <div class="section-title">
@@ -606,7 +813,7 @@
       </section>
 
 
-      <!-- ── CONTACT ───────────────────────────────────────────────── -->
+      <!-- CONTACT -->
       <section id="contact" aria-labelledby="contact-heading">
         <div class="container">
           <div class="section-title">
@@ -690,7 +897,7 @@
     </main>
 
 
-    <!-- ══ FOOTER ═════════════════════════════════════════════════════ -->
+    <!-- FOOTER -->
     <footer role="contentinfo">
       <div class="container">
         <div class="row gy-4">
@@ -749,7 +956,7 @@
     </footer>
 
 
-    <!-- ══ LOGIN MODAL ════════════════════════════════════════════════ -->
+    <!-- LOGIN MODAL -->
     <div class="modal fade" id="loginModal" tabindex="-1"
       aria-labelledby="loginModalLabel" aria-modal="true" role="dialog">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
@@ -790,7 +997,7 @@
                 style="font-size: 0.85rem">Forgot Password?</a>
             </div>
             
-            <button class="btn-submit" onclick="loginUser(event)" aria-label="Sign in to your account">
+            <button class="btn-submit" id="btnLoginUser" onclick="loginUser(event)" aria-label="Sign in to your account">
               <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Sign In
             </button>
             <hr>
@@ -807,6 +1014,7 @@
               Don't have an account?
               <a class="link-modal ms-1" data-bs-dismiss="modal"
                 data-bs-toggle="modal" data-bs-target="#signupModal">Create one here</a>
+                
             </p>
           </div>
 
@@ -814,6 +1022,7 @@
       </div>
     </div>
 
+    <!-- LOGIN WITH GMAIL LINK MODAL -->
     <div class="modal fade" id="gmailLoginModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -858,7 +1067,8 @@
       </div>
     </div>
 
-    <!-- ══ SIGNUP MODAL ═══════════════════════════════════════════════ -->
+        
+    <!-- SIGNUP MODAL -->
     <div class="modal fade" id="signupModal" tabindex="-1"
       aria-labelledby="signupModalLabel" aria-modal="true" role="dialog">
       <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -878,8 +1088,8 @@
 
           <div class="modal-body">
 
-            <!-- Registration Form -->
-            <form id="signupForm" class="signup-form-section" novalidate>
+            <!-- SECTION 1: Registration Form -->
+            <form id="signupForm" class="signup-form-section" novalidate style="display:none;">
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label" for="signupUsername">
@@ -929,12 +1139,15 @@
                 <input class="form-check-input" type="checkbox" id="agreeTerms" aria-required="true" />
                 <label class="form-check-label" for="agreeTerms"
                   style="font-size: 0.875rem; color: var(--text-secondary)">
-                  I agree to the <a href="#" class="link-modal">Terms and Conditions</a>
+                  I agree to the
+                  <a href="../pages/legal.html#pp-dpa" target="_blank" class="link-modal">Terms and Conditions</a>
                 </label>
               </div>
+
               <button class="btn-submit mt-3" onclick="signUpUser(event)" type="button">
                 <i class="bi bi-person-check" aria-hidden="true"></i> Create Account
               </button>
+
               <hr class="modal-divider" />
               <p class="text-center mb-0" style="font-size: 0.875rem; color: var(--text-secondary)">
                 Already have an account?
@@ -943,20 +1156,162 @@
               </p>
             </form>
 
-            <!-- Verification Section -->
-            <div class="verification-section" style="display: none" role="region" aria-label="Email verification">
+            <!-- SECTION 2: Consent -->
+            <div id="consentSection" class="consent-section"
+              role="region" aria-label="Account creation consent">
+
+          
+              <!-- Header -->
+              <div class="consent-header">
+                <div class="consent-shield">
+                  <i class="bi bi-shield-fill-check"></i>
+                </div>
+                <div>
+                  <h5 class="consent-title">Account Creation Consent</h5>
+                  <p class="consent-subtitle">Please read and agree before continuing</p>
+                </div>
+              </div>
+
+              <!-- Brief explanation -->
+              <div class="consent-card consent-card--intro">
+                <p class="consent-intro-text">
+                  Before we create your account, we want to be transparent about what information
+                  we collect, how we use it, and your rights under the
+                  <strong>Data Privacy Act of 2012 (Republic Act 10173)</strong>.
+                  Your privacy is important to us.
+                </p>
+              </div>
+
+              <!-- Data collected -->
+              <div class="consent-card">
+                <div class="consent-card-label">
+                  <i class="bi bi-database"></i>
+                  Data We Collect
+                </div>
+                <div class="consent-items">
+                  <div class="consent-item">
+                    <span class="consent-dot"></span>
+                    <span><strong>Account details</strong> — username, email address, password</span>
+                  </div>
+                  <div class="consent-item">
+                    <span class="consent-dot"></span>
+                    <span><strong>Profile information</strong> — full name, age, gender</span>
+                  </div>
+                  <div class="consent-item">
+                    <span class="consent-dot"></span>
+                    <span><strong>Communication logs</strong> — messages sent through the in-app chat support</span>
+                  </div>
+                  <div class="consent-item">
+                    <span class="consent-dot"></span>
+                    <span><strong>Usage data</strong> — login timestamps and session activity for security purposes</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- How it's used -->
+              <div class="consent-card">
+                <div class="consent-card-label">
+                  <i class="bi bi-gear"></i>
+                  How We Use Your Data
+                </div>
+                <div class="consent-items">
+                  <div class="consent-item">
+                    <span class="consent-dot consent-dot--check"></span>
+                    <span>To process and track your appointments</span>
+                  </div>
+                  <div class="consent-item">
+                    <span class="consent-dot consent-dot--check"></span>
+                    <span>To send you email notifications about your transactions and account activity</span>
+                  </div>
+                  <div class="consent-item">
+                    <span class="consent-dot consent-dot--check"></span>
+                    <span>To verify your identity and protect your account from unauthorized access</span>
+                  </div>
+                  <div class="consent-item">
+                    <span class="consent-dot consent-dot--check"></span>
+                    <span>To provide customer support through our in-app messaging system</span>
+                  </div>
+                  <div class="consent-item">
+                    <span class="consent-dot consent-dot--x"></span>
+                    <span>We <strong>do not</strong> sell or share your data with third parties for marketing</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rights & links -->
+              <div class="consent-card consent-card--rights">
+                <div class="consent-card-label">
+                  <i class="bi bi-person-check"></i>
+                  Your Rights
+                </div>
+                <p class="consent-rights-text">
+                  Under RA 10173, you have the right to access and request deletion
+                  of your personal data at any time. You may also withdraw consent by 
+                  deleting your account from your profile settings.
+                </p>
+                <div class="consent-links">
+                  <a href="../pages/legal.html#pp-dpa" target="_blank" class="consent-link">
+                    <i class="bi bi-file-earmark-text"></i>
+                    Privacy Policy &amp; DPA
+                  </a>
+                  <a href="../pages/legal.html#tos" target="_blank" class="consent-link">
+                    <i class="bi bi-file-earmark-ruled"></i>
+                    Terms of Service
+                  </a>
+                </div>
+              </div>
+
+              <!-- Agreement checkbox -->
+              <div class="consent-agree-wrap">
+                <label class="consent-agree-label" for="consentAgree">
+                  <input type="checkbox" id="consentAgree" class="consent-checkbox"
+                    onchange="toggleConsentBtn(this)" />
+                  <span class="consent-agree-box" aria-hidden="true">
+                    <i class="bi bi-check"></i>
+                  </span>
+                  <span class="consent-agree-text">
+                    I have read and understood the above information. I consent to the collection and
+                    processing of my personal data by RandC Documentation Services for the purposes
+                    stated above.
+                  </span>
+                </label>
+              </div>
+
+              <!-- Final create account button -->
+              <button
+                id="consentSubmitBtn"
+                class="btn-submit consent-submit-btn"
+                onclick="showSignupForm(event)"
+                type="button"
+                disabled
+                aria-disabled="true"
+              >
+                <i class="bi bi-shield-check" aria-hidden="true"></i>
+                I Agree &amp; Create My Account
+              </button>
+
+              <p class="consent-footer-note">
+                By clicking the button above you confirm that you are at least
+                <strong>18 years old</strong> and above.
+              </p>
+
+            </div>
+
+            <!-- ── SECTION 3: Verification ────────────────────────────────── -->
+            <div class="verification-section" style="display: none"
+              role="region" aria-label="Email verification">
               <div class="text-center">
                 <div class="verify-icon-wrap" aria-hidden="true">
                   <i class="bi bi-shield-check"></i>
                 </div>
-                <h5 style="font-family: 'Outfit', sans-serif; font-weight: 700; margin-bottom: 0.5rem;">
+                <h5 style="font-family:'Outfit',sans-serif;font-weight:700;margin-bottom:0.5rem;">
                   Check Your Email
                 </h5>
-                <p style="font-size: 0.9rem; color: var(--text-secondary)">
+                <p style="font-size:0.9rem;color:var(--text-secondary)">
                   We sent a 6-digit code to<br />
-                  <strong id="verificationEmailDisplay" style="color: var(--text-accent)"></strong>
+                  <strong id="verificationEmailDisplay" style="color:var(--text-accent)"></strong>
                 </p>
-                <p style="font-size: 0.8rem; color: var(--text-muted)">
+                <p style="font-size:0.8rem;color:var(--text-muted)">
                   Check your inbox or spam — expires in 5 minutes
                 </p>
               </div>
@@ -972,19 +1327,19 @@
               <button class="btn-submit" onclick="verifyVerificationCode()" type="button">
                 <i class="bi bi-check-circle" aria-hidden="true"></i> Verify Code
               </button>
-              <p class="text-center mt-3 mb-0" style="font-size: 0.875rem; color: var(--text-muted)">
+              <p class="text-center mt-3 mb-0" style="font-size:0.875rem;color:var(--text-muted)">
                 Didn't receive it?
                 <a href="#" class="link-modal ms-1" onclick="resendCode(event)">Resend Code</a>
               </p>
             </div>
 
-          </div>
+          </div><!-- /.modal-body -->
         </div>
       </div>
     </div>
 
 
-    <!-- ══ FORGOT PASSWORD MODAL ══════════════════════════════════════ -->
+    <!-- FORGOT PASSWORD MODAL -->
     <div class="modal fade" id="forgotPassword" tabindex="-1"
       aria-labelledby="forgotPasswordLabel" aria-modal="true" role="dialog">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
@@ -1074,8 +1429,7 @@
       </div>
     </div>
 
-
-    <!-- ══ BACK TO TOP ════════════════════════════════════════════════ -->
+    <!-- BACK TO TOP -->
     <button id="backToTop" class="btn-back-top"
       onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
       aria-label="Back to top of page" title="Back to top">
@@ -1083,28 +1437,20 @@
     </button>
 
 
-    <!-- ══ SCRIPTS ════════════════════════════════════════════════════ -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      "use strict";
+"use strict";
 
-      const ROOT = document.documentElement;
-
-
-      // ── Theme ──────────────────────────────────────────────────────
+const ROOT = document.documentElement;
 
       function applyTheme(t) {
         ROOT.setAttribute("data-theme", t);
         localStorage.setItem("rnc-theme", t);
         const b = document.getElementById("themeToggle");
         if (b) {
-          b.setAttribute("aria-label", t === "dark"
-            ? "Switch to light mode for better readability"
-            : "Switch to dark mode"
-          );
-          b.title = t === "dark"
-            ? "Switch to Light Mode (easier for reading)"
-            : "Switch to Dark Mode";
+          b.setAttribute("aria-label", t === "dark" ? "Switch to light mode for better readability" : "Switch to dark mode");
+          b.title = t === "dark" ? "Switch to Light Mode (easier for reading)": "Switch to Dark Mode";
         }
         updateNavbarBg();
       }
@@ -1129,7 +1475,7 @@
       });
 
 
-      // ── Navbar ─────────────────────────────────────────────────────
+      // Navbar
 
       function updateNavbarBg() {
         const nav = document.querySelector(".navbar");
@@ -1148,7 +1494,7 @@
       });
 
 
-      // ── Accordion ──────────────────────────────────────────────────
+      // Accordion
 
       function toggleAcc(id) {
         const item    = document.querySelector('[data-acc="' + id + '"]');
@@ -1174,7 +1520,7 @@
       }
 
 
-      // ── Toast Notifications ────────────────────────────────────────
+      // Toast Notifications
 
       const _toastIcons = {
         success: '<i class="bi bi-check-circle-fill toast-icon" aria-hidden="true"></i>',
@@ -1189,7 +1535,7 @@
         warning: "Warning",
         info:    "Info",
       };
-
+            
       function showNotificationMessage(message, type = "info", containerId = null, duration = 5000) {
         if (!["success", "error", "warning", "info"].includes(type)) type = "info";
 
@@ -1217,6 +1563,9 @@
             document.body.appendChild(container);
           }
         }
+
+        // Clear previous notifications
+        container.innerHTML = "";
 
         const pill = document.createElement("div");
         pill.className = "toast-pill toast-" + type;
@@ -1250,8 +1599,7 @@
         return { dismiss };
       }
 
-
-      // ── Forgot Password Flow ───────────────────────────────────────
+      // Forgot Password Flow
 
       function showVerificationCodeInput(email) {
         document.getElementById("email-banner").innerHTML =
@@ -1292,7 +1640,6 @@
         if (btn) {btn.disabled = false;}
       }
 
-      
       async function forgotResendCode(e, el) {
         e.preventDefault();
         el.disabled = true;
@@ -1323,7 +1670,6 @@
         }
         el.disabled = false;
       }
-
 
       async function forgotPasswordVerificationCode() {
         const code   = document.getElementById("verificationCode").value;
@@ -1388,8 +1734,7 @@
         }
       }
 
-
-      // ── Auth ───────────────────────────────────────────────────────
+      // Auth
 
       async function loginUser(event) {
         event.preventDefault();
@@ -1419,13 +1764,54 @@
         }
       }
 
+      function showSignupForm() {
+        document.getElementById('consentSection').style.display = 'none';
+        document.getElementById('signupForm').style.display     = 'block';
+      }
+
+      function resetSignupModal() {
+        document.getElementById('consentSection').style.display = 'block';
+        document.getElementById('signupForm').style.display     = 'none';
+
+        const cb  = document.getElementById('consentAgree');
+        const btn = document.getElementById('consentSubmitBtn');
+        if (cb)  cb.checked = false;
+        if (btn) { btn.disabled = true; btn.setAttribute('aria-disabled', 'true'); }
+      }
+
+      document.getElementById('signupModal')?.addEventListener('show.bs.modal', resetSignupModal);
+      document.getElementById('signupModal')?.addEventListener('hidden.bs.modal', resetSignupModal);
+      document.getElementById("password").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          loginUser(e);
+        }
+      });
+      document.getElementById("searchGmailAccount").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          searchVerifiedEmail(e);
+        }
+      });
+      
+      document.getElementById("gmailInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          sendMagicLink();
+        }
+      });
+
+      function toggleConsentBtn(checkbox) {
+        const btn = document.getElementById('consentSubmitBtn');
+        if (!btn) return;
+        btn.disabled = !checkbox.checked;
+        btn.setAttribute('aria-disabled', String(!checkbox.checked));
+      }
+
       async function signUpUser(event) {
         event.preventDefault();
-        const username        = document.getElementById("signupUsername").value;
-        const password        = document.getElementById("signupPassword").value;
-        const confirmPassword = document.getElementById("confirmPassword").value;
-        const email           = document.getElementById("signupEmail").value;
-        const agreeTerms      = document.getElementById("agreeTerms").checked;
+
+        const username        = document.getElementById('signupUsername').value.trim();
+        const email           = document.getElementById('signupEmail').value.trim();
+        const password        = document.getElementById('signupPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
 
         if (!checkUsername(username)) {
           showNotificationMessage("Invalid username. Use letters, numbers, or underscores (e.g. johndoe123).", "error", "signupModal");
@@ -1443,10 +1829,8 @@
           showNotificationMessage("Invalid email format. Example: johndoe@gmail.com", "error", "signupModal");
           return;
         }
-        if (!agreeTerms) {
-          showNotificationMessage("Please agree to the Terms and Conditions to continue.", "warning", "signupModal");
-          return;
-        }
+
+        // No agreeTerms check needed — consent was already agreed before reaching this form
 
         const res  = await fetch("/api/user/signup", {
           method:  "POST",
@@ -1493,7 +1877,7 @@
       }
 
 
-      // ── Services ───────────────────────────────────────────────────
+  // ── Services ───────────────────────────────────────────────────
 
       const serviceIcons = [
         "bi-file-earmark-text",
@@ -1521,7 +1905,7 @@
                 '<div class="service-icon" aria-hidden="true"><i class="bi ' + serviceIcons[i % serviceIcons.length] + '"></i></div>' +
                 '<h4 itemprop="name">' + service.service_name + '</h4>' +
                 '<p itemprop="description">' + service.description + '</p>' +
-                '<button class="btn-service" data-bs-toggle="modal" data-bs-target="#signupModal" ' +
+                '<button class="btn-service" data-bs-toggle="modal" data-bs-target="#loginModal" ' +
                   'aria-label="Book appointment for ' + service.service_name + '">' +
                   'Book Appointment <i class="bi bi-arrow-right" aria-hidden="true"></i>' +
                 '</button>' +
@@ -1533,8 +1917,7 @@
         }
       }
 
-
-      // ── OTP / Verification ─────────────────────────────────────────
+      // OTP / Verification
 
       function showVerify(email) {
         document.querySelector(".signup-form-section").style.display = "none";
@@ -1547,10 +1930,10 @@
         return /^[A-Za-z][A-Za-z0-9_]*$/.test(u);
       }
 
-      function checkEmailAddress(e) {
-        return /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(e);
+      function checkEmailAddress(email) {
+        return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/.test(email);
       }
-
+   
       function togglePw(id, btn) {
         const inp  = document.getElementById(id);
         const icon = btn.querySelector("i");
@@ -1620,9 +2003,7 @@
         codeInputs.forEach((input) => (input.value = ""));
       });
 
-
-      // ── DOMContentLoaded ───────────────────────────────────────────
-
+      // DOMContentLoaded
       document.addEventListener("DOMContentLoaded", function () {
 
         // Leaflet map
@@ -1684,8 +2065,7 @@
       });
 
 
-      // ── Scroll Reveal ──────────────────────────────────────────────
-
+      // Scroll Reveal
       const revealObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach((e) => {
@@ -1699,18 +2079,14 @@
         { threshold: 0.08 },
       );
 
-      document.querySelectorAll(
-        ".service-card,.testimonial-card,.mv-card,.acc-item,.contact-info-panel,.contact-map-panel"
-      ).forEach((el) => {
+      document.querySelectorAll(".service-card,.testimonial-card,.mv-card,.acc-item,.contact-info-panel,.contact-map-panel").forEach((el) => {
         el.style.opacity    = "0";
         el.style.transform  = "translateY(16px)";
         el.style.transition = "opacity 0.5s ease,transform 0.5s ease";
         revealObserver.observe(el);
       });
 
-
-      // ── Testimonials ───────────────────────────────────────────────
-
+      // Testimonials
       async function fetchTestimonials() {
         const row     = document.getElementById("testimonials-row");
         const loading = document.getElementById("testimonials-loading");
@@ -1808,10 +2184,6 @@
         }
       }
 
-      // ════════════════════════════════════════════════════════════
-      //  MAGIC LINK — Gmail passwordless login
-      // ════════════════════════════════════════════════════════════
-
       async function sendMagicLink() {
         const emailInput = document.getElementById('gmailInput');
         const btn        = document.querySelector('#gmailLoginModal .btn-submit');
@@ -1864,7 +2236,7 @@
         }
       }
 
-      // ── Swap modal body to "sent" confirmation ────────────────────────
+      // Swap modal body to "sent" confirmation
       function _magicShowSentState(email) {
         const body = document.querySelector('#gmailLoginModal .modal-body');
         if (!body) return;
@@ -1899,7 +2271,7 @@
           '</div>';
       }
 
-      // ── Reset modal back to email input ───────────────────────────────
+      // Reset modal back to email input
       function _magicResetModal() {
         const body = document.querySelector('#gmailLoginModal .modal-body');
         if (!body) return;
@@ -1924,12 +2296,12 @@
         if (input) input.focus();
       }
 
-      // ── Toast helper ──────────────────────────────────────────────────
+      // Toast helper
       function _magicToast(message, type) {
         showNotificationMessage(message, type, 'gmailLoginModal');
       }
 
-      // ── Full-screen verify overlay ────────────────────────────────────
+      // Full-screen verify overlay
       function _magicOverlay(state, message) {
         let el = document.getElementById('_magicOverlay');
         if (!el) {
@@ -2011,7 +2383,7 @@
           '</div>';
       }
 
-      // ── XSS sanitiser ─────────────────────────────────────────────────
+      // XSS sanitiser
       function _escHtml(str) {
         return String(str)
           .replace(/&/g, '&amp;').replace(/</g, '&lt;')

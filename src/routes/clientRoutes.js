@@ -6,11 +6,12 @@ import { setupAccountController, getDashboardStatsController,
   getMyTestimonialsController,
     getRecentActivityController,getUpcomingAppointmentsController,getActiveTransactionsController,getMonthlyOverviewController,getClientTransactionsController,searchClientTransactionsController,getClientTransactionTimelineController,cancelClientTransactionController,getClientTransactionReceiptController,getAvailableTimeSlotsController,markAllNotificationsAsReadController,markNotificationAsReadController,getNotificationsController,getAppointmentsController ,submitAppointmentController,changePasswordController, cancelClientAppointmentController} from '../controller/clientController.js';
 import {isUserAuthenticated,verifyAccessRole} from  '../middleware/auth.js';
-import { requestAccountDeletion } from '../controller/userController.js';
+import { requestAccountAnonymization } from '../controller/userController.js';
+import { getClosedDatesController } from '../controller/adminController.js';
 
 const router = express.Router();
 
-
+router.get('/closed-dates',isUserAuthenticated,verifyAccessRole('client'),getClosedDatesController);
 // ── TESTIMONIALS ──────────────────────────────────────────────
 // Public — no auth needed
 router.get('/testimonials/public',getPublicTestimonialsController);
@@ -18,8 +19,8 @@ router.post('/testimonials',isUserAuthenticated,verifyAccessRole('client'),submi
 router.get('/testimonials/eligible',isUserAuthenticated,verifyAccessRole('client'),checkTestimonialEligibilityController);
 router.get('/testimonials/mine',isUserAuthenticated,verifyAccessRole('client'),getMyTestimonialsController);
 
-// ── ACCOUNT DELETION ──────────────────────────────────────────
-router.post('/account/delete',isUserAuthenticated,requestAccountDeletion);
+// ── ACCOUNT ANONYMIZATION ──────────────────────────────────────────
+router.post('/account/anonymize',isUserAuthenticated,requestAccountAnonymization);
 
 
 router.put('/setupAccount', isUserAuthenticated,setupAccountController);
@@ -32,7 +33,7 @@ router.put('/cancelAppointment/:appointmentID',isUserAuthenticated,verifyAccessR
 
 
 // Time Slot Management
-router.get('/available-time-slots', isUserAuthenticated, verifyAccessRole('client'), getAvailableTimeSlotsController);
+router.get('/available-time-slots', isUserAuthenticated, verifyAccessRole( ['client','admin']), getAvailableTimeSlotsController);
 
 // Notification Management
 router.get('/notifications', isUserAuthenticated, verifyAccessRole('client'), getNotificationsController);

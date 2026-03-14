@@ -146,8 +146,10 @@ export async function getDashboardStatsModel() {
   }
 }
 
+
 export async function getRecentActivitiesModel(limit = 10) {
   try {
+    const safeLimit = Number(limit);
     const [activities] = await db.execute(`
       (
         SELECT 
@@ -159,7 +161,7 @@ export async function getRecentActivitiesModel(limit = 10) {
         FROM appointments a
         INNER JOIN users u ON a.client_id = u.id
         ORDER BY a.created_at DESC
-        LIMIT  ${Number(limit)}
+        LIMIT ${safeLimit}
       )
       UNION ALL
       (
@@ -173,11 +175,13 @@ export async function getRecentActivitiesModel(limit = 10) {
         INNER JOIN users u ON dpt.client_id = u.id
         INNER JOIN status s ON dpt.current_status_id = s.status_id
         ORDER BY dpt.created_at DESC
-        LIMIT  ${Number(limit)}
+        LIMIT ${safeLimit}
       )
       ORDER BY created_at DESC
-      LIMIT  ${Number(limit)}
-    `, [limit, limit, limit]);
+      LIMIT ${safeLimit}
+    `);
+    // ↑ No params array — LIMIT is already in the template. Passing [limit,limit,limit]
+    //   was ignored by mysql2 since there are no ? placeholders in this query.
 
     return activities;
   } catch (error) {
@@ -185,3 +189,18 @@ export async function getRecentActivitiesModel(limit = 10) {
   }
 }
 
+export async function getDashboardTimeSlotsModel(date) {
+  const [slots] = await db.execute(
+    `SELECT
+       appointment_time,
+       max_capacity,
+       current_bookings,
+       is_available,
+       (max_capacity - current_bookings) AS spots_left
+     FROM appointment_time_slots
+     WHERE appointment_date = ?
+     ORDER BY appointment_time ASC`,
+    [date]
+  );
+  return slots;
+}

@@ -2,17 +2,29 @@ import {getAllServices,addService,editService,verifyService ,verifyUpdateService
 import {getDocumentTransactionsByStatusModel,getWalikinDocumentTransactions,searchDocumentTransactionsByStatusModel,getTransactionByIdModel,updateTransactionStatusModel,getTransactionTimelineModel,getAllStatusesModel,createNotificationModel,getTransactionReportDataModel} from "../model/documentTransactionModel.js";
 import { sendClientDocumentProcessUpdate,sendReadyToClaimEmail,sendAppointmentCompletionEmail } from "../services/emailService.js";
 import { getAllUsersModel,searchUsersByNameModel } from "../model/adminModel.js";
-import { getDashboardStatsModel, getRecentActivitiesModel } from "../model/dashboardModel.js";
+import { getDashboardStatsModel, getRecentActivitiesModel,getDashboardTimeSlotsModel } from "../model/dashboardModel.js";
 import {getAppointmentByIdModel,getAppointmentServicesModel,getAllActiveServicesModel,completeAppointmentWithTransactionsModel, searchAppointmentsModel} from "../model/appointmentModel.js";
 
 import { banUserModel, unbanUserModel, getAllClientsModel, getUserById } from '../model/userModel.js';
 import { createWalkInTransactionModel, searchClientForWalkInModel, setReadyDateModel } from '../model/walkInModel.js';
 import { createTestimonialModel, getAllTestimonialsAdminModel } from '../model/testimonialModel.js';
+import { getAllAuditLogsModel, filterAuditLogsModel } from '../model/auditLogModel.js';
+
 import { emitToUser, emitToAdmins } from '../config/socket.js';
 import { db } from '../config/db.js';
+import {
+  getAllHolidaysModel,
+  createHolidayModel,
+  updateHolidayModel,
+  toggleHolidayActiveModel,
+  deleteHolidayModel,
+  getHolidayByIdModel,
+  getHolidaysInRangeModel,
+  getClosedDatesForCalendarModel,
+} from '../model/holidayModel.js';
 
 
-// ── SCHEDULE FORECAST DETAIL ──────────────────────────────────
+// SCHEDULE FORECAST DETAIL
 export async function getAppointmentForecastDetail(req, res) {
   try {
     const { appointmentId } = req.params;
@@ -49,7 +61,7 @@ export async function getAppointmentForecastDetail(req, res) {
   }
 }
 
-// ── BAN CLIENT ────────────────────────────────────────────────
+// BAN CLIENT
 export async function banClientController(req, res) {
   try {
     const adminId = req.user?.id;
@@ -99,7 +111,7 @@ export async function banClientController(req, res) {
   }
 }
 
-// ── UNBAN CLIENT ──────────────────────────────────────────────
+// UNBAN CLIENT
 export async function unbanClientController(req, res) {
   try {
     const adminId = req.user?.id;
@@ -119,7 +131,7 @@ export async function unbanClientController(req, res) {
   }
 }
 
-// ── GET ALL CLIENTS (Admin panel) ─────────────────────────────
+// GET ALL CLIENTS (Admin panel)
 export async function getClientsController(req, res) {
   try {
     const search = req.query.search || '';
@@ -131,7 +143,7 @@ export async function getClientsController(req, res) {
   }
 }
 
-// ── CLIENT FULL HISTORY ────────────────────────────────────────
+// CLIENT FULL HISTORY
 export async function getClientFullHistoryController(req, res) {
   try {
     const { userId } = req.params;
@@ -179,7 +191,7 @@ export async function getClientFullHistoryController(req, res) {
   }
 }
 
-// ── WALK-IN TRANSACTION ────────────────────────────────────────
+// WALK-IN TRANSACTION
 export async function createWalkInController(req, res) {
   try {
     const adminId = req.user.id;
@@ -226,7 +238,7 @@ export async function searchClientWalkInController(req, res) {
   }
 }
 
-// ── CREATE APPOINTMENT (Admin Manual) ────────────────────────
+// CREATE APPOINTMENT (Admin Manual)
 export async function createAdminAppointmentController(req, res) {
   try {
     const adminId = req.user?.id;
@@ -286,7 +298,7 @@ export async function createAdminAppointmentController(req, res) {
   }
 }
 
-// ── READY TO CLAIM (sets deadline) ────────────────────────────
+// READY TO CLAIM (sets deadline)
 export async function setTransactionReadyController(req, res) {
   try {
     const adminId = req.user?.id;
@@ -321,7 +333,7 @@ export async function setTransactionReadyController(req, res) {
   }
 }
 
-// ── TESTIMONIALS (Admin view) ─────────────────────────────────
+// TESTIMONIALS (Admin view)
 export async function getTestimonialsAdminController(req, res) {
   try {
     const testimonials = await getAllTestimonialsAdminModel();
@@ -331,25 +343,26 @@ export async function getTestimonialsAdminController(req, res) {
   }
 }
 
-// dashboadr
 export async function getDashboardStatsController(req, res) {
   try {
-    const stats = await getDashboardStatsModel();
-    const recentActivities = await getRecentActivitiesModel(10);
+    const todayStr = new Date().toISOString().split('T')[0];
 
-    res.status(200).json({
-      stats,
-      recentActivities
-    });
+    const [stats, recentActivities, todaySlots] = await Promise.all([
+      getDashboardStatsModel(),
+      getRecentActivitiesModel(10),
+      getDashboardTimeSlotsModel(todayStr),
+    ]);
+
+    res.status(200).json({...stats,recentActivities,todaySlots});
+
   } catch (error) {
-    console.error("Error fetching dashboard stats:", error);
-    res.status(500).json({ message: "Failed to fetch dashboard statistics" });
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ message: 'Failed to fetch dashboard statistics' });
   }
 }
 
 
-
-// ========== SERVICES MANAGEMENT ==========
+// SERVICES MANAGEMENT
 
 export async function fetchAllServices(req,res) {
     const services = await getAllServices()
@@ -400,7 +413,7 @@ export async function searchServices(req,res) {
     return res.json(services)
 }
 
-// ========== USERS MANAGEMENT ==========
+// USERS MANAGEMENT
 export async function getAllUsersController(req,res) {
   const role = req.params.role
   const users = await getAllUsersModel(role)
@@ -413,7 +426,7 @@ export async function searchUsersController(req,res) {
   return res.status(200).json(users)
 }
 
-// ========== APPOINTMENT MANAGEMENT ==========
+// APPOINTMENT MANAGEMENT
 
 export async function getAppointments(req,res) {
     const status = req.params.status
@@ -601,7 +614,7 @@ export async function completeAppointmentController(req, res) {
 
 
 
-// ========== TIME SLOT MANAGEMENT ==========
+// TIME SLOT MANAGEMENT
 
 export async function getTimeSlotsController(req, res) {
   const { date } = req.query;
@@ -627,7 +640,7 @@ export async function updateTimeSlotController(req, res) {
   return res.status(404).json({ message: 'Time slot not found' });
 }
 
-// ========== HELPER FUNCTIONS ==========
+// HELPER FUNCTIONS
 
 function getNotificationTitle(status) {
   const titles = {
@@ -854,3 +867,247 @@ export const getScheduleForecastController = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch schedule forecast', error: error.message });
   }
 };
+
+
+// holiday
+
+export async function getAllHolidaysController(req, res) {
+  try {
+    const holidays = await getAllHolidaysModel();
+    return res.status(200).json({ holidays });
+  } catch (error) {
+    console.error('getAllHolidaysController error:', error.message);
+    return res.status(500).json({ message: 'Failed to fetch holidays' });
+  }
+}
+
+export async function getHolidaysInRangeController(req, res) {
+  try {
+    const { startDate, endDate } = req.params;
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: 'startDate and endDate are required' });
+    }
+    const holidays = await getHolidaysInRangeModel(startDate, endDate);
+    return res.status(200).json({ holidays });
+  } catch (error) {
+    console.error('getHolidaysInRangeController error:', error.message);
+    return res.status(500).json({ message: 'Failed to fetch holidays in range' });
+  }
+}
+
+export async function getHolidayByIdController(req, res) {
+  try {
+    const { id } = req.params;
+    const holiday = await getHolidayByIdModel(id);
+    if (!holiday) return res.status(404).json({ message: 'Holiday not found' });
+    return res.status(200).json({ holiday });
+  } catch (error) {
+    console.error('getHolidayByIdController error:', error.message);
+    return res.status(500).json({ message: 'Failed to fetch holiday' });
+  }
+}
+
+export async function createHolidayController(req, res) {
+  try {
+    const adminId = req.user.id;
+    const {
+      holidayName,
+      holidayDate,
+      month,
+      day,
+      isRecurring,
+      holidayType,
+      description,
+    } = req.body;
+
+    // ── Validation ────────────────────────────────────────────────────────────
+    if (!holidayName || holidayName.trim().length < 2) {
+      return res.status(400).json({ message: 'Holiday name is required (min 2 characters)' });
+    }
+
+    const recurring = Boolean(isRecurring);
+
+    if (recurring) {
+      // Recurring needs month + day
+      const m = parseInt(month);
+      const d = parseInt(day);
+      if (!m || !d || m < 1 || m > 12 || d < 1 || d > 31) {
+        return res.status(400).json({ message: 'Recurring holidays require a valid month (1-12) and day (1-31)' });
+      }
+    } else {
+      // One-time needs a specific date
+      if (!holidayDate) {
+        return res.status(400).json({ message: 'Non-recurring holidays require a specific date (YYYY-MM-DD)' });
+      }
+      // Validate date format
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(holidayDate) || isNaN(Date.parse(holidayDate))) {
+        return res.status(400).json({ message: 'Invalid date format. Use YYYY-MM-DD' });
+      }
+    }
+
+    if (holidayType && !['regular', 'special', 'custom'].includes(holidayType)) {
+      return res.status(400).json({ message: 'holidayType must be regular, special, or custom' });
+    }
+
+    const insertId = await createHolidayModel(
+      {
+        holidayName: holidayName.trim(),
+        holidayDate: recurring ? null : holidayDate,
+        month:       recurring ? parseInt(month) : null,
+        day:         recurring ? parseInt(day)   : null,
+        isRecurring: recurring,
+        holidayType: holidayType || 'custom',
+        description: description?.trim() || null,
+      },
+      adminId
+    );
+
+    const created = await getHolidayByIdModel(insertId);
+    return res.status(201).json({ message: 'Holiday added successfully', holiday: created });
+  } catch (error) {
+    console.error('createHolidayController error:', error.message);
+    return res.status(500).json({ message: 'Failed to create holiday' });
+  }
+}
+
+export async function updateHolidayController(req, res) {
+  try {
+    const { id } = req.params;
+    const {
+      holidayName,
+      holidayDate,
+      month,
+      day,
+      isRecurring,
+      holidayType,
+      description,
+      isActive,
+    } = req.body;
+
+    if (!holidayName || holidayName.trim().length < 2) {
+      return res.status(400).json({ message: 'Holiday name is required' });
+    }
+
+    const recurring = Boolean(isRecurring);
+
+    if (recurring) {
+      const m = parseInt(month);
+      const d = parseInt(day);
+      if (!m || !d || m < 1 || m > 12 || d < 1 || d > 31) {
+        return res.status(400).json({ message: 'Recurring holidays require a valid month and day' });
+      }
+    } else if (holidayDate) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(holidayDate) || isNaN(Date.parse(holidayDate))) {
+        return res.status(400).json({ message: 'Invalid date format. Use YYYY-MM-DD' });
+      }
+    }
+
+    const affectedRows = await updateHolidayModel(id, {
+      holidayName: holidayName.trim(),
+      holidayDate: recurring ? null : (holidayDate || null),
+      month:       recurring ? parseInt(month) : null,
+      day:         recurring ? parseInt(day)   : null,
+      isRecurring: recurring,
+      holidayType: holidayType || 'custom',
+      description: description?.trim() || null,
+      isActive:    isActive !== undefined ? isActive : true,
+    });
+
+    if (!affectedRows) return res.status(404).json({ message: 'Holiday not found' });
+
+    const updated = await getHolidayByIdModel(id);
+    return res.status(200).json({ message: 'Holiday updated successfully', holiday: updated });
+  } catch (error) {
+    console.error('updateHolidayController error:', error.message);
+    return res.status(500).json({ message: 'Failed to update holiday' });
+  }
+}
+
+export async function toggleHolidayController(req, res) {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    if (isActive === undefined) {
+      return res.status(400).json({ message: 'isActive (true/false) is required' });
+    }
+
+    const affectedRows = await toggleHolidayActiveModel(id, Boolean(isActive));
+    if (!affectedRows) return res.status(404).json({ message: 'Holiday not found' });
+
+    return res.status(200).json({
+      message: `Holiday ${isActive ? 'enabled' : 'disabled'} successfully`,
+    });
+  } catch (error) {
+    console.error('toggleHolidayController error:', error.message);
+    return res.status(500).json({ message: 'Failed to toggle holiday' });
+  }
+}
+
+export async function deleteHolidayController(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Guard: check it exists and is 'custom'
+    const holiday = await getHolidayByIdModel(id);
+    if (!holiday) return res.status(404).json({ message: 'Holiday not found' });
+
+    if (holiday.holiday_type !== 'custom') {
+      return res.status(403).json({
+        message: 'Regular and special holidays cannot be deleted — use the toggle to disable them instead.',
+      });
+    }
+
+    const affectedRows = await deleteHolidayModel(id);
+    if (!affectedRows) return res.status(404).json({ message: 'Holiday not found or not deletable' });
+
+    return res.status(200).json({ message: 'Holiday deleted successfully' });
+  } catch (error) {
+    console.error('deleteHolidayController error:', error.message);
+    return res.status(500).json({ message: 'Failed to delete holiday' });
+  }
+}
+
+export async function getClosedDatesController(req, res) {
+  try {
+    const months = parseInt(req.query.months) || 3;
+    if (months < 1 || months > 12) {
+      return res.status(400).json({ message: 'months must be between 1 and 12' });
+    }
+    const closedDates = await getClosedDatesForCalendarModel(months);
+    return res.status(200).json({ closedDates });
+  } catch (error) {
+    console.error('getClosedDatesController error:', error.message);
+    return res.status(500).json({ message: 'Failed to fetch closed dates' });
+  }
+}
+//AUDIT
+export async function getAllAuditLogsController(req, res) {
+  try {
+    const logs = await getAllAuditLogsModel();
+    return res.status(200).json(logs);
+  } catch (err) {
+    console.error('[AuditLog] getAllAuditLogsController error:', err);
+    return res.status(500).json({ message: 'Failed to fetch audit logs.' });
+  }
+}
+
+export async function filterAuditLogsController(req, res) {
+  try {
+    const { actor_role, category, target_id, start_date, end_date, search } = req.query;
+
+    const params = {};
+    if (actor_role)  params.actor_role  = actor_role;
+    if (category)    params.category    = category;
+    if (target_id)   params.target_id   = Number(target_id);
+    if (start_date)  params.start_date  = start_date;   // 'YYYY-MM-DD'
+    if (end_date)    params.end_date    = end_date + ' 23:59:59';
+    if (search)      params.search      = search.trim();
+
+    const logs = await filterAuditLogsModel(params);
+    return res.status(200).json(logs);
+  } catch (err) {
+    console.error('[AuditLog] filterAuditLogsController error:', err);
+    return res.status(500).json({ message: 'Failed to filter audit logs.' });
+  }
+}

@@ -4,9 +4,10 @@ import {
   getUserById, getUserCridentials, changeClientPassword, getUserByEmail,
   incrementLoginAttempts, setLoginCooldown, resetLoginAttempts,
   incrementOtpAttempts, setOtpLock, getOTP,
-  softDeleteAccountModel, hasActiveTransactionsModel, hasActiveAppointmentsModel,
+  anonymizationAccountModel, hasActiveTransactionsModel, hasActiveAppointmentsModel,
   banUserModel, checkActiveBanModel
 } from '../model/userModel.js';
+import {insertAuditLogsModel} from '../model/auditLogModel.js';
 import { hashPassword, comparePassword } from '../services/authService.js';
 import { generateOTP, saveUserOTP, verifyUserOTP } from '../services/otpService.js';
 import { sendUserOTP } from '../services/emailService.js';
@@ -33,9 +34,10 @@ export async function loginUser(req, res) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Check if account is soft-deleted
+    // Check if account is anonymized
     if (userCredentials.deleted_at) {
-      return res.status(401).json({ message: 'This account has been deleted' });
+      console.log(userCredentials.deleted_at)
+      return res.status(401).json({ message: "Your account was anonymized. Please sign in with Google to restore access."});
     }
 
     // Check role
@@ -99,6 +101,15 @@ export async function loginUser(req, res) {
 
     const user = await getUserById(userCredentials.id);
     const token = generateJWT(user);
+
+    await insertAuditLogsModel({
+      actor_id: user.id,
+      actor_role: 'Client',
+      target_id: user.id,
+      action: 'Login Success',
+      details: `User logged in from IP ${req.ip}, device ${req.headers['user-agent']}`,
+      category: 'Authentication'
+    });
     return res.status(200).json({ message: 'Login successful', token, user });
 
   } catch (err) {
@@ -151,6 +162,15 @@ export async function signupUser(req, res) {
     await saveUserOTP(userID, otp);
     await sendUserOTP(otp, email);
 
+    await insertAuditLogsModel({
+      actor_id: userID,
+      actor_role: 'Client',
+      target_id: userID,
+      action: 'Account Registered',
+      details: `Account Registered at ${email}`,
+      category: 'Account'
+    });
+
     emitToAdmins('admin_notification', {
       type: 'new_user_registered',
       title: 'New Account Registration',
@@ -178,6 +198,15 @@ export async function verifyOTP(req, res) {
 
       const user = await getUserById(userID);
       const token = generateJWT(user);
+
+      await insertAuditLogsModel({
+        actor_id: user.id,
+        actor_role: 'Client',
+        target_id: user.id,
+        action: 'OTP Verified',
+        details: `User successfully verified a secure OTP for ${user.email}`,
+        category: 'Authentication'
+      });
 
       // Notify admins
       emitToAdmins('admin_notification', {
@@ -246,6 +275,15 @@ export async function resendOTP(req, res) {
     await saveUserOTP(userID, otp);
     await sendUserOTP(otp, email);
 
+    await insertAuditLogsModel({
+      actor_id: userID,
+      actor_role: 'Client',
+      target_id: userID,
+      action: 'OTP Resent',
+      details: `User requested a new OTP for account verification (${email})`,
+      category: 'Authentication'
+    });
+
     return res.status(200).json({ message: 'OTP sent successfully' });
   } catch (err) {
     console.error('Resend OTP error:', err);
@@ -266,6 +304,15 @@ export async function forgotPassword(req, res) {
     const otp = generateOTP();
     await saveUserOTP(userID, otp);
     await sendUserOTP(otp, email);
+
+    await insertAuditLogsModel({
+      actor_id: userID,
+      actor_role: 'Client',
+      target_id: userID,
+      action: 'Password Reset Token Verified',
+      details: `Password reset token verified for ${email}`,
+      category: 'Authentication'
+    });
 
     return res.status(200).json({ userID, message: 'Verification code sent successfully!' });
   } catch (err) {
@@ -294,6 +341,16 @@ export async function updateNewPassword(req, res) {
     await changeClientPassword(hashedPassword, userID);
     const user = await getUserById(userID);
     const token = generateJWT(user);
+
+    await insertAuditLogsModel({
+      actor_id: userID,
+      actor_role: 'Client',
+      target_id: userID,
+      action: 'Password Reset Completed',
+      details: `User successfully created a new password via password reset`,
+      category: 'Account'
+    });
+
     return res.status(200).json({ message: 'Password changed successfully', token, user });
   } catch (err) {
     return res.status(500).json({ message: 'Server error' });
@@ -312,28 +369,38 @@ export async function createNewPassword(req, res) {
     await changeClientPassword(hashedPassword, userID);
     const user = await getUserById(userID);
     const token = generateJWT(user);
+
+    await insertAuditLogsModel({
+      actor_id: userID,
+      actor_role: 'Client',
+      target_id: userID,
+      action: 'Password Changed',
+      details: `User changed their account password`,
+      category: 'Account'
+    });
+
     return res.status(200).json({ message: 'Password changed successfully', token, user });
   } catch (err) {
     return res.status(500).json({ message: 'Server error' });
   }
 }
 
-// ── ACCOUNT DELETION REQUEST ──────────────────────────────────
-export async function requestAccountDeletion(req, res) {
+// ── ACCOUNT Anonymization REQUEST ──────────────────────────────────
+export async function requestAccountAnonymization(req, res) {
   try {
-    const userId = req.user?.id;
+    const userId = req.user.id;
     const { confirmText } = req.body;
 
-    // Strict confirmation — must type exactly "Confirm Delete"
-    if (confirmText !== 'Confirm Delete') {
-      return res.status(400).json({ message: 'Confirmation text does not match. Type exactly: Confirm Delete' });
+    // Strict confirmation — must type exactly "Confirm Anonymize"
+    if (confirmText !== 'Confirm Anonymize') {
+      return res.status(400).json({ message: 'Confirmation text does not match. Type exactly: Confirm Anonymize' });
     }
 
     // Check for active appointments
     const hasAppointments = await hasActiveAppointmentsModel(userId);
     if (hasAppointments) {
       return res.status(400).json({
-        message: 'Cannot delete account. You have active or pending appointments.',
+        message: 'Cannot anonymize account. You have active or pending appointments.',
         blocker: 'appointment'
       });
     }
@@ -342,26 +409,26 @@ export async function requestAccountDeletion(req, res) {
     const hasTransactions = await hasActiveTransactionsModel(userId);
     if (hasTransactions) {
       return res.status(400).json({
-        message: 'Cannot delete account. You have active or in-progress transactions.',
+        message: 'Cannot anonymize account. You have active or in-progress transactions.',
         blocker: 'transaction'
       });
     }
 
-    // Proceed with soft deletion
-    await softDeleteAccountModel(userId);
+    // Proceed with anonymization
+    await anonymizationAccountModel(userId);
 
     // Notify admins in realtime
     const user = await getUserById(userId);
     emitToAdmins('admin_notification', {
       type: 'account_deletion_request',
-      title: 'Account Deleted',
-      message: `Account deleted by user: ${user?.username || userId}`,
+      title: 'Account Anonymization Request',
+      message: `Account Anonymization Request by user: ${user?.username || userId}`,
       timestamp: new Date()
     });
 
-    return res.status(200).json({ message: 'Account deleted successfully. You will be logged out.' });
+    return res.status(200).json({ message: 'Action successful. You will be logged out.' });
   } catch (err) {
-    console.error('Account deletion error:', err);
+    console.error('Account anonymization error:', err);
     return res.status(500).json({ message: 'Server error' });
   }
 }

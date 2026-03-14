@@ -29,8 +29,19 @@ import {
   getAppointmentForecastDetail,
   getTestimonialsAdminController,
   setTransactionReadyController,
+  
+  getAllHolidaysController,
+  getHolidaysInRangeController,
+  getHolidayByIdController,
+  createHolidayController,
+  updateHolidayController,
+  toggleHolidayController,
+  deleteHolidayController,
+  filterAuditLogsController,
+  getAllAuditLogsController,
 } from '../controller/adminController.js';
 import { isUserAuthenticated, verifyAccessRole } from '../middleware/auth.js';
+
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -157,7 +168,7 @@ router.put('/saveService/:id',isUserAuthenticated,verifyAccessRole('admin'),upda
 router.put('/toggleServiceStatus',isUserAuthenticated,verifyAccessRole('admin'),updateServiceStatus)
 router.get('/filterAppointments/:status',isUserAuthenticated,verifyAccessRole('admin'), getAppointments);
 
-// All routes require admin or staff authentication
+//TRANSACTIONS
 router.get('/getDocumentTransactions/:status',isUserAuthenticated, verifyAccessRole(['admin', 'staff']), getDocumentTransactionsController);
 router.get('/getWalkinDocumentTransactions',isUserAuthenticated, verifyAccessRole(['admin', 'staff']), getWalkinDocumentTransactionsController);
 
@@ -168,12 +179,26 @@ router.get('/getAllStatuses', isUserAuthenticated,  verifyAccessRole(['admin', '
 
 router.get('/getTransactionReport/:transactionId',isUserAuthenticated,verifyAccessRole(['admin', 'staff']),getTransactionReportController);
 
-// appointment services 
+// appointments 
 router.get('/getAppointmentServices/:appointmentId',isUserAuthenticated,verifyAccessRole(['admin', 'staff']),getAppointmentServicesController);
 router.post('/completeAppointment',isUserAuthenticated,verifyAccessRole(['admin', 'staff']),completeAppointmentController);
 router.get('/searchAppointments/:searchTerm/:status', isUserAuthenticated, verifyAccessRole(['admin', 'staff']), searchAppointmentsController);
 
 router.get('/getScheduleForecast/:startDate/:endDate',isUserAuthenticated,verifyAccessRole(['admin', 'staff']),getScheduleForecastController);
+
+//  HOLIDAY MANAGEMENT  (NEW — added below, nothing above changed)
+router.get('/holidays',isUserAuthenticated, verifyAccessRole('admin'),getAllHolidaysController);
+router.get('/holidays/range/:startDate/:endDate',isUserAuthenticated, verifyAccessRole(['admin', 'staff']),getHolidaysInRangeController);
+router.get('/holidays/:id',isUserAuthenticated, verifyAccessRole('admin'),getHolidayByIdController);
+router.post('/holidays',isUserAuthenticated, verifyAccessRole('admin'),createHolidayController);
+router.put('/holidays/:id',isUserAuthenticated, verifyAccessRole('admin'),updateHolidayController);
+router.patch('/holidays/:id/toggle',isUserAuthenticated, verifyAccessRole('admin'),toggleHolidayController);
+router.delete('/holidays/:id',isUserAuthenticated, verifyAccessRole('admin'),deleteHolidayController);
+
+//AUDIT
+router.get('/audit-logs',        isUserAuthenticated, verifyAccessRole('admin'), getAllAuditLogsController);
+router.get('/audit-logs/filter', isUserAuthenticated, verifyAccessRole('admin'), filterAuditLogsController);
+
 
 export default router;
 

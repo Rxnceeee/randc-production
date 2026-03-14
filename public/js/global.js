@@ -1,4 +1,4 @@
-const BASE_URL = 'https://randcdocumentations.up.railway.app';
+const BASE_URL = '';
 
 //document.addEventListener("contextmenu", function (e) {
 //e.preventDefault();

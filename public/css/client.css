@@ -26,8 +26,10 @@
   --border:       #232f4a;
   --border-bright:#2e3f60;
 
-  --gradient:     linear-gradient(135deg,#22c55e 0%,#22d3ee 100%); /* updated */
-  --gradient-soft:linear-gradient(135deg,rgba(34,197,94,.15) 0%,rgba(34,211,238,.08) 100%);
+  --gradient:#15803d; 
+  --gradient-soft:linear-gradient(135deg,rgba(22,163,74,.08) 0%,rgba(8,145,178,.05) 100%);
+
+
 
   --shadow-sm:    0 1px 3px rgba(0,0,0,.4);
   --shadow-md:    0 4px 12px rgba(0,0,0,.5);
@@ -70,8 +72,9 @@
   --border:       #dde1ef;
   --border-bright:#b8c0db;
 
-  --gradient:     linear-gradient(135deg,#16a34a 0%,#0891b2 100%); /* updated */
+  --gradient:#15803d; 
   --gradient-soft:linear-gradient(135deg,rgba(22,163,74,.08) 0%,rgba(8,145,178,.05) 100%);
+
 
   --shadow-sm:    0 1px 4px rgba(0,0,0,.08);
   --shadow-md:    0 4px 16px rgba(0,0,0,.1);
@@ -210,6 +213,25 @@ a{color:var(--text-accent);text-decoration:none;transition:var(--transition);}
   position:relative;align-self:flex-start;
 }
 .sidebar-notif-btn:hover{border-color:var(--primary);color:var(--primary);}
+
+.sidebar-icon-btn{
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg-card);border:1px solid var(--border-bright);
+  color:var(--text-secondary);
+  width:36px;height:36px;border-radius:50%;
+  cursor:pointer;transition:var(--transition);
+  position:relative;align-self:flex-start;
+}
+.sidebar-icon-btn:hover{border-color:var(--primary);color:var(--primary);}
+.sidebar-logout-btn{
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg-card);border:1px solid var(--border-bright);
+  color:var(--text-secondary);
+  width:36px;height:36px;border-radius:50%;
+  cursor:pointer;transition:var(--transition);
+  position:relative;align-self:flex-start;
+}
+.sidebar-logout-btn:hover{border-color:var(--danger);color:var(--danger);}
 .notif-badge{
   position:absolute;top:-4px;right:-4px;
   min-width:16px;height:16px;
@@ -237,13 +259,7 @@ a{color:var(--text-accent);text-decoration:none;transition:var(--transition);}
 .sidebar-user-info{flex:1;overflow:hidden;}
 .sidebar-user-name{font-size:.75rem;font-weight:600;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sidebar-user-role{font-size:.65rem;color:var(--text-muted);margin:0;text-transform:capitalize;}
-.sidebar-logout-btn{
-  background:none;border:none;
-  color:var(--text-muted);font-size:1rem;
-  cursor:pointer;padding:0 .2rem;
-  transition:var(--transition);flex-shrink:0;
-}
-.sidebar-logout-btn:hover{color:var(--danger);}
+
 
 /* ══════════════════════════════════════════════
    NOTIFICATION PANEL
@@ -844,8 +860,6 @@ a{color:var(--text-accent);text-decoration:none;transition:var(--transition);}
 
 .rnc-modal{
   background:var(--bg-elevated);
-  border:1px solid var(--border-bright);
-  border-radius:var(--radius-xl);
   box-shadow:var(--shadow-lg),0 0 40px rgba(99,102,241,.1);
   overflow:hidden;
   z-index: 0;
@@ -856,7 +870,7 @@ a{color:var(--text-accent);text-decoration:none;transition:var(--transition);}
   background:var(--gradient-soft);
   border-bottom:1px solid var(--border);
   padding:.875rem 1.25rem;
-  display:flex;align-items:center;gap:.75rem;
+  display:flex; align-items:center;gap:.75rem;
 }
 .modal-header-icon{
   width:34px;height:34px;background:var(--gradient);
@@ -1257,10 +1271,9 @@ select.rnc-input{cursor:pointer;}
 }
 .rnc-modal-sheet {
   position: fixed;
-  bottom: 0; left: 50%; transform: translateX(-50%);
+  top: 20%; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 500px;
   background: var(--bg-surface);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   border-top: 1px solid var(--border-bright);
   z-index: 1050;
   animation: sheetUp .22s cubic-bezier(.4,0,.2,1);

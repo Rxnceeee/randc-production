@@ -1,5 +1,5 @@
 import express from 'express';
-import { loginUser,signupUser,verifyOTPForgotPassword,updateNewPassword,createNewPassword,forgotPassword,verifyOTP ,resendOTP ,requestAccountDeletion} from '../controller/userController.js';
+import { loginUser,signupUser,verifyOTPForgotPassword,updateNewPassword,createNewPassword,forgotPassword,verifyOTP ,resendOTP } from '../controller/userController.js';
 import { getPublicTestimonialsController} from '../controller/clientController.js';
 import { getActiveServices} from '../controller/serviceController.js';
 import { isUserAuthenticated, verifyAccessRole } from '../middleware/auth.js';
@@ -18,7 +18,7 @@ router.post('/verifyOTPForgotPassword', verifyOTPForgotPassword);
 router.get('/forgotPassword/:email',forgotPassword)
 router.post('/updateNewPassword',updateNewPassword);
 router.post('/createNewPassword',isUserAuthenticated,verifyAccessRole(['admin', 'staff']), createNewPassword);
-router.post('/account/delete', isUserAuthenticated, requestAccountDeletion);
+
 router.post('/resend-otp', resendOTP);
 
 

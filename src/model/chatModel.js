@@ -2,7 +2,7 @@ import { db } from '../config/db.js';
 import fs from 'fs';
 import path from 'path';
 
-// ── GET OR CREATE CONVERSATION ────────────────────────────────
+// GET OR CREATE CONVERSATION
 export async function getOrCreateConversationModel(clientId) {
   const connection = await db.getConnection();
   try {
@@ -35,7 +35,7 @@ export async function getOrCreateConversationModel(clientId) {
   }
 }
 
-// ── GET CONVERSATION MESSAGES ─────────────────────────────────
+// GET CONVERSATION MESSAGES
 // Only returns non-deleted messages
 export async function getConversationMessagesModel(conversationId, userId, userRole) {
   try {
@@ -80,7 +80,7 @@ export async function getConversationMessagesModel(conversationId, userId, userR
   }
 }
 
-// ── SAVE MESSAGE ──────────────────────────────────────────────
+// SAVE MESSAGE
 export async function saveMessageModel(conversationId, senderId, messageText, fileData = null) {
   const connection = await db.getConnection();
   try {
@@ -116,7 +116,7 @@ export async function saveMessageModel(conversationId, senderId, messageText, fi
   }
 }
 
-// ── EDIT MESSAGE ──────────────────────────────────────────────
+// EDIT MESSAGE
 // Only sender can edit; updates text, marks as edited
 export async function editMessageModel(messageId, senderId, newText) {
   // Verify ownership
@@ -137,7 +137,6 @@ export async function editMessageModel(messageId, senderId, newText) {
   return { conversation_id: rows[0].conversation_id };
 }
 
-// ── HARD DELETE MESSAGE (UNSEND) ──────────────────────────────
 // Completely removes from DB and deletes file from storage
 export async function hardDeleteMessageModel(messageId, senderId) {
   const connection = await db.getConnection();
@@ -193,7 +192,7 @@ export async function hardDeleteMessageModel(messageId, senderId) {
   }
 }
 
-// ── MARK MESSAGES AS READ ─────────────────────────────────────
+// MARK MESSAGES AS READ
 export async function markMessagesAsReadModel(conversationId, userId) {
   try {
     await db.execute(
@@ -208,7 +207,7 @@ export async function markMessagesAsReadModel(conversationId, userId) {
   }
 }
 
-// ── GET ALL ACTIVE CONVERSATIONS ──────────────────────────────
+// GET ALL ACTIVE CONVERSATIONS
 export async function getActiveConversationsModel() {
   try {
     const [conversations] = await db.execute(
@@ -241,7 +240,7 @@ export async function getActiveConversationsModel() {
   }
 }
 
-// ── GET TOTAL UNREAD COUNT ────────────────────────────────────
+// GET TOTAL UNREAD COUNT
 export async function getTotalUnreadCountModel() {
   const [rows] = await db.query(
     `SELECT COALESCE(COUNT(*), 0) AS total

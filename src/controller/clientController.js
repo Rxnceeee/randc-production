@@ -5,6 +5,7 @@ import {createNotificationModel,getDashboardStatsModel,getRecentActivityModel,ge
 import { hashPassword,comparePassword } from "../services/authService.js";
 import { sendAppointmentEmailService } from "../services/emailService.js";
 import { db } from '../config/db.js';
+import { isHolidayDate } from '../model/holidayModel.js';
 
 import {
   createTestimonialModel,
@@ -15,7 +16,7 @@ import {
 import { emitToAdmins } from '../config/socket.js';
 
 
-// ── SUBMIT TESTIMONIAL ────────────────────────────────────────
+// TESTIMONIAL
 export async function submitTestimonialController(req, res) {
   try {
     const userId = req.user?.id;
@@ -67,7 +68,6 @@ export async function submitTestimonialController(req, res) {
   }
 }
 
-// ── GET PUBLIC TESTIMONIALS ────────────────────────────────────
 export async function getPublicTestimonialsController(req, res) {
   try {
     const limit = parseInt(req.query.limit) || 20;
@@ -78,7 +78,6 @@ export async function getPublicTestimonialsController(req, res) {
   }
 }
 
-// ── CHECK IF CLIENT CAN LEAVE TESTIMONIAL ─────────────────────
 export async function checkTestimonialEligibilityController(req, res) {
   try {
     const userId = req.user?.id;
@@ -103,7 +102,6 @@ export async function checkTestimonialEligibilityController(req, res) {
   }
 }
 
-// ── MY TESTIMONIALS ───────────────────────────────────────────
 export async function getMyTestimonialsController(req, res) {
   try {
     const userId = req.user.id;
@@ -115,7 +113,7 @@ export async function getMyTestimonialsController(req, res) {
   }
 }
 
-
+// ACCOUNT
 export async function setupAccountController(req,res) {
     const {firstName,lastName,middleName,sex}=req.body
     
@@ -281,7 +279,17 @@ export async function submitAppointmentController(req, res) {
       await connection.rollback();
       return res.status(401).json({ message: "You already have an active appointment. Please complete or cancel it before booking another." });
     }
-
+    
+    const holidayCheck = await isHolidayDate(date);
+    
+    if (holidayCheck.isHoliday) {
+      await connection.rollback();
+      return res.status(400).json({
+        message: 'This date is not available due to a holiday or scheduled closure. Please select another date.',
+        holidayName: holidayCheck.holidayName,
+        holidayType: holidayCheck.type,
+      });
+    }
     // Check slot
     const slotCheck = await checkTimeSlotAvailabilityModel(date, time);
 
@@ -293,7 +301,7 @@ export async function submitAppointmentController(req, res) {
         message: 'This time slot is now fully booked. Please select another time.'
       });
     }
-
+    
     // Insert appointment
     const appointmentId = await submitClientAppointmentsModel(connection, clientId, formData);
 
@@ -464,7 +472,7 @@ export async function cancelClientTransactionController(req, res) {
 export async function getClientTransactionReceiptController(req, res) {
   try {
     const { transactionId } = req.params;
-    const clientId = req.user.id; // From JWT middleware
+    const clientId = req.user.id; 
 
     const receiptData = await getClientTransactionReceiptModel(transactionId, clientId);
 

@@ -35,7 +35,7 @@ export async function getUserById(userId) {
   const query = `
     SELECT id, username, email, role,
            last_name, first_name, middle_name, sex, picture,
-           is_banned, ban_type, ban_until, deleted_at, is_verified
+           is_banned, ban_type, ban_until, deleted_at, is_verified, created_at
     FROM users WHERE id = ?`;
   const [rows] = await db.query(query, [userId]);
   return rows[0];
@@ -47,7 +47,7 @@ export async function getUserByEmail(email) {
   return rows[0]?.id;
 }
 
-// ── OTP ───────────────────────────────────────────────────────
+// OTP
 export async function saveOTP(userId, hashed, expiresAt) {
   const query = `UPDATE users SET verification_code = ?, code_expires_at = ? WHERE id = ?`;
   const [result] = await db.query(query, [hashed, expiresAt, userId]);
@@ -76,7 +76,7 @@ export async function clearOTP(userId) {
   await db.query(query, [userId]);
 }
 
-// ── OTP ANTI-SPAM ─────────────────────────────────────────────
+// OTP ANTI-SPAM
 export async function incrementOtpAttempts(userId) {
   await db.query(
     `UPDATE users SET otp_attempts = otp_attempts + 1 WHERE id = ?`,
@@ -91,7 +91,7 @@ export async function setOtpLock(userId, lockUntil) {
   );
 }
 
-// ── LOGIN SECURITY ────────────────────────────────────────────
+// LOGIN SECURITY
 export async function incrementLoginAttempts(userId) {
   await db.query(
     `UPDATE users
@@ -119,14 +119,14 @@ export async function resetLoginAttempts(userId) {
   );
 }
 
-// ── PASSWORD ──────────────────────────────────────────────────
+// PASSWORD
 export async function changeClientPassword(newPassword, userID) {
   const query = 'UPDATE users SET password = ? WHERE id = ?';
   const [result] = await db.query(query, [newPassword, userID]);
   return result;
 }
 
-// ── BAN MANAGEMENT ────────────────────────────────────────────
+// BAN MANAGEMENT
 export async function banUserModel(userId, bannedBy, banType, banReason) {
   const connection = await db.getConnection();
   try {
@@ -218,23 +218,67 @@ export async function checkActiveBanModel(userId) {
   return { ban_type: user.ban_type, ban_until: user.ban_until };
 }
 
-// ── ACCOUNT DELETION ─────────────────────────────────────────
-export async function softDeleteAccountModel(userId) {
+// ACCOUNT Anonymization
+export async function anonymizationAccountModel(userId, ip = null, userAgent = null) {
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
 
-    // Mark user as deleted and deactivate
+    // 1. Deactivate account and mark deleted
     await connection.execute(
       `UPDATE users SET deleted_at = NOW(), is_active = 0 WHERE id = ?`,
       [userId]
     );
 
-    // Log the deletion request
+    // 2. Log the deletion request in account_deletion_requests
     await connection.execute(
-      `INSERT INTO account_deletion_requests (user_id, status, processed_at)
-       VALUES (?, 'approved', NOW())`,
+      `INSERT INTO account_deletion_requests (user_id, status)
+       VALUES (?, 'Approved')`,
       [userId]
+    );
+
+    // 3. Add audit log for client request
+    await connection.execute(
+      `INSERT INTO audit_logs(actor_id, actor_role, target_id, action, details, ip_address, user_agent, category)
+       VALUES (?, 'Client', ?, 'Requested Account Anonymization','Client requested account anonymization, pending 7-day completion',?, ?, 'Anonymization')`,
+      [userId, userId, ip, userAgent]
+    );
+
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+// ACCOUNT reverse Anonymization
+export async function reverseAnonymizationAccountModel(userId, ip = null, userAgent = null) {
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 1. Reactivate account
+    await connection.execute(
+      `UPDATE users SET deleted_at = NULL, is_active = 1 WHERE id = ?`,
+      [userId]
+    );
+
+    // 2. Update account_deletion_requests
+    await connection.execute(
+      `UPDATE account_deletion_requests
+       SET status = 'Reactivated', processed_at = NOW()
+       WHERE user_id = ?`,
+      [userId]
+    );
+
+    // 3. Add audit log for client reactivation
+    await connection.execute(
+      `INSERT INTO audit_logs
+        (actor_id, actor_role, target_id, action, details, ip_address, user_agent, category) 
+        VALUES (?, 'Client', ?, 'Recovered Account','Client restored their account after anonymization',?, ?, 'Anonymization')`,
+      [userId, userId, ip, userAgent]
     );
 
     await connection.commit();
@@ -266,7 +310,7 @@ export async function hasActiveAppointmentsModel(userId) {
   return rows[0].cnt > 0;
 }
 
-// ── GET ALL CLIENTS (Admin) ───────────────────────────────────
+// GET ALL CLIENTS (Admin)
 export async function getAllClientsModel(search = '') {
   const keyword = `%${search}%`;
   const [rows] = await db.query(

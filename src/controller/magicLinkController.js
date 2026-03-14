@@ -10,18 +10,20 @@ import {
   consumeMagicTokenModel,
   countRecentMagicTokensModel,
 } from '../model/magicLinkModel.js';
+
+import {reverseAnonymizationAccountModel} from '../model/userModel.js'
 import { sendMagicLinkEmail } from '../services/emailService.js';
 import { generateJWT }        from '../middleware/auth.js';
 
-// ── Config ─────────────────────────────────────────────────────
+// Config
 const TOKEN_TTL_MIN  = 15;   // link expires after 15 min
 const RATE_LIMIT_MAX = 3;    // max sends per window
 const RATE_LIMIT_WIN = 10;   // window in minutes
 
-// ── POST /api/user/magic-link/send ─────────────────────────────
+// POST /api/user/magic-link/send
 export async function sendMagicLinkController(req, res) {
   try {
-    const raw = req.body?.email;
+    const raw = req.body.email;
 
     // 1. Input validation
     if (!raw || typeof raw !== 'string') {
@@ -86,6 +88,16 @@ export async function sendMagicLinkController(req, res) {
       name:     user.first_name || user.username,
       magicUrl,
       expiresAt,
+      deleted_at:user.deleted_at,
+    });
+
+    await insertAuditLogsModel({
+      actor_id: user.id,
+      actor_role: 'Client',
+      target_id: user.id,
+      action: 'Magic Link Sent',
+      details: `Magic login link sent to ${user.email} at IP ${req.ip}`,
+      category: 'Email'
     });
 
     console.log(`Magic link sent → ${email} [user #${userId}]`);
@@ -99,11 +111,10 @@ export async function sendMagicLinkController(req, res) {
   }
 }
 
-// ── GET /api/user/magic-link/verify?token=<raw> ────────────────
+// GET /api/user/magic-link/verify?token=<raw>
 export async function verifyMagicLinkController(req, res) {
   try {
     const { token } = req.query;
-    console.log(token)
     // 1. Shape check — must be 64-char hex
     if (!token || typeof token !== 'string' || !/^[a-f0-9]{64}$/.test(token)) {
       return res.status(400).json({ message: 'Invalid or missing token.' });
@@ -112,6 +123,14 @@ export async function verifyMagicLinkController(req, res) {
     // 2. Find by hash — checks unused + not expired in one query
     const record = await findValidMagicTokenModel(token);
     if (!record) {
+      await insertAuditLogsModel({
+        actor_id: null,
+        actor_role: 'System',
+        target_id: null,
+        action: 'Magic Link Verification Failed',
+        details: `Expired or invalid magic login link attempt`,
+        category: 'Authentication'
+      });
       return res.status(401).json({
         message: 'This login link is invalid, has already been used, or has expired.',
         expired: true,
@@ -129,10 +148,26 @@ export async function verifyMagicLinkController(req, res) {
       });
     }
 
+    // IF USER HAS REQUEST FOR ANONYMIZE REVERSE CHANGES
+    if(user.deleted_at){
+      await reverseAnonymizationAccountModel(user.id)
+     
+    }
+
     // 5. Issue JWT (same shape as loginUser)
     const jwtToken = generateJWT(user);
+    await insertAuditLogsModel({
+      actor_id: user.id,
+      actor_role: 'Client',
+      target_id: user.id,
+      action: 'Magic Link Consumed',
+      details: `User successfully logged in using a magic link at ${req.ip}`,
+      category: 'Authentication'
+    });
 
     console.log(`Magic link verified — user #${user.id} (${user.username})`);
+
+    
     return res.status(200).json({
       message: 'Login successful.',
       token:   jwtToken,

@@ -90,7 +90,7 @@ export async function decrementTimeSlotBookingModel( date, time) {
   return result.affectedRows;
 }
 
-// ========== NOTIFICATION FUNCTIONS ==========
+// NOTIFICATION FUNCTIONS
 
 export async function getUserNotificationsModel(userId) {
   const query = `

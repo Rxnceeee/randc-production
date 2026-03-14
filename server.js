@@ -9,6 +9,7 @@ import cron from 'node-cron';
 
 import { initializeSocketIO, getIO } from './src/config/socket.js';
 import { applyExpiredClaimPenaltiesModel } from './src/model/walkInModel.js';
+
 import { db } from './src/config/db.js';
 
 // Routes
@@ -16,6 +17,7 @@ import userRoutes   from './src/routes/userRoutes.js';
 import clientRoutes from './src/routes/clientRoutes.js';
 import adminRoutes  from './src/routes/adminRoutes.js';
 import chatRoutes   from './src/routes/chatRoutes.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -71,8 +73,8 @@ app.use('/api/user', authLimiter);
 
 
 const globalLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000, 
-  max: 300, 
+  windowMs: 60 * 1000, 
+  max: 200, 
 
   standardHeaders: true,
   legacyHeaders: false,
@@ -94,6 +96,7 @@ app.use('/api/client', clientRoutes);
 app.use('/api/admin',  adminRoutes);
 app.use('/api/chat',   chatRoutes);
 
+
 // Health Check
 app.get('/health', async (_req, res) => {
   let dbStatus = 'ok';
@@ -113,6 +116,10 @@ app.get('/health', async (_req, res) => {
 // Root Entry Point
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pages', 'index.html'));
+});
+
+app.get('/ticket/:token', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'pages', 'ticket.html'));
 });
 
 // 404 Handler
@@ -136,23 +143,27 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-
-// CRON JOBS
-// Walk-in claim penalty (every midnight)
+// ── CRON 1: Walk-in claim penalty (every midnight) ────────────────────────────
 cron.schedule('0 0 * * *', async () => {
   try {
     const count = await applyExpiredClaimPenaltiesModel();
     if (count > 0) {
-      console.log(`Walk-in penalties applied: ${count} expired transactions`);
-      // Real-time: admins get a dashboard refresh signal
-      getIO().emit('admin_refresh', { area: 'walkin_transactions' });
+      console.log(`[Cron] Walk-in penalties applied: ${count} expired transaction(s)`);
+      getIO().to('admins').emit('admin_notification', {
+        type:      'penalties_applied',
+        title:     'Penalty Fees Applied',
+        message:   `₱200 penalty applied to ${count} transaction(s).`,
+        timestamp: new Date(),
+      });
+      getIO().to('admins').emit('admin_refresh', { area: 'walkin_transactions' });
     }
   } catch (err) {
-    console.error('Walk-in penalty cron error:', err);
+    console.error('[Cron] Walk-in penalty error:', err);
   }
 });
 
-// Hard-delete accounts whose 7-day grace period has elapsed (every midnight)
+
+// ── CRON 2: Anonymize deleted accounts after 7-day grace period (every midnight)
 cron.schedule('0 0 * * *', async () => {
   try {
     const [due] = await db.execute(
@@ -168,32 +179,63 @@ cron.schedule('0 0 * * *', async () => {
     const placeholders = ids.map(() => '?').join(', ');
 
     await db.execute(
-      `DELETE FROM users WHERE id IN (${placeholders})`,
+      `UPDATE users
+       SET
+         email             = NULL,
+         phone_number      = NULL,
+         first_name        = 'Deleted',
+         last_name         = 'User',
+         middle_name       = NULL,
+         picture           = NULL,
+         username          = CONCAT('deleted_user_', id),
+         password          = NULL,
+         verification_code = NULL,
+         token_id          = NULL,
+         sex               = NULL,
+         is_active         = 0,
+         is_verified       = 0,
+         is_online         = 0,
+         deleted_at        = NOW()
+       WHERE id IN (${placeholders})`,
       ids
     );
 
-    getIO().emit('admin_refresh', { area: 'clients' });
+    // FIX: was `connection.execute` — `connection` was never declared in this scope
+    for (const u of due) {
+      await db.execute(
+        `INSERT INTO audit_logs (actor_role, target_id, action, details, category)
+         VALUES ('System', ?, 'Account Successfully Anonymized',
+                 'Scheduled anonymization completed after 7 days',
+                 'Anonymization')`,
+        [u.id]
+      );
+    }
+
+    getIO().to('admins').emit('admin_refresh', { area: 'clients' });
 
     console.log(
-      ` Permanently deleted ${due.length} account(s): ` +
+      `[Cron] Anonymized ${due.length} account(s): ` +
       due.map((u) => `${u.username} (#${u.id})`).join(', ')
     );
   } catch (err) {
-    console.error('Account purge cron error:', err);
+    console.error('[Cron] Account anonymization error:', err);
   }
 });
-// Auto-lapse overdue appointments (every midnight) 
+
+
+// ── CRON 3: Auto-lapse overdue appointments (every midnight) ──────────────────
 cron.schedule('0 0 * * *', async () => {
   try {
     const [result] = await db.execute(
       `UPDATE appointments
-       SET status = 'lapsed', remarks = 'Automatically lapsed — appointment date passed'
+       SET status  = 'lapsed',
+           remarks = 'Automatically lapsed — appointment date passed'
        WHERE status IN ('pending', 'approved')
          AND CONCAT(appointment_date, ' ', appointment_time) < NOW() - INTERVAL 30 MINUTE`
     );
 
     if (result.affectedRows > 0) {
-      console.log(` Lapsed ${result.affectedRows} appointment(s)`);
+      console.log(`[Cron] Lapsed ${result.affectedRows} appointment(s)`);
 
       const [lapsed] = await db.execute(
         `SELECT appointment_id, client_id, appointment_date, appointment_time
@@ -214,86 +256,27 @@ cron.schedule('0 0 * * *', async () => {
           ]
         );
 
-        // Real-time to affected client
         io.to(`user_${appt.client_id}`).emit('notification', {
-          type: 'appointment',
-          title: 'Appointment Lapsed',
+          type:    'appointment',
+          title:   'Appointment Lapsed',
           message: `Your appointment on ${new Date(`${appt.appointment_date}T${appt.appointment_time}`).toLocaleString('en-PH')} has lapsed.`,
         });
       }
 
-      // Real-time to admin room
       io.to('admins').emit('admin_notification', {
-        type: 'appointments_lapsed',
-        title: 'Appointments Auto-Lapsed',
-        message: `${result.affectedRows} appointment(s) were automatically lapsed.`,
+        type:      'appointments_lapsed',
+        title:     'Appointments Auto-Lapsed',
+        message:   `${result.affectedRows} appointment(s) were automatically lapsed.`,
         timestamp: new Date(),
       });
-
       io.to('admins').emit('admin_refresh', { area: 'appointments' });
     }
   } catch (err) {
-    console.error('Lapse cron error:', err);
+    console.error('[Cron] Lapse error:', err);
   }
 });
 
-// Apply 200 penalty to unclaimed documents (every midnight) 
-cron.schedule('0 0 * * *', async () => {
-  try {
-    const [expired] = await db.execute(
-      `SELECT dpt.transaction_id, dpt.client_id, s.service_name
-       FROM document_process_transaction dpt
-       INNER JOIN status st ON dpt.current_status_id = st.status_id
-       INNER JOIN services s ON dpt.service_id = s.service_id
-       WHERE st.status_name = 'to_claim'
-         AND dpt.claim_deadline < NOW()
-         AND dpt.has_penalty = 0`
-    );
-
-    if (expired.length === 0) return;
-
-    const io = getIO();
-    for (const tx of expired) {
-      await db.execute(
-        `UPDATE document_process_transaction
-         SET penalty_amount = 200.00, has_penalty = 1
-         WHERE transaction_id = ?`,
-        [tx.transaction_id]
-      );
-      await db.execute(
-        `INSERT INTO notifications (user_id, type, title, message, related_id)
-         VALUES (?, 'penalty_notice', 'Penalty Fee Applied', ?, ?)`,
-        [
-          tx.client_id,
-          `A ₱200.00 penalty has been applied to your ${tx.service_name} transaction for not claiming within 7 days.`,
-          tx.transaction_id,
-        ]
-      );
-
-      // Real-time to affected client
-      io.to(`user_${tx.client_id}`).emit('notification', {
-        type: 'penalty_notice',
-        title: 'Penalty Fee Applied',
-        message: `₱200 penalty applied to ${tx.service_name} — document not claimed within 7 days.`,
-      });
-    }
-
-    // Real-time to admin room
-    io.to('admins').emit('admin_notification', {
-      type: 'penalties_applied',
-      title: 'Penalty Fees Applied',
-      message: `₱200 penalty applied to ${expired.length} transaction(s).`,
-      timestamp: new Date(),
-    });
-
-    io.to('admins').emit('admin_refresh', { area: 'transactions' });
-    console.log(`  Applied ₱200 penalty to ${expired.length} transaction(s)`);
-  } catch (err) {
-    console.error('Penalty cron error:', err);
-  }
-});
-
-// Upcoming appointment reminders (daily at 8 AM) 
+// ── CRON 4: Upcoming appointment reminders (daily at 8 AM) ───────────────────
 cron.schedule('0 8 * * *', async () => {
   try {
     const [upcoming] = await db.execute(
@@ -316,19 +299,18 @@ cron.schedule('0 8 * * *', async () => {
       );
 
       io.to(`user_${appt.client_id}`).emit('notification', {
-        type: 'appointment_reminder',
-        title: 'Appointment Tomorrow',
+        type:    'appointment_reminder',
+        title:   'Appointment Tomorrow',
         message: `Reminder: Your appointment is tomorrow at ${appt.appointment_time}. Please arrive 10 minutes early.`,
       });
     }
 
     if (upcoming.length > 0)
-      console.log(`Sent reminders for ${upcoming.length} upcoming appointment(s)`);
+      console.log(`[Cron] Sent reminders for ${upcoming.length} appointment(s)`);
   } catch (err) {
-    console.error('Reminder cron error:', err);
+    console.error('[Cron] Reminder error:', err);
   }
 });
-
 
 // SERVER START
 const PORT = process.env.PORT || 3000;
