@@ -10,6 +10,7 @@ import {
   consumeMagicTokenModel,
   countRecentMagicTokensModel,
 } from '../model/magicLinkModel.js';
+import { insertAuditLogsModel} from '../model/auditLogModel.js';
 
 import { insertAuditLogsModel} from '../model/auditLogModel.js';
 import {reverseAnonymizationAccountModel} from '../model/userModel.js'

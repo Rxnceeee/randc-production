@@ -903,7 +903,7 @@
         <div class="row gy-4">
           <div class="col-lg-4 col-md-6">
             <div class="footer-brand">
-              <i class="bi bi-file-earmark-check me-2" aria-hidden="true"></i>RandC
+              </i>RandC
             </div>
             <p>Professional document processing services you can trust. Licensed, accredited, and dedicated to your peace of mind.</p>
             <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
@@ -1617,13 +1617,15 @@ const ROOT = document.documentElement;
 
       async function searchVerifiedEmail(event) {
         event.preventDefault();
+
+        
         const searchedGmail = document.getElementById("searchGmailAccount").value;
         const formgotPasswordMessage = document.getElementById("forgot-password-message");
         const btn = document.getElementById('searchVerifiedEmailButton')
         if (btn) {btn.disabled = true;}
 
         if (!checkEmailAddress(searchedGmail)) {
-          showNotificationMessage("Invalid email format. Example: johndoe@gmail.com", "error", "forgotPassword");
+          showNotificationMessage("Invalid email format. Example: johndoe@gmasdfasdfasdfail.com", "error", "forgotPassword");
           return;
         }
 
@@ -1817,6 +1819,10 @@ const ROOT = document.documentElement;
           showNotificationMessage("Invalid username. Use letters, numbers, or underscores (e.g. johndoe123).", "error", "signupModal");
           return;
         }
+        if (username.length <= 7) {
+          showNotificationMessage("Username must be at least 8 characters long.", "error", "signupModal");
+          return;
+        }
         if (password.length < 12 || password.length > 24) {
           showNotificationMessage("Password must be between 12 and 24 characters.", "error", "signupModal");
           return;
@@ -1826,11 +1832,10 @@ const ROOT = document.documentElement;
           return;
         }
         if (!checkEmailAddress(email)) {
-          showNotificationMessage("Invalid email format. Example: johndoe@gmail.com", "error", "signupModal");
+          showNotificationMessage("Invalid email format. Example: johndose@gmail.com", "error", "signupModal");
           return;
         }
 
-        // No agreeTerms check needed — consent was already agreed before reaching this form
 
         const res  = await fetch("/api/user/signup", {
           method:  "POST",
@@ -2194,8 +2199,8 @@ const ROOT = document.documentElement;
           if (emailInput) emailInput.focus();
           return;
         }
-        if (!/^[^\s@]+@gmail\.com$/i.test(email)) {
-          _magicToast('Please enter a valid @gmail.com address.', 'error');
+        if (!checkEmailAddress(email)) {
+          _magicToast('Please enter a valid @gmasssil.com address.', 'error');
           if (emailInput) emailInput.focus();
           return;
         }
