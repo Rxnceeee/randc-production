@@ -1,0 +1,450 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  admin
+  client
+  staff
+}
+
+enum BanType {
+  three_days  @map("3_days")
+  thirty_days @map("30_days")
+  permanent
+}
+
+enum AccountDeletionStatus {
+  Pending
+  Approved
+  Reactivated
+  Completed
+}
+
+enum AppointmentStatus {
+  pending
+  approved
+  completed
+  cancelled
+  lapsed
+}
+
+enum PublicBookingStatus {
+  pending
+  approved
+  completed
+  cancelled
+  lapsed
+}
+
+enum ActorRole {
+  Client
+  Admin
+  System
+}
+
+enum AuditCategory {
+  Account
+  Authentication
+  Email
+  Anonymization
+}
+
+enum ChatConversationStatus {
+  active
+  closed
+}
+
+enum TransactionType {
+  appointment
+  walk_in
+}
+
+enum HolidayType {
+  regular
+  special
+  custom
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id                  Int       @id @default(autoincrement())
+  email               String?   @unique @db.VarChar(255)
+  phoneNumber         String?   @unique @map("phone_number") @db.VarChar(255)
+  verificationCode    String?   @map("verification_code") @db.VarChar(255)
+  firstName           String?   @map("first_name") @db.VarChar(255)
+  lastName            String?   @map("last_name") @db.VarChar(255)
+  middleName          String?   @map("middle_name") @db.VarChar(255)
+  picture             String?   @db.VarChar(500)
+  role                UserRole  @default(client)
+  isActive            Boolean   @default(true) @map("is_active")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  lastLogin           DateTime? @map("last_login")
+  username            String    @unique @db.VarChar(255)
+  codeExpiresAt       DateTime? @map("code_expires_at")
+  password            String?   @db.VarChar(120)
+  isVerified          Int       @default(0) @map("is_verified")
+  tokenId             String?   @map("token_id") @db.VarChar(120)
+  sex                 String?   @db.VarChar(20)
+  lastSeen            DateTime? @map("last_seen")
+  loginAttempts       Int       @default(0) @map("login_attempts")
+  loginLastAttempt    DateTime? @map("login_last_attempt")
+  loginCooldownUntil  DateTime? @map("login_cooldown_until")
+  otpAttempts         Int       @default(0) @map("otp_attempts")
+  otpLockUntil        DateTime? @map("otp_lock_until")
+  isBanned            Boolean   @default(false) @map("is_banned")
+  banType             BanType?  @map("ban_type")
+  banUntil            DateTime? @map("ban_until")
+  banReason           String?   @map("ban_reason") @db.VarChar(500)
+  deletedAt           DateTime? @map("deleted_at")
+  isOnline            Boolean   @default(false) @map("is_online")
+
+  appointments              Appointment[]
+  accountDeletionRequests   AccountDeletionRequest[]
+  notifications             Notification[]
+  magicLinkTokens           MagicLinkToken[]
+  transactions              DocumentProcessTransaction[]     @relation("ClientTransactions")
+  transactionsCreated       DocumentProcessTransaction[]     @relation("CreatedByTransactions")
+  transactionTimestamps     DocumentProcessTransactionTimestamp[]
+  bansReceived              UserBan[]                        @relation("UserBansReceived")
+  bansGiven                 UserBan[]                        @relation("UserBansGiven")
+  sessions                  UserSession[]
+  chatConversationsAsClient ChatConversation[]               @relation("ClientConversations")
+  chatConversationsAsAdmin  ChatConversation[]               @relation("AdminConversations")
+  chatMessages              ChatMessage[]
+  testimonials              Testimonial[]
+
+  @@map("users")
+}
+
+model AccountDeletionRequest {
+  requestId   Int                   @id @default(autoincrement()) @map("request_id")
+  userId      Int                   @map("user_id")
+  reason      String?               @db.Text
+  requestedAt DateTime              @default(now()) @map("requested_at")
+  processedAt DateTime?             @map("processed_at")
+  status      AccountDeletionStatus
+
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account_deletion_requests")
+}
+
+model Appointment {
+  appointmentId   Int               @id @default(autoincrement()) @map("appointment_id")
+  clientId        Int               @map("client_id")
+  appointmentDate DateTime          @map("appointment_date") @db.Date
+  appointmentTime DateTime          @map("appointment_time") @db.Time(0)
+  notes           String?           @db.Text
+  status          AppointmentStatus @default(pending)
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  remarks         String?           @db.VarChar(250)
+
+  client          User              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  services        AppointmentService[]
+
+  @@map("appointments")
+}
+
+model AppointmentService {
+  id            Int         @id @default(autoincrement())
+  appointmentId Int         @map("appointment_id")
+  serviceId     Int         @map("service_id")
+
+  appointment   Appointment @relation(fields: [appointmentId], references: [appointmentId], onDelete: Cascade)
+  service       Service     @relation(fields: [serviceId], references: [serviceId])
+
+  @@map("appointment_service")
+}
+
+model AppointmentTimeSlot {
+  slotId          Int      @id @default(autoincrement()) @map("slot_id")
+  appointmentDate DateTime @map("appointment_date") @db.Date
+  appointmentTime DateTime @map("appointment_time") @db.Time(0)
+  maxCapacity     Int      @default(3) @map("max_capacity")
+  currentBookings Int      @default(0) @map("current_bookings")
+  isAvailable     Boolean  @default(true) @map("is_available")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([appointmentDate, appointmentTime], name: "unique_slot")
+  @@index([appointmentDate, isAvailable], name: "idx_date_available")
+  @@index([appointmentDate, appointmentTime], name: "idx_date_time")
+  @@map("appointment_time_slots")
+}
+
+model AuditLog {
+  id        Int           @id @default(autoincrement())
+  actorId   Int?          @map("actor_id")
+  actorRole ActorRole     @default(Client) @map("actor_role")
+  targetId  Int?          @map("target_id")
+  action    String        @db.VarChar(100)
+  details   String?       @db.Text
+  ipAddress String?       @map("ip_address") @db.VarChar(45)
+  userAgent String?       @map("user_agent") @db.VarChar(255)
+  category  AuditCategory
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
+
+model ChatConversation {
+  conversationId Int                    @id @default(autoincrement()) @map("conversation_id")
+  clientId       Int                    @map("client_id")
+  adminId        Int?                   @map("admin_id")
+  status         ChatConversationStatus @default(active)
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime               @updatedAt @map("updated_at")
+  lastMessageAt  DateTime?              @map("last_message_at")
+
+  client         User                   @relation("ClientConversations", fields: [clientId], references: [id], onDelete: Cascade)
+  admin          User?                  @relation("AdminConversations", fields: [adminId], references: [id], onDelete: SetNull)
+  messages       ChatMessage[]
+
+  @@index([clientId], name: "idx_client")
+  @@index([status], name: "idx_status")
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  messageId      Int              @id @default(autoincrement()) @map("message_id")
+  conversationId Int              @map("conversation_id")
+  senderId       Int              @map("sender_id")
+  messageText    String?          @map("message_text") @db.Text
+  filePath       String?          @map("file_path") @db.VarChar(255)
+  fileName       String?          @map("file_name") @db.VarChar(255)
+  fileType       String?          @map("file_type") @db.VarChar(50)
+  fileSize       Int?             @map("file_size")
+  isRead         Boolean          @default(false) @map("is_read")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  isEdited       Boolean          @default(false) @map("is_edited")
+  editedAt       DateTime?        @map("edited_at")
+  isDeleted      Boolean          @default(false) @map("is_deleted")
+  deletedAt      DateTime?        @map("deleted_at")
+
+  conversation   ChatConversation @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+  sender         User             @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId], name: "idx_conversation")
+  @@map("chat_messages")
+}
+
+model DocumentProcessTransaction {
+  transactionId   Int             @id @default(autoincrement()) @map("transaction_id")
+  clientId        Int             @map("client_id")
+  serviceId       Int             @map("service_id")
+  currentStatusId Int             @map("current_status_id")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  createdBy       Int             @map("created_by")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  transactionType TransactionType @default(appointment) @map("transaction_type")
+  readyDate       DateTime?       @map("ready_date")
+  claimDeadline   DateTime?       @map("claim_deadline")
+  penaltyAmount   Decimal         @default(0.00) @map("penalty_amount") @db.Decimal(10, 2)
+  hasPenalty      Boolean         @default(false) @map("has_penalty")
+
+  client          User            @relation("ClientTransactions", fields: [clientId], references: [id])
+  creator         User            @relation("CreatedByTransactions", fields: [createdBy], references: [id])
+  service         Service         @relation(fields: [serviceId], references: [serviceId])
+  currentStatus   Status          @relation(fields: [currentStatusId], references: [statusId])
+  timestamps      DocumentProcessTransactionTimestamp[]
+  testimonial     Testimonial?
+
+  @@map("document_process_transaction")
+}
+
+model DocumentProcessTransactionTimestamp {
+  timestampId   Int                        @id @default(autoincrement()) @map("timestamp_id")
+  transactionId Int                        @map("transaction_id")
+  statusId      Int                        @map("status_id")
+  changedBy     Int                        @map("changed_by")
+  remarks       String?                    @db.Text
+  changedAt     DateTime                   @default(now()) @map("changed_at")
+
+  transaction   DocumentProcessTransaction @relation(fields: [transactionId], references: [transactionId])
+  status        Status                     @relation(fields: [statusId], references: [statusId])
+  changedByUser User                       @relation(fields: [changedBy], references: [id])
+  photos        DocumentProcessTransactionTimestampPhoto[]
+
+  @@map("document_process_transaction_timestamp")
+}
+
+model DocumentProcessTransactionTimestampPhoto {
+  id          Int                                  @id @default(autoincrement()) @map("ID")
+  timestampId Int                                  @map("timestamp_id")
+  filePath    String?                              @map("file_path") @db.VarChar(120)
+  fileName    String?                              @map("file_name") @db.VarChar(120)
+  fileSize    String?                              @map("file_size") @db.VarChar(120)
+
+  timestamp   DocumentProcessTransactionTimestamp  @relation(fields: [timestampId], references: [timestampId], onDelete: Cascade)
+
+  @@map("document_process_transaction_timestamp_photo")
+}
+
+model Holiday {
+  holidayId   Int         @id @default(autoincrement()) @map("holiday_id")
+  holidayName String      @map("holiday_name") @db.VarChar(120)
+  holidayDate DateTime?   @map("holiday_date") @db.Date
+  month       Int?        @db.TinyInt
+  day         Int?        @db.TinyInt
+  isRecurring Boolean     @default(false) @map("is_recurring")
+  holidayType HolidayType @default(custom) @map("holiday_type")
+  description String?     @db.VarChar(255)
+  isActive    Boolean     @default(true) @map("is_active")
+  createdBy   Int?        @map("created_by")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@index([holidayDate], name: "idx_holiday_date")
+  @@index([month, day], name: "idx_month_day")
+  @@index([isActive], name: "idx_active")
+  @@map("holidays")
+}
+
+model MagicLinkToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  tokenHash String   @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime @map("expires_at") @db.DateTime(0)
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(0)
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt], name: "idx_user_expires")
+  @@map("magic_link_tokens")
+}
+
+model Notification {
+  notificationId Int      @id @default(autoincrement()) @map("notification_id")
+  userId         Int      @map("user_id")
+  type           String   @default("general") @db.VarChar(100)
+  title          String   @db.VarChar(255)
+  message        String   @db.Text
+  relatedId      Int?     @map("related_id")
+  isRead         Boolean  @default(false) @map("is_read")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead], name: "idx_user_read")
+  @@index([type], name: "idx_type")
+  @@map("notifications")
+}
+
+model Service {
+  serviceId   Int      @id @default(autoincrement()) @map("service_id")
+  serviceName String   @unique @map("service_name") @db.VarChar(150)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  isActive    Int      @default(1) @map("is_active")
+
+  transactions          DocumentProcessTransaction[]
+  appointmentServices   AppointmentService[]
+  publicBookingServices PublicBookingService[]
+
+  @@map("services")
+}
+
+model PublicBooking {
+  id              Int                 @id @default(autoincrement())
+  trackingToken   String              @unique @map("tracking_token") @db.Char(64)
+  email           String              @db.VarChar(255)
+  firstName       String              @map("first_name") @db.VarChar(100)
+  lastName        String              @map("last_name") @db.VarChar(100)
+  phone           String?             @db.VarChar(20)
+  appointmentDate DateTime            @map("appointment_date") @db.Date
+  appointmentTime DateTime            @map("appointment_time") @db.Time(0)
+  notes           String?             @db.Text
+  status          PublicBookingStatus @default(pending)
+  remarks         String?             @db.VarChar(250)
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  services        PublicBookingService[]
+
+  @@index([email], name: "idx_email")
+  @@map("public_bookings")
+}
+
+model PublicBookingService {
+  id        Int           @id @default(autoincrement())
+  bookingId Int           @map("booking_id")
+  serviceId Int           @map("service_id")
+
+  booking   PublicBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  service   Service       @relation(fields: [serviceId], references: [serviceId])
+
+  @@map("public_booking_services")
+}
+
+model Status {
+  statusId    Int     @id @default(autoincrement()) @map("status_id")
+  statusName  String  @map("status_name") @db.VarChar(50)
+  description String? @db.VarChar(255)
+
+  transactions DocumentProcessTransaction[]
+  timestamps   DocumentProcessTransactionTimestamp[]
+
+  @@map("status")
+}
+
+model Testimonial {
+  testimonialId Int                        @id @default(autoincrement()) @map("testimonial_id")
+  transactionId Int                        @unique @map("transaction_id")
+  userId        Int                        @map("user_id")
+  initials      String                     @db.VarChar(20)
+  sex           String?                    @db.VarChar(20)
+  rating        Int                        @db.TinyInt
+  message       String                     @db.Text
+  isVisible     Boolean                    @default(true) @map("is_visible")
+  createdAt     DateTime                   @default(now()) @map("created_at")
+
+  transaction   DocumentProcessTransaction @relation(fields: [transactionId], references: [transactionId], onDelete: Cascade)
+  user          User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_user_id")
+  @@map("testimonials")
+}
+
+model UserBan {
+  banId     Int       @id @default(autoincrement()) @map("ban_id")
+  userId    Int       @map("user_id")
+  bannedBy  Int       @map("banned_by")
+  banType   BanType   @map("ban_type")
+  banUntil  DateTime? @map("ban_until")
+  banReason String    @default("") @map("ban_reason") @db.VarChar(500)
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  liftedAt  DateTime? @map("lifted_at")
+  liftedBy  Int?      @map("lifted_by")
+
+  user      User      @relation("UserBansReceived", fields: [userId], references: [id], onDelete: Cascade)
+  banner    User      @relation("UserBansGiven", fields: [bannedBy], references: [id])
+
+  @@index([userId], name: "idx_user_id")
+  @@index([isActive], name: "idx_is_active")
+  @@map("user_bans")
+}
+
+model UserSession {
+  sessionId      Int       @id @default(autoincrement()) @map("session_id")
+  userId         Int       @map("user_id")
+  socketId       String    @map("socket_id") @db.VarChar(100)
+  connectedAt    DateTime  @default(now()) @map("connected_at")
+  disconnectedAt DateTime? @map("disconnected_at")
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, disconnectedAt], name: "idx_user_session")
+  @@map("user_sessions")
+}
