@@ -26,7 +26,7 @@ export async function verifyUsername(username) {
 
 export async function saveUser(username, hashedPassword, email) {
   const role = 'client';
-  const query = `INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)`;
+  const query = `INSERT INTO users (username, password, email, role, updated_at) VALUES (?, ?, ?, ?, NOW())`;
   const [result] = await db.query(query, [username, hashedPassword, email, role]);
   return result.insertId;
 }

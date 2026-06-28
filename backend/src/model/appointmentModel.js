@@ -107,9 +107,9 @@ export async function completeAppointmentWithTransactionsModel(appointmentId, se
     for (const serviceId of selectedServiceIds) {
       // Insert into document_process_transaction
       const [transactionResult] = await connection.execute(
-        `INSERT INTO document_process_transaction 
-         (client_id, service_id, current_status_id, created_by)
-         VALUES (?, ?, ?, ?)`,
+        `INSERT INTO document_process_transaction
+         (client_id, service_id, current_status_id, created_by, updated_at)
+         VALUES (?, ?, ?, ?, NOW())`,
         [clientId, serviceId, submittedStatusId, completedBy]
       );
 

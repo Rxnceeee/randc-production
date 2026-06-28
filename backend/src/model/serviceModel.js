@@ -105,8 +105,8 @@ export async function submitClientAppointmentsModel(connection, clientId, appoin
 
 async function insertAppointment(connection, clientId, appointmentData) {
   const query = `
-    INSERT INTO appointments (client_id, appointment_date, appointment_time, notes,status)
-    VALUES (?, ?, ?, ?,'approved')
+    INSERT INTO appointments (client_id, appointment_date, appointment_time, notes, status, updated_at)
+    VALUES (?, ?, ?, ?, 'approved', NOW())
   `;
 
   const [result] = await connection.query(query, [

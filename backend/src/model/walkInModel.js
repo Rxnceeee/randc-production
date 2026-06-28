@@ -24,8 +24,8 @@ export async function createWalkInTransactionModel(adminId, clientId, serviceId,
     // Status 6 = pending (walk-in starts as pending)
     const [txResult] = await connection.execute(
       `INSERT INTO document_process_transaction
-         (client_id, service_id,created_by, current_status_id, transaction_type)
-       VALUES (?, ?, ?,6, 'walk_in')`,
+         (client_id, service_id, created_by, current_status_id, transaction_type, updated_at)
+       VALUES (?, ?, ?, 6, 'walk_in', NOW())`,
       [clientId, serviceId, adminId]
     );
     const transactionId = txResult.insertId;

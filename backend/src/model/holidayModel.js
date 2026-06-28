@@ -90,8 +90,8 @@ export async function createHolidayModel(data, createdBy) {
 
   const [result] = await db.execute(
     `INSERT INTO holidays
-       (holiday_name, holiday_date, month, day, is_recurring, holiday_type, description, is_active, created_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+       (holiday_name, holiday_date, month, day, is_recurring, holiday_type, description, is_active, created_by, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, NOW())`,
     [
       holidayName,
       holidayDate  || null,

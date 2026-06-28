@@ -1604,7 +1604,7 @@
       }
 
       async function markAsRead(id) {
-        await fetch(`/api/client/notifications/${id}/read`, {
+        await fetch(`${BASE_URL}/api/client/notifications/${id}/read`, {
           method: "PUT",
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
@@ -1612,7 +1612,7 @@
       }
 
       async function markAllAsRead() {
-        await fetch("/api/client/notifications/mark-all-read", {
+        await fetch(`${BASE_URL}/api/client/notifications/mark-all-read`, {
           method: "PUT",
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
@@ -1921,7 +1921,7 @@
           ).textContent = "Cancellation reason is required";
           return;
         }
-        const res = await fetch(`/api/client/cancelAppointment/${id}`, {
+        const res = await fetch(`${BASE_URL}/api/client/cancelAppointment/${id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -1984,7 +1984,7 @@
           return;
         }
 
-        const res = await fetch("/api/client/submitAppointment", {
+        const res = await fetch(`${BASE_URL}/api/client/submitAppointment`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -2577,7 +2577,7 @@
       }
 
       async function submitUserInfo(formData) {
-        const res = await fetch("/api/client/setupAccount", {
+        const res = await fetch(`${BASE_URL}/api/client/setupAccount`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -2640,7 +2640,7 @@
             "Password must be 12–24 characters",
             "error",
           );
-        const res = await fetch("/api/client/changePassword", {
+        const res = await fetch(`${BASE_URL}/api/client/changePassword`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -2723,7 +2723,7 @@
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Anonymizing';
 
         try {
-          const res  = await fetch('/api/client/account/anonymize', {
+          const res  = await fetch(`${BASE_URL}/api/client/account/anonymize`, {
             method:  'POST',
             headers: {
               'Content-Type': 'application/json',
