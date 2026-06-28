@@ -28,11 +28,15 @@ app.set("trust proxy", 1);
 // CORS — in production, restrict to the Vercel frontend domain
 const allowedOrigins = IS_PROD
   ? (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean)
-  : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5173', 'http://127.0.0.1:5173'];
+  : [];
 
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
+    // Dev: allow any localhost or 127.0.0.1 origin regardless of port
+    if (!IS_PROD && (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
+      return callback(null, true);
+    }
     if (allowedOrigins.includes(origin)) return callback(null, true);
     return callback(new Error(`CORS blocked: ${origin}`));
   },
