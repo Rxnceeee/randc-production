@@ -1819,7 +1819,7 @@ async function hmLoadHolidays() {
 
   try {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const res   = await fetch('/api/admin/holidays', {
+    const res   = await fetch(`${BASE_URL}/api/admin/holidays`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (!res.ok) throw new Error('Failed to fetch');
@@ -2020,7 +2020,7 @@ async function hmSaveHoliday() {
 async function hmToggle(id, isActive) {
   try {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const res   = await fetch(`/api/admin/holidays/${id}/toggle`, {
+    const res   = await fetch(`${BASE_URL}/api/admin/holidays/${id}/toggle`, {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body:    JSON.stringify({ isActive }),
@@ -2048,7 +2048,7 @@ async function hmDeleteHoliday(id) {
 
   try {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const res   = await fetch(`/api/admin/holidays/${id}`, {
+    const res   = await fetch(`${BASE_URL}/api/admin/holidays/${id}`, {
       method:  'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -2066,7 +2066,7 @@ async function hmDeleteHoliday(id) {
 async function sfOverlayHolidays(startDate, endDate) {
   try {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const res   = await fetch(`/api/admin/holidays/range/${startDate}/${endDate}`, {
+    const res   = await fetch(`${BASE_URL}/api/admin/holidays/range/${startDate}/${endDate}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (!res.ok) return;
@@ -2791,7 +2791,6 @@ if (typeof showToast === 'undefined') {
 
         if (name === "users") {
           await fetchUsers();
-          toggleChatPanel()
         }
 
         if (name === "walkin") {
@@ -2950,7 +2949,7 @@ if (typeof showToast === 'undefined') {
       async function submitCancellationReason() {
         const id     = document.getElementById("appointmentID").innerHTML;
         const reason = document.getElementById("cancelReason").value;
-        const res    = await fetch("/api/admin/cancelAppointment", {
+        const res    = await fetch(`${BASE_URL}/api/admin/cancelAppointment`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           body: JSON.stringify({ appointmentID: id, cancelReason: reason }),
         });
@@ -2962,7 +2961,7 @@ if (typeof showToast === 'undefined') {
       }
 
       async function fetchClientAppointments(status = "all") {
-        const res          = await fetch(`/api/admin/filterAppointments/${status}`, {
+        const res          = await fetch(`${BASE_URL}/api/admin/filterAppointments/${status}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const appointments = await res.json();
@@ -3468,7 +3467,7 @@ if (typeof showToast === 'undefined') {
       /* ── Services ──────────────────────────────────────────────── */
 
       async function fetchServices() {
-        const res      = await fetch("/api/admin/getAllServices", {
+        const res      = await fetch(`${BASE_URL}/api/admin/getAllServices`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const services = await res.json();
@@ -3530,7 +3529,7 @@ if (typeof showToast === 'undefined') {
         if (!name || !desc) return showServiceMessage("Please fill in all fields", "error");
         if (name.length < 4) return showServiceMessage("Name too short", "error");
 
-        const url = id ? `/api/admin/saveService/${id}` : `/api/admin/saveService`;
+        const url = id ? `${BASE_URL}/api/admin/saveService/${id}` : `${BASE_URL}/api/admin/saveService`;
         const res = await fetch(url, {
           method:  id ? "PUT" : "POST",
           headers: {
@@ -3558,7 +3557,7 @@ if (typeof showToast === 'undefined') {
         });
         if (!ok) return;
 
-        const res  = await fetch("/api/admin/toggleServiceStatus", {
+        const res  = await fetch(`${BASE_URL}/api/admin/toggleServiceStatus`, {
           method:  "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -3575,7 +3574,7 @@ if (typeof showToast === 'undefined') {
         const q = document.getElementById("serviceSearch").value;
         if (!q.length) return fetchServices();
         if (q.length < 2) return;
-        const res = await fetch(`/api/admin/searchService/${q}`, {
+        const res = await fetch(`${BASE_URL}/api/admin/searchService/${q}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         renderServices(await res.json());
@@ -5041,7 +5040,6 @@ function _esc(str) {
         document.getElementById("user-role").textContent = user.role;
         fetchServices();
        
-        fetchAdminUnreadCount()
       }
 
       window.addEventListener("DOMContentLoaded", () => {

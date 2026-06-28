@@ -63,8 +63,8 @@ async function seed() {
       for (const time of times) {
         await conn.execute(
           `INSERT IGNORE INTO appointment_time_slots
-             (appointment_date, appointment_time, max_capacity, current_bookings, is_available)
-           VALUES (?, ?, 3, 0, 1)`,
+             (appointment_date, appointment_time, max_capacity, current_bookings, is_available, updated_at)
+           VALUES (?, ?, 3, 0, 1, NOW())`,
           [dateStr, time]
         );
         slotCount++;

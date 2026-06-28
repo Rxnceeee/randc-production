@@ -79,8 +79,8 @@ export async function createPublicBookingModel({
     const [result] = await connection.execute(
       `INSERT INTO public_bookings
          (tracking_token, email, first_name, last_name, phone,
-          appointment_date, appointment_time, notes, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+          appointment_date, appointment_time, notes, status, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
       [trackingToken, email, firstName, lastName, phone ?? null,
        appointmentDate, appointmentTime, notes ?? null]
     );
@@ -95,11 +95,12 @@ export async function createPublicBookingModel({
 
     await connection.execute(
       `INSERT INTO appointment_time_slots
-         (appointment_date, appointment_time, max_capacity, current_bookings, is_available)
-       VALUES (?, ?, 3, 1, 1)
+         (appointment_date, appointment_time, max_capacity, current_bookings, is_available, updated_at)
+       VALUES (?, ?, 3, 1, 1, NOW())
        ON DUPLICATE KEY UPDATE
          current_bookings = current_bookings + 1,
-         is_available = IF(current_bookings + 1 >= max_capacity, 0, 1)`,
+         is_available = IF(current_bookings + 1 >= max_capacity, 0, 1),
+         updated_at = NOW()`,
       [appointmentDate, appointmentTime]
     );
 
@@ -184,8 +185,8 @@ export async function getAllPublicBookingsModel({ status, page, limit, search })
      ${where}
      GROUP BY pb.id
      ORDER BY pb.created_at DESC
-     LIMIT ? OFFSET ?`,
-    [...params, limit, offset]
+     LIMIT ${limit} OFFSET ${offset}`,
+    params
   );
 
   return { rows, total };
@@ -215,7 +216,8 @@ export async function updateSlotCapacityModel(slotId, maxCapacity) {
   await db.execute(
     `UPDATE appointment_time_slots
      SET max_capacity = ?,
-         is_available = IF(current_bookings >= ?, 0, 1)
+         is_available = IF(current_bookings >= ?, 0, 1),
+         updated_at = NOW()
      WHERE slot_id = ?`,
     [maxCapacity, maxCapacity, slotId]
   );
