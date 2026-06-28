@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    { "source": "/admin",           "destination": "/pages/admin.html" },
+    { "source": "/client",          "destination": "/pages/client.html" },
+    { "source": "/booking",         "destination": "/pages/booking.html" },
+    { "source": "/legal",           "destination": "/pages/legal.html" },
+    { "source": "/404",             "destination": "/pages/404.html" },
+    { "source": "/badrequest",      "destination": "/pages/badrequest.html" },
+    { "source": "/inactivity",      "destination": "/pages/inactivity.html" },
+    { "source": "/ticket/(.*)",     "destination": "/pages/ticket.html" },
+    { "source": "/track/(.*)",      "destination": "/pages/track.html" }
+  ]
+}
