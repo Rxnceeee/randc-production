@@ -18,7 +18,6 @@ const PANEL_TITLES = {
     transactionsPanel: 'Transactions',
     testimonialsPanel: 'Testimonials',
     userProfilePanel:  'My Account',
-    adminChatPanel:    'Support Chat',
 };
 
 const ACTIVITY_ICONS = {

@@ -1,14 +1,14 @@
 import { db } from '../config/db.js';
 
-export async function getUserCridentials(username) {
+export async function getUserCridentials(usernameOrEmail) {
   const query = `
     SELECT id, password, role, is_verified,
            login_attempts, login_cooldown_until,
            is_banned, ban_type, ban_until,
            otp_attempts, otp_lock_until,
            deleted_at
-    FROM users WHERE username = ? LIMIT 1`;
-  const [rows] = await db.query(query, [username]);
+    FROM users WHERE username = ? OR email = ? LIMIT 1`;
+  const [rows] = await db.query(query, [usernameOrEmail, usernameOrEmail]);
   return rows.length ? rows[0] : null;
 }
 

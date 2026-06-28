@@ -1,4 +1,19 @@
+# Dependencies
 node_modules/
-uploads/messages/
-uploads/transaction_photos/
+backend/node_modules/
+
+# Environment secrets
 .env
+backend/.env
+
+# Uploaded files
+backend/uploads/messages/
+backend/uploads/transaction_photos/
+
+# Prisma generated client
+backend/src/generated/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/

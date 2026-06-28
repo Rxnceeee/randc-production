@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transaction Ticket — RandC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <link rel="shortcut icon" href="../images/randclogo.png" type="image/x-icon" />
+    <style>
+      body { background: #0e1525; color: #e8edf7; font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+      .ticket-card { background: #1a2540; border: 1px solid #2e3f60; border-radius: 12px; padding: 2.5rem; max-width: 480px; width: 100%; text-align: center; }
+      .ticket-icon { font-size: 3rem; color: #22c55e; margin-bottom: 1rem; }
+      h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+      p { color: #8a97b4; font-size: 0.9rem; }
+      #ticketContent { margin-top: 1.5rem; text-align: left; }
+      .info-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #2e3f60; font-size: 0.875rem; }
+      .info-label { color: #8a97b4; }
+      .info-value { font-weight: 600; }
+      .loading { color: #8a97b4; }
+      .error { color: #f43f5e; }
+    </style>
+  </head>
+  <body>
+    <div class="ticket-card">
+      <div class="ticket-icon"><i class="bi bi-file-earmark-check-fill"></i></div>
+      <h2>Transaction Ticket</h2>
+      <p>RandC Document Processing</p>
+      <div id="ticketContent">
+        <p class="loading"><i class="bi bi-arrow-repeat"></i> Loading ticket…</p>
+      </div>
+    </div>
+
+    <script>
+      (async function () {
+        const token = window.location.pathname.split('/ticket/')[1];
+        if (!token) {
+          document.getElementById('ticketContent').innerHTML = '<p class="error">Invalid ticket link.</p>';
+          return;
+        }
+        try {
+          const res  = await fetch(`/api/user/magic-link/verify?token=${token}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || 'Invalid or expired ticket.');
+
+          const content = document.getElementById('ticketContent');
+          content.innerHTML = `
+            <div class="info-row"><span class="info-label">Status</span><span class="info-value" style="color:#22c55e;">Verified</span></div>
+            <div class="info-row"><span class="info-label">Message</span><span class="info-value">${data.message || 'Ticket verified.'}</span></div>`;
+        } catch (err) {
+          document.getElementById('ticketContent').innerHTML = `<p class="error"><i class="bi bi-x-circle"></i> ${err.message}</p>`;
+        }
+      })();
+    </script>
+  </body>
+</html>

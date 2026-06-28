@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Track Appointment — RandC Document Processing</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="shortcut icon" href="../images/randclogo.png" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+    <style>
+      :root {
+        --tr-bg:      #080d17;
+        --tr-surface: #0e1525;
+        --tr-card:    #1a2540;
+        --tr-border:  #2e3f60;
+        --tr-primary: #22c55e;
+        --tr-text:    #e8edf7;
+        --tr-sub:     #8a97b4;
+        --tr-muted:   #5a6a88;
+        --tr-radius:  14px;
+        --tr-radius-lg: 20px;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: var(--tr-bg);
+        color: var(--tr-text);
+        font-family: 'DM Sans', system-ui, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ─── Nav ─────────────────────────────────────────── */
+      .tr-nav {
+        background: rgba(8,13,23,.92);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--tr-border);
+        padding: 0.875rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .tr-nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: var(--tr-text);
+        text-decoration: none;
+      }
+      .tr-nav-brand img { border-radius: 6px; }
+      .tr-nav-back {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.875rem;
+        color: var(--tr-sub);
+        text-decoration: none;
+        transition: color .15s;
+      }
+      .tr-nav-back:hover { color: var(--tr-primary); }
+
+      /* ─── Page ────────────────────────────────────────── */
+      .tr-page {
+        flex: 1;
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 4rem;
+        width: 100%;
+      }
+
+      /* ─── Header ──────────────────────────────────────── */
+      .tr-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .tr-header-icon {
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        background: rgba(34,197,94,.12);
+        border: 1px solid rgba(34,197,94,.25);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+      }
+      .tr-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.3rem;
+      }
+      .tr-header p {
+        font-size: 0.875rem;
+        color: var(--tr-sub);
+      }
+
+      /* ─── Card ────────────────────────────────────────── */
+      .tr-card {
+        background: var(--tr-card);
+        border: 1px solid var(--tr-border);
+        border-radius: var(--tr-radius-lg);
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+
+      /* ─── Status section ──────────────────────────────── */
+      .tr-status-section {
+        padding: 1.75rem 1.75rem 1.25rem;
+        border-bottom: 1px solid var(--tr-border);
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+      }
+      .tr-status-icon-wrap {
+        width: 52px; height: 52px;
+        border-radius: 50%;
+        background: rgba(34,197,94,.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        transition: background .3s;
+      }
+      .tr-status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.875rem;
+        border-radius: 99px;
+        border: 1px solid transparent;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 0.875rem;
+        letter-spacing: .02em;
+        margin-bottom: 0.35rem;
+        transition: all .3s;
+      }
+      .tr-status-hint {
+        font-size: 0.78rem;
+        color: var(--tr-sub);
+        line-height: 1.4;
+      }
+
+      /* ─── Info rows ───────────────────────────────────── */
+      .tr-info-list {
+        padding: 0.75rem 1.75rem;
+      }
+      .tr-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(46,63,96,.5);
+        gap: 1rem;
+        font-size: 0.875rem;
+      }
+      .tr-info-row:last-child { border-bottom: none; }
+      .tr-info-label {
+        color: var(--tr-sub);
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        flex-shrink: 0;
+        padding-top: 1px;
+      }
+      .tr-info-value {
+        font-weight: 600;
+        text-align: right;
+        word-break: break-word;
+      }
+
+      /* ─── Service pills ───────────────────────────────── */
+      .tr-svc-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        justify-content: flex-end;
+      }
+      .track-svc-pill {
+        background: rgba(34,197,94,.1);
+        border: 1px solid rgba(34,197,94,.2);
+        border-radius: 99px;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #4ade80;
+      }
+      .track-muted { color: var(--tr-sub); }
+
+      /* ─── Remarks section ─────────────────────────────── */
+      .tr-remarks {
+        margin: 0 1.75rem 1.25rem;
+        background: rgba(245,158,11,.07);
+        border: 1px solid rgba(245,158,11,.2);
+        border-radius: 10px;
+        padding: 0.875rem 1rem;
+      }
+      .tr-remarks-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #f59e0b;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        margin-bottom: 0.35rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .tr-remarks-text {
+        font-size: 0.875rem;
+        color: var(--tr-text);
+        line-height: 1.55;
+      }
+
+      /* ─── Refresh strip ───────────────────────────────── */
+      .tr-refresh-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        font-size: 0.75rem;
+        color: var(--tr-muted);
+        margin-top: 0.5rem;
+        padding: 0.5rem 0;
+      }
+      .tr-refresh-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--tr-primary);
+        animation: tr-pulse 2s ease-in-out infinite;
+      }
+      @keyframes tr-pulse {
+        0%, 100% { opacity: .4; transform: scale(.8); }
+        50%       { opacity: 1;  transform: scale(1.1); }
+      }
+
+      /* ─── Network error ───────────────────────────────── */
+      .tr-net-err {
+        background: rgba(244,63,94,.08);
+        border: 1px solid rgba(244,63,94,.2);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.825rem;
+        color: #fca5a5;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* ─── Error state ─────────────────────────────────── */
+      .tr-error-card {
+        background: var(--tr-card);
+        border: 1px solid var(--tr-border);
+        border-radius: var(--tr-radius-lg);
+        padding: 3rem 2rem;
+        text-align: center;
+      }
+      .tr-error-icon {
+        font-size: 3rem;
+        color: #f43f5e;
+        margin-bottom: 1rem;
+      }
+      .tr-error-card h2 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .tr-error-card p {
+        font-size: 0.875rem;
+        color: var(--tr-sub);
+        margin-bottom: 1.5rem;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* ─── CTA button ──────────────────────────────────── */
+      .tr-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.65rem 1.25rem;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity .2s;
+      }
+      .tr-btn:hover { opacity: .88; color: #fff; text-decoration: none; }
+      .tr-btn-ghost {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.65rem 1.25rem;
+        background: transparent;
+        color: var(--tr-sub);
+        border: 1px solid var(--tr-border);
+        border-radius: 10px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all .2s;
+      }
+      .tr-btn-ghost:hover { color: var(--tr-text); border-color: var(--tr-sub); text-decoration: none; }
+
+      /* ─── Loading ─────────────────────────────────────── */
+      .tr-loading {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--tr-sub);
+      }
+      .tr-spin {
+        display: inline-block;
+        width: 40px; height: 40px;
+        border: 3px solid rgba(34,197,94,.15);
+        border-top-color: var(--tr-primary);
+        border-radius: 50%;
+        animation: tr-rotate .8s linear infinite;
+        margin-bottom: 1rem;
+      }
+      @keyframes tr-rotate { to { transform: rotate(360deg); } }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- NAV -->
+    <nav class="tr-nav" role="navigation" aria-label="Tracking page navigation">
+      <a class="tr-nav-brand" href="/" aria-label="RandC homepage">
+        <img src="../images/randclogo.png" alt="RandC" width="28" height="28" />
+        RandC
+      </a>
+      <a class="tr-nav-back" href="/" aria-label="Return to homepage">
+        <i class="bi bi-house" aria-hidden="true"></i> Home
+      </a>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="tr-page" id="track-main" role="main" aria-label="Appointment tracking">
+
+      <div class="tr-header">
+        <div class="tr-header-icon" aria-hidden="true">
+          <i class="bi bi-qr-code-scan" style="color:#22c55e;"></i>
+        </div>
+        <h1>Appointment Status</h1>
+        <p>Real-time status of your appointment request</p>
+      </div>
+
+      <!-- Network error (transient) -->
+      <div class="tr-net-err" id="track-net-err" hidden role="alert" aria-live="assertive">
+        <i class="bi bi-wifi-off" aria-hidden="true"></i>
+        Could not refresh — check your connection. Retrying automatically.
+      </div>
+
+      <!-- Loading -->
+      <div id="track-loading" role="status" aria-live="polite">
+        <div class="tr-loading">
+          <div class="tr-spin" aria-hidden="true"></div>
+          <p>Loading your appointment…</p>
+        </div>
+      </div>
+
+      <!-- Error state -->
+      <div id="track-error" hidden>
+        <div class="tr-error-card">
+          <div class="tr-error-icon" aria-hidden="true"><i class="bi bi-qr-code"></i></div>
+          <h2>Booking Not Found</h2>
+          <p id="track-error-msg">This QR code may be invalid or the booking does not exist. Please check your confirmation email.</p>
+          <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+            <a href="/booking" class="tr-btn">
+              <i class="bi bi-calendar-plus" aria-hidden="true"></i> Make a Booking
+            </a>
+            <a href="/" class="tr-btn-ghost">
+              <i class="bi bi-house" aria-hidden="true"></i> Home
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div id="track-content" hidden aria-live="polite">
+
+        <div class="tr-card">
+
+          <!-- Status -->
+          <div class="tr-status-section">
+            <div class="tr-status-icon-wrap">
+              <i class="bi bi-hourglass-split" id="track-status-icon" style="color:#22c55e;" aria-hidden="true"></i>
+            </div>
+            <div>
+              <span class="tr-status-badge" id="track-status-badge">Pending</span>
+              <p class="tr-status-hint" id="track-status-hint">
+                Your appointment is awaiting review by our team.
+              </p>
+            </div>
+          </div>
+
+          <!-- Info rows -->
+          <div class="tr-info-list" role="list" aria-label="Appointment details">
+            <div class="tr-info-row" role="listitem">
+              <span class="tr-info-label">Name</span>
+              <span class="tr-info-value" id="track-name">—</span>
+            </div>
+            <div class="tr-info-row" role="listitem">
+              <span class="tr-info-label">Date</span>
+              <span class="tr-info-value" id="track-date">—</span>
+            </div>
+            <div class="tr-info-row" role="listitem">
+              <span class="tr-info-label">Time</span>
+              <span class="tr-info-value" id="track-time">—</span>
+            </div>
+            <div class="tr-info-row" role="listitem">
+              <span class="tr-info-label">Services</span>
+              <div class="tr-svc-pills" id="track-services" aria-label="Requested services">—</div>
+            </div>
+            <div class="tr-info-row" role="listitem">
+              <span class="tr-info-label">Last Updated</span>
+              <span class="tr-info-value" id="track-updated">—</span>
+            </div>
+          </div>
+
+          <!-- Remarks (shown only when set) -->
+          <div class="tr-remarks" id="track-remarks-section" hidden role="note" aria-label="Staff remarks">
+            <div class="tr-remarks-label">
+              <i class="bi bi-chat-square-text" aria-hidden="true"></i> Note from our team
+            </div>
+            <p class="tr-remarks-text" id="track-remarks"></p>
+          </div>
+
+        </div>
+
+        <!-- Refresh indicator -->
+        <div class="tr-refresh-strip" aria-live="polite" aria-atomic="true">
+          <div class="tr-refresh-dot" aria-hidden="true"></div>
+          <span id="track-last-check">Auto-refreshes every 60 seconds</span>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;">
+          <a href="/booking" class="tr-btn">
+            <i class="bi bi-calendar-plus" aria-hidden="true"></i> Book Another
+          </a>
+          <a href="/" class="tr-btn-ghost">
+            <i class="bi bi-house" aria-hidden="true"></i> Home
+          </a>
+        </div>
+
+      </div><!-- /track-content -->
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/global.js"></script>
+    <script src="../js/track.js"></script>
+  </body>
+</html>

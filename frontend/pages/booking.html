@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book an Appointment — RandC Document Processing</title>
+    <meta name="description" content="Book a consultation appointment with RandC Document Processing. No account required — just your email address." />
+    <link rel="shortcut icon" href="../images/randclogo.png" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+    <style>
+      :root {
+        --bk-bg:       #080d17;
+        --bk-surface:  #0e1525;
+        --bk-card:     #1a2540;
+        --bk-elevated: #202d4a;
+        --bk-border:   #2e3f60;
+        --bk-primary:  #22c55e;
+        --bk-prim-dk:  #16a34a;
+        --bk-prim-gl:  rgba(34,197,94,.18);
+        --bk-accent:   #22d3ee;
+        --bk-danger:   #f43f5e;
+        --bk-warning:  #f59e0b;
+        --bk-text:     #e8edf7;
+        --bk-sub:      #8a97b4;
+        --bk-muted:    #5a6a88;
+        --bk-radius:   12px;
+        --bk-radius-lg:20px;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: var(--bk-bg);
+        color: var(--bk-text);
+        font-family: 'DM Sans', system-ui, sans-serif;
+        font-size: 1rem;
+        line-height: 1.65;
+        min-height: 100vh;
+      }
+
+      /* ─── Nav ─────────────────────────────────────────── */
+      .bk-nav {
+        background: rgba(8,13,23,.92);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--bk-border);
+        padding: 0.875rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .bk-nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: var(--bk-text);
+        text-decoration: none;
+      }
+      .bk-nav-brand img { border-radius: 6px; }
+      .bk-nav-back {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.875rem;
+        color: var(--bk-sub);
+        text-decoration: none;
+        transition: color .15s;
+      }
+      .bk-nav-back:hover { color: var(--bk-primary); }
+
+      /* ─── Page layout ─────────────────────────────────── */
+      .bk-page {
+        max-width: 660px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 4rem;
+      }
+
+      /* ─── Progress rail ───────────────────────────────── */
+      .bk-progress {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        gap: 0;
+      }
+      .bk-prog-node {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+        flex-shrink: 0;
+        z-index: 1;
+      }
+      .bk-prog-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid var(--bk-border);
+        background: var(--bk-surface);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        color: var(--bk-muted);
+        transition: all .25s;
+        position: relative;
+      }
+      .bk-prog-label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: var(--bk-muted);
+        text-align: center;
+        white-space: nowrap;
+        letter-spacing: .02em;
+        transition: color .25s;
+      }
+      .bk-prog-node.active .bk-prog-circle {
+        border-color: var(--bk-primary);
+        background: var(--bk-prim-gl);
+        color: var(--bk-primary);
+        box-shadow: 0 0 0 4px rgba(34,197,94,.15);
+      }
+      .bk-prog-node.active .bk-prog-label { color: var(--bk-primary); }
+      .bk-prog-node.done .bk-prog-circle {
+        border-color: var(--bk-primary);
+        background: var(--bk-primary);
+        color: #fff;
+      }
+      .bk-prog-node.done .bk-prog-label { color: var(--bk-primary); opacity: .8; }
+      .bk-prog-line {
+        flex: 1;
+        height: 2px;
+        background: var(--bk-border);
+        margin-bottom: 1.35rem;
+        transition: background .25s;
+      }
+      .bk-prog-line.done { background: var(--bk-primary); }
+
+      @media (max-width: 480px) {
+        .bk-prog-label { display: none; }
+        .bk-prog-circle { width: 30px; height: 30px; font-size: 0.8rem; }
+      }
+
+      /* ─── Card ────────────────────────────────────────── */
+      .bk-card {
+        background: var(--bk-card);
+        border: 1px solid var(--bk-border);
+        border-radius: var(--bk-radius-lg);
+        padding: 2rem;
+        margin-bottom: 1.25rem;
+      }
+      .bk-card-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+        color: var(--bk-text);
+      }
+      .bk-card-sub {
+        font-size: 0.875rem;
+        color: var(--bk-sub);
+        margin-bottom: 1.5rem;
+      }
+
+      /* ─── Form fields ─────────────────────────────────── */
+      .bk-field { margin-bottom: 1.1rem; }
+      .bk-label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--bk-sub);
+        margin-bottom: 0.4rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+      }
+      .bk-req { color: var(--bk-primary); }
+      .bk-input {
+        width: 100%;
+        background: var(--bk-surface);
+        border: 1px solid rgba(46,63,96,.8);
+        border-radius: var(--bk-radius);
+        padding: 0.7rem 0.95rem;
+        color: var(--bk-text);
+        font-size: 0.95rem;
+        font-family: inherit;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+        appearance: none;
+      }
+      .bk-input:focus {
+        border-color: var(--bk-primary);
+        box-shadow: 0 0 0 3px rgba(34,197,94,.15);
+      }
+      .bk-input::placeholder { color: var(--bk-muted); }
+      .bk-input option { background: var(--bk-surface); }
+
+      textarea.bk-input { resize: vertical; min-height: 80px; }
+
+      .bk-err {
+        display: block;
+        font-size: 0.78rem;
+        color: var(--bk-danger);
+        margin-top: 0.3rem;
+        min-height: 1rem;
+      }
+      .bk-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      @media (max-width: 500px) { .bk-row-2 { grid-template-columns: 1fr; gap: 0; } }
+
+      /* ─── Service cards ───────────────────────────────── */
+      .bk-services-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+      }
+      @media (max-width: 480px) { .bk-services-grid { grid-template-columns: 1fr; } }
+
+      .bk-svc-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        padding: 1rem 1rem 0.875rem;
+        background: var(--bk-surface);
+        border: 2px solid transparent;
+        border-radius: var(--bk-radius);
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+        user-select: none;
+      }
+      .bk-svc-card input[type=checkbox] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .bk-svc-card:hover { border-color: rgba(34,197,94,.3); background: var(--bk-elevated); }
+      .bk-svc-card:has(input:checked) {
+        border-color: var(--bk-primary);
+        background: rgba(34,197,94,.06);
+      }
+      .bk-svc-icon {
+        font-size: 1.35rem;
+        color: var(--bk-sub);
+        transition: color .2s;
+        margin-bottom: 0.2rem;
+      }
+      .bk-svc-card:has(input:checked) .bk-svc-icon { color: var(--bk-primary); }
+      .bk-svc-name {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--bk-text);
+      }
+      .bk-svc-desc {
+        font-size: 0.78rem;
+        color: var(--bk-sub);
+        line-height: 1.4;
+      }
+      .bk-svc-checkmark {
+        position: absolute;
+        top: 0.6rem;
+        right: 0.7rem;
+        font-size: 1rem;
+        color: var(--bk-primary);
+        opacity: 0;
+        transition: opacity .2s;
+      }
+      .bk-svc-card:has(input:checked) .bk-svc-checkmark { opacity: 1; }
+
+      /* ─── Slots ───────────────────────────────────────── */
+      .bk-slots-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+      }
+      .bk-slot-pill {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.55rem 0.875rem;
+        background: var(--bk-surface);
+        border: 1.5px solid var(--bk-border);
+        border-radius: 99px;
+        cursor: pointer;
+        transition: all .2s;
+        min-width: 90px;
+        font-family: inherit;
+        gap: 0.1rem;
+      }
+      .bk-slot-pill:hover:not(:disabled) {
+        border-color: var(--bk-primary);
+        background: rgba(34,197,94,.08);
+      }
+      .bk-slot-pill.bk-slot-selected {
+        border-color: var(--bk-primary);
+        background: rgba(34,197,94,.14);
+        box-shadow: 0 0 0 3px rgba(34,197,94,.18);
+      }
+      .bk-slot-pill.bk-slot-full,
+      .bk-slot-pill:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+        border-color: var(--bk-border);
+      }
+      .bk-slot-time {
+        font-weight: 700;
+        font-size: 0.875rem;
+        color: var(--bk-text);
+        letter-spacing: .02em;
+      }
+      .bk-slot-rem {
+        font-size: 0.7rem;
+        color: var(--bk-sub);
+        font-weight: 500;
+      }
+      .bk-slot-full .bk-slot-rem { color: var(--bk-danger); }
+      .bk-slots-loading {
+        color: var(--bk-sub);
+        font-size: 0.875rem;
+        padding: 0.75rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      /* ─── Review rows ─────────────────────────────────── */
+      .bk-review-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0.625rem 0;
+        border-bottom: 1px solid rgba(46,63,96,.6);
+        font-size: 0.875rem;
+        gap: 1rem;
+      }
+      .bk-review-row:last-of-type { border-bottom: none; }
+      .bk-rv-label { color: var(--bk-sub); flex-shrink: 0; }
+      .bk-rv-value { font-weight: 600; text-align: right; word-break: break-word; }
+
+      /* ─── Confirm checkbox ────────────────────────────── */
+      .bk-confirm-wrap {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: rgba(34,197,94,.05);
+        border: 1px solid rgba(34,197,94,.2);
+        border-radius: var(--bk-radius);
+        margin: 1.25rem 0 0.5rem;
+        cursor: pointer;
+      }
+      .bk-confirm-wrap input[type=checkbox] {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        accent-color: var(--bk-primary);
+        margin-top: 2px;
+        cursor: pointer;
+      }
+      .bk-confirm-text { font-size: 0.875rem; color: var(--bk-sub); line-height: 1.5; }
+
+      /* ─── Buttons ─────────────────────────────────────── */
+      .bk-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+      }
+      .bk-btn-primary {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, var(--bk-primary), var(--bk-prim-dk));
+        color: #fff;
+        border: none;
+        border-radius: var(--bk-radius);
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity .2s, transform .15s;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .bk-btn-primary:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
+      .bk-btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+      .bk-btn-ghost {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.75rem 1.25rem;
+        background: transparent;
+        color: var(--bk-sub);
+        border: 1px solid var(--bk-border);
+        border-radius: var(--bk-radius);
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .2s;
+        white-space: nowrap;
+      }
+      .bk-btn-ghost:hover { background: var(--bk-elevated); color: var(--bk-text); border-color: var(--bk-sub); }
+
+      /* ─── Submit error ────────────────────────────────── */
+      .bk-submit-err {
+        background: rgba(244,63,94,.1);
+        border: 1px solid rgba(244,63,94,.3);
+        border-radius: var(--bk-radius);
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        color: #fca5a5;
+        margin-top: 1rem;
+      }
+
+      /* ─── API messages ────────────────────────────────── */
+      .bk-api-msg {
+        font-size: 0.875rem;
+        color: var(--bk-sub);
+        padding: 0.75rem 0;
+      }
+      .bk-api-err { color: var(--bk-danger); }
+
+      /* ─── Spinner ─────────────────────────────────────── */
+      .bk-spin {
+        display: inline-block;
+        animation: bk-rotate .8s linear infinite;
+      }
+      .bk-spin-sm {
+        display: inline-block;
+        width: 16px; height: 16px;
+        border: 2px solid rgba(255,255,255,.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: bk-rotate .6s linear infinite;
+        vertical-align: middle;
+      }
+      @keyframes bk-rotate { to { transform: rotate(360deg); } }
+
+      /* ─── Success screen ──────────────────────────────── */
+      .bk-success {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        background: var(--bk-card);
+        border: 1px solid var(--bk-border);
+        border-radius: var(--bk-radius-lg);
+      }
+      .bk-success-icon {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--bk-primary), var(--bk-prim-dk));
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0 40px rgba(34,197,94,.3);
+      }
+      .bk-success h2 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: var(--bk-text);
+      }
+      .bk-success-sub {
+        color: var(--bk-sub);
+        font-size: 0.925rem;
+        margin-bottom: 0.75rem;
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .bk-success-email-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: rgba(34,197,94,.08);
+        border: 1px solid rgba(34,197,94,.2);
+        border-radius: 99px;
+        padding: 0.45rem 1rem;
+        font-size: 0.82rem;
+        color: var(--bk-primary);
+        margin-bottom: 2rem;
+        font-weight: 500;
+      }
+      .bk-success-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+
+      /* ─── Page footer note ────────────────────────────── */
+      .bk-info-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        background: rgba(34,211,238,.06);
+        border: 1px solid rgba(34,211,238,.15);
+        border-radius: var(--bk-radius);
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+        color: var(--bk-sub);
+        margin-bottom: 1.5rem;
+      }
+      .bk-info-note i { color: var(--bk-accent); flex-shrink: 0; margin-top: 1px; }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- NAV -->
+    <nav class="bk-nav" role="navigation" aria-label="Booking page navigation">
+      <a class="bk-nav-brand" href="/" aria-label="RandC homepage">
+        <img src="../images/randclogo.png" alt="RandC" width="28" height="28" />
+        RandC
+      </a>
+      <a class="bk-nav-back" href="/" aria-label="Return to homepage">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i> Back to Home
+      </a>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="bk-page" id="bk-main" role="main">
+
+      <!-- Header -->
+      <div style="margin-bottom: 2rem;">
+        <div style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:99px;padding:.3rem .875rem;font-size:.78rem;font-weight:600;color:#22c55e;margin-bottom:.875rem;">
+          <i class="bi bi-calendar-plus" aria-hidden="true"></i> No account required
+        </div>
+        <h1 style="font-family:'Outfit',sans-serif;font-size:clamp(1.5rem,4vw,2rem);font-weight:800;margin-bottom:.4rem;">
+          Book an Appointment
+        </h1>
+        <p style="color:#8a97b4;font-size:.9rem;">
+          Schedule a consultation with our team. We'll confirm by email.
+        </p>
+      </div>
+
+      <!-- Wizard -->
+      <div id="bk-wizard">
+
+        <!-- Progress indicator -->
+        <div class="bk-progress" role="list" aria-label="Booking progress">
+          <div class="bk-prog-node" role="listitem" aria-label="Step 1: Your Details">
+            <div class="bk-prog-circle"><i class="bi bi-person" aria-hidden="true"></i></div>
+            <span class="bk-prog-label">Details</span>
+          </div>
+          <div class="bk-prog-line"></div>
+          <div class="bk-prog-node" role="listitem" aria-label="Step 2: Services">
+            <div class="bk-prog-circle"><i class="bi bi-list-check" aria-hidden="true"></i></div>
+            <span class="bk-prog-label">Services</span>
+          </div>
+          <div class="bk-prog-line"></div>
+          <div class="bk-prog-node" role="listitem" aria-label="Step 3: Schedule">
+            <div class="bk-prog-circle"><i class="bi bi-calendar3" aria-hidden="true"></i></div>
+            <span class="bk-prog-label">Schedule</span>
+          </div>
+          <div class="bk-prog-line"></div>
+          <div class="bk-prog-node" role="listitem" aria-label="Step 4: Confirm">
+            <div class="bk-prog-circle"><i class="bi bi-shield-check" aria-hidden="true"></i></div>
+            <span class="bk-prog-label">Confirm</span>
+          </div>
+        </div>
+
+        <!-- ── STEP 1: Personal Info ── -->
+        <div id="bk-step-1" role="region" aria-labelledby="bk-step1-title">
+          <div class="bk-card">
+            <h2 class="bk-card-title" id="bk-step1-title">Your Contact Details</h2>
+            <p class="bk-card-sub">We'll use your email to send your booking confirmation and QR code.</p>
+
+            <div class="bk-row-2">
+              <div class="bk-field">
+                <label class="bk-label" for="bk-firstName">First Name <span class="bk-req" aria-label="required">*</span></label>
+                <input class="bk-input" type="text" id="bk-firstName" placeholder="e.g. Juan" autocomplete="given-name" aria-required="true" maxlength="50" />
+                <span class="bk-err" id="bk-firstName-err" role="alert" aria-live="polite"></span>
+              </div>
+              <div class="bk-field">
+                <label class="bk-label" for="bk-lastName">Last Name <span class="bk-req" aria-label="required">*</span></label>
+                <input class="bk-input" type="text" id="bk-lastName" placeholder="e.g. dela Cruz" autocomplete="family-name" aria-required="true" maxlength="50" />
+                <span class="bk-err" id="bk-lastName-err" role="alert" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <div class="bk-field">
+              <label class="bk-label" for="bk-email">Email Address <span class="bk-req" aria-label="required">*</span></label>
+              <input class="bk-input" type="email" id="bk-email" placeholder="you@email.com" autocomplete="email" aria-required="true" inputmode="email" />
+              <span class="bk-err" id="bk-email-err" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="bk-field" style="margin-bottom:0">
+              <label class="bk-label" for="bk-phone">Phone Number <span style="color:var(--bk-muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+              <input class="bk-input" type="tel" id="bk-phone" placeholder="09XX XXX XXXX" autocomplete="tel" inputmode="tel" maxlength="15" />
+              <span class="bk-err" id="bk-phone-err" role="alert" aria-live="polite"></span>
+            </div>
+          </div>
+
+          <div class="bk-actions">
+            <button class="bk-btn-primary" onclick="bkNext()" type="button">
+              Choose Services <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── STEP 2: Services ── -->
+        <div id="bk-step-2" hidden role="region" aria-labelledby="bk-step2-title">
+          <div class="bk-card">
+            <h2 class="bk-card-title" id="bk-step2-title">Select Services</h2>
+            <p class="bk-card-sub">Choose what you need help with. You can select multiple services.</p>
+
+            <div class="bk-services-grid" id="bk-services-grid" role="group" aria-label="Available services">
+              <div class="bk-slots-loading">
+                <i class="bi bi-arrow-repeat bk-spin" aria-hidden="true"></i> Loading services…
+              </div>
+            </div>
+            <span class="bk-err" id="bk-services-err" role="alert" aria-live="polite" style="display:block;margin-top:.5rem;"></span>
+          </div>
+
+          <div class="bk-actions">
+            <button class="bk-btn-ghost" onclick="bkBack()" type="button">
+              <i class="bi bi-arrow-left" aria-hidden="true"></i> Back
+            </button>
+            <button class="bk-btn-primary" onclick="bkNext()" type="button">
+              Pick a Date <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── STEP 3: Date & Time ── -->
+        <div id="bk-step-3" hidden role="region" aria-labelledby="bk-step3-title">
+          <div class="bk-card">
+            <h2 class="bk-card-title" id="bk-step3-title">Choose a Date & Time</h2>
+            <p class="bk-card-sub">We're open Monday – Saturday. Select a date to see available slots.</p>
+
+            <div class="bk-field">
+              <label class="bk-label" for="bk-date">Appointment Date <span class="bk-req" aria-label="required">*</span></label>
+              <input class="bk-input" type="date" id="bk-date" aria-required="true"
+                style="cursor:pointer;" />
+              <span class="bk-err" id="bk-date-err" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="bk-field" style="margin-bottom:0">
+              <label class="bk-label">Available Time Slots <span class="bk-req" aria-label="required">*</span></label>
+              <div class="bk-slots-grid" id="bk-slots-grid" role="group" aria-label="Available time slots">
+                <p class="bk-api-msg">Select a date above to see available times.</p>
+              </div>
+              <span class="bk-err" id="bk-time-err" role="alert" aria-live="polite" style="display:block;margin-top:.4rem;"></span>
+            </div>
+          </div>
+
+          <div class="bk-actions">
+            <button class="bk-btn-ghost" onclick="bkBack()" type="button">
+              <i class="bi bi-arrow-left" aria-hidden="true"></i> Back
+            </button>
+            <button class="bk-btn-primary" onclick="bkNext()" type="button">
+              Review Booking <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── STEP 4: Review & Confirm ── -->
+        <div id="bk-step-4" hidden role="region" aria-labelledby="bk-step4-title">
+          <div class="bk-card">
+            <h2 class="bk-card-title" id="bk-step4-title">Review Your Booking</h2>
+            <p class="bk-card-sub">Double-check your details before submitting.</p>
+
+            <div role="list" aria-label="Booking summary">
+              <div class="bk-review-row" role="listitem">
+                <span class="bk-rv-label">Name</span>
+                <span class="bk-rv-value" id="rv-name">—</span>
+              </div>
+              <div class="bk-review-row" role="listitem">
+                <span class="bk-rv-label">Email</span>
+                <span class="bk-rv-value" id="rv-email">—</span>
+              </div>
+              <div class="bk-review-row" role="listitem">
+                <span class="bk-rv-label">Phone</span>
+                <span class="bk-rv-value" id="rv-phone">—</span>
+              </div>
+              <div class="bk-review-row" role="listitem">
+                <span class="bk-rv-label">Service(s)</span>
+                <span class="bk-rv-value" id="rv-services" style="max-width:60%;text-align:right;">—</span>
+              </div>
+              <div class="bk-review-row" role="listitem">
+                <span class="bk-rv-label">Date</span>
+                <span class="bk-rv-value" id="rv-date">—</span>
+              </div>
+              <div class="bk-review-row" role="listitem">
+                <span class="bk-rv-label">Time</span>
+                <span class="bk-rv-value" id="rv-time">—</span>
+              </div>
+            </div>
+
+            <div class="bk-field" style="margin-top:1.25rem;margin-bottom:0">
+              <label class="bk-label" for="bk-notes">Additional Notes <span style="color:var(--bk-muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+              <textarea class="bk-input" id="bk-notes" placeholder="Any details we should know before your appointment…" maxlength="500" rows="3"></textarea>
+              <div id="rv-notes" style="display:none;"></div>
+            </div>
+
+            <label class="bk-confirm-wrap" for="bk-confirm-check">
+              <input type="checkbox" id="bk-confirm-check" onchange="bkClearError('bk-confirm-err')" />
+              <span class="bk-confirm-text">
+                I confirm that my details above are correct and I understand that a QR tracking code will be sent to my email after submission.
+              </span>
+            </label>
+            <span class="bk-err" id="bk-confirm-err" role="alert" aria-live="polite"></span>
+          </div>
+
+          <div class="bk-info-note" role="note">
+            <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+            <span>Your booking request will be reviewed by our team. You'll receive an email with a QR code — bring it to your appointment. Approval is not instant.</span>
+          </div>
+
+          <div class="bk-actions" style="flex-direction:column;">
+            <button class="bk-btn-primary" id="bk-submit-btn" onclick="bkSubmit()" type="button">
+              <i class="bi bi-send" aria-hidden="true"></i> Submit Booking Request
+            </button>
+            <button class="bk-btn-ghost" onclick="bkBack()" type="button" style="width:100%;justify-content:center;">
+              <i class="bi bi-arrow-left" aria-hidden="true"></i> Back
+            </button>
+          </div>
+
+          <div class="bk-submit-err" id="bk-submit-err" hidden role="alert" aria-live="assertive"></div>
+        </div>
+
+      </div><!-- /bk-wizard -->
+
+      <!-- ── SUCCESS ── -->
+      <div id="bk-success" hidden>
+        <div class="bk-success">
+          <div class="bk-success-icon" aria-hidden="true">
+            <i class="bi bi-check-lg"></i>
+          </div>
+          <h2>Request Sent!</h2>
+          <p class="bk-success-sub">
+            Your appointment request has been submitted. Our team will review it and send you a confirmation.
+          </p>
+          <div class="bk-success-email-note">
+            <i class="bi bi-envelope-fill" aria-hidden="true"></i>
+            Check your email — we've sent your QR tracking code
+          </div>
+          <div class="bk-success-actions">
+            <a href="/" class="bk-btn-primary">
+              <i class="bi bi-house" aria-hidden="true"></i> Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/global.js"></script>
+    <script src="../js/booking.js"></script>
+  </body>
+</html>

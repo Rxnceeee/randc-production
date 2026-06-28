@@ -1,0 +1,11 @@
+{
+  "name": "randc-frontend",
+  "version": "1.0.0",
+  "description": "RandC Document Processing — frontend static files",
+  "scripts": {
+    "dev": "npx serve . -p 5173 --no-clipboard",
+    "start": "npx serve . -p 5173 --no-clipboard"
+  },
+  "keywords": [],
+  "license": "ISC"
+}

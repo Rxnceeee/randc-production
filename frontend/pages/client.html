@@ -12,10 +12,8 @@
       href="../images/randclogo.png"
       type="image/x-icon"
     />
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <link rel="stylesheet" href="../css/client.css" />
     <script src="../js/global.js"></script>
-    <script src="../js/main.js"></script>
     <script src="../js/inactivityLogout.js"></script>
   </head>
   <body>
@@ -721,21 +719,6 @@
             <i class="bi bi-person-circle" aria-hidden="true"></i>
             <span>My Account</span>
           </a>
-          <a
-            class="sidebar-nav-item"
-            onclick="showSection('adminChatPanel')"
-            role="button"
-            tabindex="0"
-            data-section="adminChatPanel"
-            aria-label="Support Chat"
-          >
-            <span class="nav-icon-wrap">
-              <i class="bi bi-chat-dots" aria-hidden="true"></i>
-              <span class="chat-nav-badge" id="chatNavBadge" style="display:none;" aria-label="Unread messages"></span>
-            </span>
-            <span>Support Chat</span>
-          </a>
-          
         </nav>
 
         <!-- Sidebar footer -->
@@ -1054,92 +1037,6 @@
           </div>
         </div>
 
-        <!-- SUPPORT CHAT CLIENT SIDE -->
-        <div class="panel panel-chat" id="adminChatPanel">
-          <div class="chat-shell">
-            <div class="chat-head">
-              <div class="chat-head-left">
-                <div class="chat-avatar-lg">
-                  <i class="bi bi-headset" aria-hidden="true"></i
-                  ><span class="online-dot" id="onlineDot"></span>
-                </div>
-                <div>
-                  <h5 class="chat-head-title">Support Chat</h5>
-                  <div class="chat-head-status">
-                    <span class="status-dot" id="connectionStatus"></span>
-                    <small id="statusText">Connecting…</small>
-                  </div>
-                </div>
-              </div>
-              <div class="chat-secure-badge">
-                <i class="bi bi-shield-check" aria-hidden="true"></i> Secure
-              </div>
-            </div>
-
-            <div
-              class="chat-messages"
-              id="chatMessages"
-              aria-live="polite"
-              aria-label="Chat messages"
-            ></div>
-
-            <div
-              class="typing-indicator"
-              id="typingIndicator"
-              style="display: none"
-              aria-live="polite"
-              aria-label="Support is typing"
-            >
-              <div class="typing-avatar">
-                <i class="bi bi-headset" aria-hidden="true"></i>
-              </div>
-              <div class="typing-bubble">
-                <span></span><span></span><span></span>
-              </div>
-              <small>Support is typing</small>
-            </div>
-
-            <div class="chat-input-bar">
-              <button
-                class="chat-attach-btn"
-                onclick="document.getElementById('fileInput').click()"
-                title="Attach file"
-                aria-label="Attach file"
-              >
-                <i class="bi bi-paperclip" aria-hidden="true"></i>
-              </button>
-              <input
-                type="file"
-                id="fileInput"
-                style="display: none"
-                accept="image/*,.pdf,.doc,.docx,.txt"
-                onchange="handleFileSelect(event)"
-              />
-              <div class="chat-textarea-wrap">
-                <textarea
-                  id="messageInput"
-                  class="chat-textarea"
-                  placeholder="Type your message…"
-                  rows="1"
-                  onkeydown="handleKeyPress(event)"
-                  oninput="
-                    handleTyping();
-                    autoResizeTextarea(this);
-                  "
-                  aria-label="Message input"
-                ></textarea>
-              </div>
-              <button
-                class="chat-send-btn"
-                onclick="sendMessage()"
-                title="Send"
-                aria-label="Send message"
-              >
-                <i class="bi bi-send-fill" aria-hidden="true"></i>
-              </button>
-            </div>
-          </div>
-        </div>
 
       </main>
       <!-- /app-main -->

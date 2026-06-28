@@ -62,10 +62,6 @@
                     <i class="bi bi-person-circle"></i>
                     <span>Account</span>
                 </a>
-                <a class="mobile-nav-item" data-section="adminChatPanel">
-                    <i class="bi bi-chat-dots"></i>
-                    <span>Chat</span>
-                </a>
             </div>
         `;
         document.body.appendChild(mobileNav);

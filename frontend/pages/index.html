@@ -360,6 +360,104 @@
   }
   .pt-success-hint { font-size: 13px; color: var(--pt-muted); margin-top: 12px; }
 
+  /* ── Book CTA Band ── */
+  .bk-cta-band {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 3rem;
+    align-items: center;
+    background: var(--bg-elevated, #141e33);
+    border: 1px solid var(--border, #232f4a);
+    border-radius: 20px;
+    padding: 3rem;
+  }
+  @media (max-width: 768px) {
+    .bk-cta-band { grid-template-columns: 1fr; gap: 2rem; padding: 2rem; }
+    .bk-cta-visual { display: none; }
+  }
+  .bk-cta-heading {
+    font-size: clamp(1.4rem, 2.8vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -.025em;
+    margin-bottom: .75rem;
+    line-height: 1.2;
+  }
+  .bk-cta-sub {
+    color: var(--text-secondary);
+    font-size: .9rem;
+    margin-bottom: 1.25rem;
+    max-width: 440px;
+  }
+  .bk-cta-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: 1.75rem;
+  }
+  .bk-cta-feat {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    background: var(--bg-card, #1a2540);
+    border: 1px solid var(--border-bright, #2e3f60);
+    border-radius: 99px;
+    padding: .3rem .875rem;
+    font-size: .8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+  .bk-cta-feat i { color: var(--primary, #22c55e); }
+  .bk-cta-btn { display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap; }
+
+  /* ── CTA visual demo card ── */
+  .bk-cta-card-demo {
+    background: var(--bg-card, #1a2540);
+    border: 1px solid var(--border-bright, #2e3f60);
+    border-radius: 16px;
+    padding: 1.5rem;
+    width: 220px;
+    font-size: .82rem;
+    color: var(--text-secondary, #8a97b4);
+    flex-shrink: 0;
+  }
+  .bk-demo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    background: rgba(34,197,94,.12);
+    color: #22c55e;
+    border-radius: 99px;
+    padding: .2rem .625rem;
+    font-size: .72rem;
+    font-weight: 700;
+    margin-bottom: .875rem;
+  }
+  .bk-demo-name {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--text-primary, #e8edf7);
+    margin-bottom: .625rem;
+  }
+  .bk-demo-row {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin-bottom: .3rem;
+  }
+  .bk-demo-row i { color: var(--primary, #22c55e); }
+  .bk-demo-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .3rem;
+    margin-top: 1rem;
+    padding-top: .875rem;
+    border-top: 1px solid var(--border, #232f4a);
+    font-size: .72rem;
+    color: var(--text-muted, #5a6a88);
+  }
+
   /* ── Service card extra button ── */
   .btn-service-public {
     display: block;
@@ -512,6 +610,46 @@
         
       </section>
 
+
+      <!-- BOOK APPOINTMENT CTA -->
+      <section id="book-appointment" aria-labelledby="book-cta-heading">
+        <div class="container">
+          <div class="bk-cta-band">
+            <div class="bk-cta-left">
+              <div class="section-label mb-2" aria-hidden="true">
+                <i class="bi bi-calendar-plus-fill"></i> No Account Needed
+              </div>
+              <h2 id="book-cta-heading" class="bk-cta-heading">
+                Book a Consultation — <span class="grad-text">Right Now</span>
+              </h2>
+              <p class="bk-cta-sub">
+                Schedule an appointment without creating an account. Just your email — we'll send a QR code you can use to track your request.
+              </p>
+              <div class="bk-cta-features" aria-label="Booking feature highlights">
+                <div class="bk-cta-feat"><i class="bi bi-person-slash" aria-hidden="true"></i> No account required</div>
+                <div class="bk-cta-feat"><i class="bi bi-qr-code" aria-hidden="true"></i> QR code confirmation</div>
+                <div class="bk-cta-feat"><i class="bi bi-activity" aria-hidden="true"></i> Real-time status tracking</div>
+              </div>
+              <a href="/booking" class="btn-primary-custom bk-cta-btn" aria-label="Book an appointment — no account needed">
+                Book an Appointment <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </a>
+            </div>
+            <div class="bk-cta-visual" aria-hidden="true">
+              <div class="bk-cta-card-demo">
+                <div class="bk-demo-badge"><i class="bi bi-check-circle-fill"></i> Booking Confirmed</div>
+                <p class="bk-demo-name">Juan dela Cruz</p>
+                <div class="bk-demo-row"><i class="bi bi-calendar3"></i> Monday, March 10</div>
+                <div class="bk-demo-row"><i class="bi bi-clock"></i> 9:00 AM</div>
+                <div class="bk-demo-row"><i class="bi bi-file-earmark-text"></i> Title Transfer</div>
+                <div class="bk-demo-qr">
+                  <i class="bi bi-qr-code" style="font-size:3rem;color:#22c55e;"></i>
+                  <span>Scan to track</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- TESTIMONIALS -->
       <section id="testimonials" aria-labelledby="testimonials-heading">
@@ -1622,12 +1760,14 @@ const ROOT = document.documentElement;
         const searchedGmail = document.getElementById("searchGmailAccount").value;
         const formgotPasswordMessage = document.getElementById("forgot-password-message");
         const btn = document.getElementById('searchVerifiedEmailButton')
-        if (btn) {btn.disabled = true;}
 
         if (!checkEmailAddress(searchedGmail)) {
           showNotificationMessage("Invalid email format. Example: johndoe@gmasdfasdfasdfail.com", "error", "forgotPassword");
           return;
         }
+
+        if (btn) {btn.disabled = true;}
+
 
         const res  = await fetch(BASE_URL + "/api/user/forgotPassword/" + searchedGmail);
         const data = await res.json();
@@ -1911,9 +2051,13 @@ const ROOT = document.documentElement;
                 '<h4 itemprop="name">' + service.service_name + '</h4>' +
                 '<p itemprop="description">' + service.description + '</p>' +
                 '<button class="btn-service" data-bs-toggle="modal" data-bs-target="#loginModal" ' +
-                  'aria-label="Book appointment for ' + service.service_name + '">' +
-                  'Book Appointment <i class="bi bi-arrow-right" aria-hidden="true"></i>' +
+                  'aria-label="Log in to book appointment for ' + service.service_name + '">' +
+                  'Client Login <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>' +
                 '</button>' +
+                '<a href="/booking" class="btn-service-public" ' +
+                  'aria-label="Book ' + service.service_name + ' without an account">' +
+                  '<i class="bi bi-calendar-plus" aria-hidden="true"></i> Book as Guest' +
+                '</a>' +
               '</article>' +
             '</div>'
           ).join("");

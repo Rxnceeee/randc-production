@@ -13,128 +13,10 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="../js/global.js"></script>
-    <script src="../js/main.js"></script>
+    <script src="../js/adminDashboard.js"></script>
     <script src="../js/inactivityLogout.js"></script>
-  </head>
-
-  <style id="chat-menu-styles">
-    /* ── 3-Dot Menu ─────────────────────────────────────── */
-    .chat-message {
-      position: relative;
-    }
-    .msg-menu-trigger {
-      position: absolute;
-      top: 4px;
-      opacity: 1;
-      pointer-events: auto;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      width: 26px;
-      height: 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      transition: var(--transition);
-      z-index: 10;
-      line-height: 1;
-    }
-    .msg-menu-trigger:hover { background: var(--bg-hover); color: var(--text-primary); }
-    .own-message   .msg-menu-trigger { right: calc(100% + 6px); }
-    .other-message .msg-menu-trigger { left:  calc(100% + 6px); }
-
-    /* Dropdown */
-    .msg-menu-dropdown {
-      position: absolute;
-      top: 0;
-      background: var(--bg-card);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg);
-      min-width: 130px;
-      z-index: 200;
-      overflow: hidden;
-      animation: menuIn .12s ease;
-    }
-    @keyframes menuIn {
-      from { opacity: 0; transform: scale(.92) translateY(-4px); }
-      to   { opacity: 1; transform: none; }
-    }
-    .own-message   .msg-menu-dropdown { right: calc(100% + 6px); }
-    .other-message .msg-menu-dropdown { left:  calc(100% + 6px); }
-
-    .msg-menu-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 0.8rem;
-      font-size: 0.8rem;
-      color: var(--text-primary);
-      cursor: pointer;
-      border: none;
-      background: none;
-      width: 100%;
-      text-align: left;
-      transition: background .15s;
-    }
-    .msg-menu-item:hover { background: var(--bg-hover); }
-    .msg-menu-item.danger { color: var(--danger); }
-    .msg-menu-item.danger:hover { background: rgba(244, 63, 94, .1); }
-    .msg-menu-item i { font-size: 0.85rem; width: 14px; }
-
-    /* Edited label */
-    .msg-edited-label {
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      font-style: italic;
-      padding: 0 0.3rem;
-      margin-top: 1px;
-    }
-
-    /* Inline edit textarea */
-    .msg-edit-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      min-width: 200px;
-      max-width: 340px;
-    }
-    .msg-edit-textarea {
-      width: 100%;
-      background: var(--bg-elevated);
-      border: 1.5px solid var(--primary);
-      border-radius: var(--radius-md);
-      color: var(--text-primary);
-      padding: 0.45rem 0.7rem;
-      font-size: 0.83rem;
-      resize: none;
-      outline: none;
-      line-height: 1.5;
-    }
-    .msg-edit-actions {
-      display: flex;
-      gap: 0.35rem;
-      justify-content: flex-end;
-    }
-    .msg-edit-btn {
-      padding: 0.25rem 0.7rem;
-      border-radius: var(--radius-sm);
-      border: none;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .msg-edit-btn.save          { background: var(--primary); color: #fff; }
-    .msg-edit-btn.save:hover    { background: var(--primary-dark); }
-    .msg-edit-btn.cancel        { background: var(--bg-hover); color: var(--text-secondary); }
-    .msg-edit-btn.cancel:hover  { background: var(--border); }
-
+  <style>
     /* ── Schedule Forecast: Closed days ── */
     .sf-day-hdr.sf-day-closed {
       opacity: 0.45;
@@ -172,7 +54,222 @@
       letter-spacing: 0.06em;
       opacity: 0.6;
     }
+
+    /* ── Appointment Sub-tabs ── */
+    .appt-subtabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border, #232f4a);
+      margin-bottom: 0;
+    }
+    .appt-subtab {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .625rem 1.1rem;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      font-family: 'Outfit', sans-serif;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text-secondary, #8a97b4);
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .appt-subtab:hover { color: var(--text-primary, #e8edf7); }
+    .appt-subtab.active {
+      color: var(--primary, #22c55e);
+      border-bottom-color: var(--primary, #22c55e);
+    }
+    .appt-guest-badge {
+      background: var(--primary, #22c55e);
+      color: #000;
+      font-size: .65rem;
+      font-weight: 800;
+      border-radius: 99px;
+      padding: .05rem .4rem;
+      min-width: 18px;
+      text-align: center;
+      margin-left: .1rem;
+    }
+
+    /* ── Slot Capacity Panel ── */
+    .appt-capacity-wrap {
+      background: var(--bg-elevated, #141e33);
+      border: 1px solid var(--border, #232f4a);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .appt-capacity-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--border, #232f4a);
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text-secondary, #8a97b4);
+      gap: .75rem;
+      flex-wrap: wrap;
+    }
+    .appt-capacity-header i { color: var(--primary, #22c55e); margin-right: .3rem; }
+    .rnc-date-input {
+      background: var(--bg-card, #1a2540);
+      border: 1px solid var(--border-bright, #2e3f60);
+      border-radius: 8px;
+      padding: .35rem .625rem;
+      color: var(--text-primary, #e8edf7);
+      font-size: .82rem;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+    .rnc-date-input:focus { border-color: var(--primary, #22c55e); }
+    .cap-empty {
+      font-size: .85rem;
+      color: var(--text-muted, #5a6a88);
+      padding: 1rem 1.25rem;
+      margin: 0;
+    }
+    .cap-slot-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .625rem 1.25rem;
+      border-bottom: 1px solid var(--border, #232f4a);
+      gap: .75rem;
+      font-size: .875rem;
+    }
+    .cap-slot-row:last-child { border-bottom: none; }
+    .cap-slot-time {
+      font-weight: 600;
+      color: var(--text-primary, #e8edf7);
+      min-width: 72px;
+    }
+    .cap-slot-info {
+      flex: 1;
+      font-size: .78rem;
+      color: var(--text-secondary, #8a97b4);
+    }
+    .cap-slot-info .cap-full { color: #f43f5e; }
+    .cap-slot-edit {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .cap-input {
+      width: 56px;
+      background: var(--bg-card, #1a2540);
+      border: 1px solid var(--border-bright, #2e3f60);
+      border-radius: 7px;
+      padding: .3rem .4rem;
+      color: var(--text-primary, #e8edf7);
+      font-size: .85rem;
+      text-align: center;
+      outline: none;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+    }
+    .cap-input:focus { border-color: var(--primary, #22c55e); }
+    .cap-save-btn {
+      background: rgba(34,197,94,.1);
+      color: var(--primary, #22c55e);
+      border: 1px solid rgba(34,197,94,.25);
+      border-radius: 7px;
+      padding: .3rem .625rem;
+      font-size: .78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .cap-save-btn:hover { background: rgba(34,197,94,.2); }
+
+    /* ── Guest booking card ── */
+    .guest-card {
+      background: var(--bg-elevated, #141e33);
+      border: 1px solid var(--border, #232f4a);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      transition: border-color .2s;
+    }
+    .guest-card:hover { border-color: var(--border-bright, #2e3f60); }
+    .guest-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: .625rem;
+      gap: .75rem;
+    }
+    .guest-card-name {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+    }
+    .guest-card-email {
+      font-size: .78rem;
+      color: var(--text-secondary, #8a97b4);
+    }
+    .guest-status-pill {
+      display: inline-block;
+      padding: .15rem .625rem;
+      border-radius: 99px;
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      flex-shrink: 0;
+    }
+    .guest-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem .875rem;
+      font-size: .78rem;
+      color: var(--text-secondary, #8a97b4);
+      margin-bottom: .75rem;
+    }
+    .guest-card-meta i { color: var(--primary, #22c55e); margin-right: .2rem; }
+    .guest-card-services {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem;
+      margin-bottom: .75rem;
+    }
+    .guest-svc-tag {
+      background: var(--bg-card, #1a2540);
+      border: 1px solid var(--border-bright, #2e3f60);
+      border-radius: 99px;
+      padding: .15rem .55rem;
+      font-size: .72rem;
+      color: var(--text-secondary, #8a97b4);
+    }
+    .guest-card-actions { display: flex; justify-content: flex-end; }
+
+    .rnc-textarea {
+      background: var(--bg-elevated, #141e33) !important;
+      border: 1px solid var(--border-bright, #2e3f60) !important;
+      color: var(--text-primary, #e8edf7) !important;
+      border-radius: 8px !important;
+      font-family: inherit;
+      resize: vertical;
+    }
+    .rnc-textarea:focus { border-color: var(--primary, #22c55e) !important; box-shadow: none !important; }
+
+    .appt-detail-rows .appt-detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: .5rem 0;
+      border-bottom: 1px solid var(--border, #232f4a);
+      font-size: .875rem;
+    }
+    .appt-detail-rows .appt-detail-row:last-child { border-bottom: none; }
+    .appt-detail-rows .appt-detail-row span:first-child { color: var(--text-secondary, #8a97b4); }
+    .appt-detail-rows .appt-detail-row strong { font-weight: 600; }
   </style>
+  </head>
 
   <body>
 
@@ -866,13 +963,7 @@
           <div id="histTxList" class="hist-list"></div>
         </div>
 
-        <div style="display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: space-between; align-items: center;">
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn-ghost" id="histChatBtn" onclick="openHistChat()">
-              <i class="bi bi-chat-dots"></i> Open Chat
-            </button>
-            
-          </div>
+        <div style="display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: flex-end; align-items: center;">
           <button class="confirm-btn-cancel" onclick="closeClientHistory()">Close</button>
         </div>
 
@@ -957,10 +1048,6 @@
               <button class="sidebar-icon-btn sidebar-icon-btn-danger" onclick="showLogoutModal()"
                 title="Logout" aria-label="Logout">
                 <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-              </button>
-              <button class="sidebar-icon-btn" onclick="toggleChatPanel()"
-                title="Show Chat" aria-label="Show Chat">
-                <i class="bi bi-chat-dots" aria-hidden="true"></i>
               </button>
             </div>
           </div>
@@ -1313,30 +1400,140 @@
             <h3 class="panel-heading">
               <i class="bi bi-calendar-check" aria-hidden="true"></i> Manage Appointments
             </h3>
-            
+            <button class="btn-ghost-rnc" onclick="apptToggleCapacity()" id="appt-capacity-btn"
+              title="Edit time slot capacity" aria-expanded="false" aria-controls="appt-capacity-panel">
+              <i class="bi bi-sliders" aria-hidden="true"></i> Slot Capacity
+            </button>
           </div>
 
-          <input type="hidden" id="active-filter-appointment-button" value="today" />
-
-          <div class="search-strip">
-            <div class="search-wrap">
-              <i class="bi bi-search search-ico" aria-hidden="true"></i>
-              <input type="text" class="search-rnc" id="appointmentSearch"
-                placeholder="Search by client, date (YYYY-MM-DD), or status…"
-                oninput="searchAppointments()" />
+          <!-- Slot Capacity Panel (collapsible) -->
+          <div id="appt-capacity-panel" style="display:none;margin-bottom:1rem;">
+            <div class="appt-capacity-wrap">
+              <div class="appt-capacity-header">
+                <span><i class="bi bi-sliders"></i> Edit Slot Capacity by Date</span>
+                <div style="display:flex;align-items:center;gap:.5rem;">
+                  <input type="date" id="cap-date-input" class="rnc-date-input"
+                    onchange="loadCapacitySlots(this.value)"
+                    aria-label="Select date to view slot capacity" />
+                </div>
+              </div>
+              <div id="cap-slots-list">
+                <p class="cap-empty">Select a date above to view and edit slot capacity.</p>
+              </div>
             </div>
           </div>
 
-          <div class="filter-strip">
-            <button class="filter-chip active" onclick="filterAppointments('today')">Today</button>
-            <button class="filter-chip" onclick="filterAppointments('approved')">Approved</button>
-            <button class="filter-chip" onclick="filterAppointments('completed')">Completed</button>
-            <button class="filter-chip" onclick="filterAppointments('cancelled')">Cancelled</button>
-            <button class="filter-chip" onclick="filterAppointments('all')">All</button>
+          <!-- Sub-tabs: Scheduled | Guest Bookings -->
+          <div class="appt-subtabs" role="tablist" aria-label="Appointments sections">
+            <button class="appt-subtab active" id="appt-subtab-scheduled" role="tab"
+              aria-selected="true" aria-controls="appt-pane-scheduled"
+              onclick="switchApptSubTab('scheduled', this)">
+              <i class="bi bi-calendar-check" aria-hidden="true"></i> Scheduled Appointments
+            </button>
+            <button class="appt-subtab" id="appt-subtab-guest" role="tab"
+              aria-selected="false" aria-controls="appt-pane-guest"
+              onclick="switchApptSubTab('guest', this)">
+              <i class="bi bi-person-walking" aria-hidden="true"></i> Guest Bookings
+              <span class="appt-guest-badge" id="appt-guest-badge" style="display:none;"></span>
+            </button>
           </div>
 
-          <div id="appointmentsList" class="cards-grid"></div>
+          <!-- ── Scheduled Appointments pane ── -->
+          <div id="appt-pane-scheduled" role="tabpanel" aria-labelledby="appt-subtab-scheduled">
+            <input type="hidden" id="active-filter-appointment-button" value="today" />
 
+            <div class="search-strip">
+              <div class="search-wrap">
+                <i class="bi bi-search search-ico" aria-hidden="true"></i>
+                <input type="text" class="search-rnc" id="appointmentSearch"
+                  placeholder="Search by client, date (YYYY-MM-DD), or status…"
+                  oninput="searchAppointments()" />
+              </div>
+            </div>
+
+            <div class="filter-strip">
+              <button class="filter-chip active" onclick="filterAppointments('today')">Today</button>
+              <button class="filter-chip" onclick="filterAppointments('approved')">Approved</button>
+              <button class="filter-chip" onclick="filterAppointments('completed')">Completed</button>
+              <button class="filter-chip" onclick="filterAppointments('cancelled')">Cancelled</button>
+              <button class="filter-chip" onclick="filterAppointments('all')">All</button>
+            </div>
+
+            <div id="appointmentsList" class="cards-grid"></div>
+          </div>
+
+          <!-- ── Guest Bookings pane ── -->
+          <div id="appt-pane-guest" role="tabpanel" aria-labelledby="appt-subtab-guest" style="display:none;">
+            <div class="search-strip" style="margin-top:.5rem;">
+              <div class="search-wrap">
+                <i class="bi bi-search search-ico" aria-hidden="true"></i>
+                <input type="text" class="search-rnc" id="guestSearch"
+                  placeholder="Search by name or email…"
+                  oninput="searchGuestBookings()" />
+              </div>
+            </div>
+
+            <div class="filter-strip">
+              <button class="filter-chip active" onclick="filterGuestBookings('all', this)">All</button>
+              <button class="filter-chip" onclick="filterGuestBookings('pending', this)">Pending</button>
+              <button class="filter-chip" onclick="filterGuestBookings('approved', this)">Approved</button>
+              <button class="filter-chip" onclick="filterGuestBookings('completed', this)">Completed</button>
+              <button class="filter-chip" onclick="filterGuestBookings('cancelled', this)">Cancelled</button>
+              <button class="filter-chip" onclick="filterGuestBookings('lapsed', this)">Lapsed</button>
+            </div>
+
+            <div id="guestBookingsList" class="cards-grid" aria-live="polite"></div>
+          </div>
+
+        </div>
+
+        <!-- ── Guest Booking Detail Modal ── -->
+        <div class="modal fade" id="guestDetailModal" tabindex="-1" aria-modal="true" aria-labelledby="guestDetailTitle">
+          <div class="modal-dialog modal-dialog-centered" style="max-width:500px">
+            <div class="modal-content rnc-modal">
+
+              <div class="modal-header">
+                <div class="modal-header-icon"><i class="bi bi-person-walking"></i></div>
+                <div>
+                  <div class="modal-title" id="guestDetailTitle">Guest Booking</div>
+                  <div class="modal-subtitle" id="guestDetailRef"></div>
+                </div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+
+              <div class="modal-body">
+                <input type="hidden" id="guestDetailId" />
+
+                <div class="appt-detail-rows" id="guestDetailInfo"></div>
+
+                <div style="margin-top:1.25rem;">
+                  <label class="form-label" for="guestStatusSelect">Status</label>
+                  <select class="form-select rnc-select" id="guestStatusSelect">
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="lapsed">Lapsed</option>
+                  </select>
+                </div>
+
+                <div style="margin-top:.875rem;">
+                  <label class="form-label" for="guestRemarksInput">Remarks / Note to Guest</label>
+                  <textarea class="form-control rnc-textarea" id="guestRemarksInput"
+                    placeholder="Optional — this note will be visible to the guest on their tracking page."
+                    rows="3" maxlength="250"></textarea>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn-ghost-rnc" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-primary-rnc" onclick="saveGuestStatus()">
+                  <i class="bi bi-check2"></i> Save Changes
+                </button>
+              </div>
+
+            </div>
+          </div>
         </div>
 
 
@@ -1587,69 +1784,6 @@
 
         </div>
 
-
-        <!-- MESSAGES PANEL -->
-        <div class="panel panel-chat" id="panel-chats">
-          <div class="admin-chat-layout">
-
-            <!-- Conversations Sidebar -->
-            <div class="conv-list" id="conversationsSidebar">
-              <div class="conv-list-header">
-                <h6><i class="bi bi-chat-dots" aria-hidden="true"></i> Conversations</h6>
-              </div>
-              <div class="conv-list-body" id="conversationsList"></div>
-            </div>
-
-            <!-- Chat Window -->
-            <div class="chat-shell" id="chatMessages">
-              <div class="chat-head">
-                <div class="chat-head-left">
-                  <div class="chat-avatar-lg">
-                    <i class="bi bi-person-circle" aria-hidden="true"></i>
-                  </div>
-                  <div>
-                    <h5 class="chat-head-title">Client Support Chat</h5>
-                    <div class="chat-head-status">
-                      <span class="status-dot status-indicator online" id="connectionStatus"></span>
-                      <small id="statusText">Online</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="chat-messages" id="chatMessagesContainer-inner" aria-live="polite">
-                <div class="chat-empty-hint">
-                  <i class="bi bi-chat-square-dots" aria-hidden="true"></i>
-                  <p>Select a conversation to begin</p>
-                </div>
-              </div>
-
-              <div class="typing-indicator" id="typingIndicator" style="display: none;" aria-live="polite">
-                <div class="typing-bubble"><span></span><span></span><span></span></div>
-                <small>Client is typing…</small>
-              </div>
-
-              <div class="chat-input-bar">
-                <button class="chat-attach-btn" onclick="document.getElementById('fileInput').click()"
-                  aria-label="Attach file">
-                  <i class="bi bi-paperclip" aria-hidden="true"></i>
-                </button>
-                <input type="file" id="fileInput" style="display: none;"
-                  accept="image/*,.pdf,.doc,.docx,.txt"
-                  onchange="handleFileSelect(event)" />
-                <div class="chat-textarea-wrap">
-                  <textarea id="messageInput" class="chat-textarea" placeholder="Type a message…"
-                    rows="1" onkeydown="handleKeyPress(event)" oninput="handleTyping()"
-                    aria-label="Message"></textarea>
-                </div>
-                <button class="chat-send-btn" onclick="sendMessage()" aria-label="Send">
-                  <i class="bi bi-send-fill" aria-hidden="true"></i>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
 
 
       </main>
@@ -2193,7 +2327,6 @@ if (typeof showToast === 'undefined') {
          CLIENT HISTORY MODAL
       ═══════════════════════════════════════════════════════════════ */
 
-      let _histClientConvId = null;
       let _histClientId     = null;
       let _histClientName   = "";
 
@@ -2215,10 +2348,6 @@ if (typeof showToast === 'undefined') {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
           const data = await res.json();
-          _histClientConvId = data.conversationId;
-
-          const histChatBtn = document.getElementById("histChatBtn");
-          if (histChatBtn) histChatBtn.style.display = data.conversationId ? "" : "none";
 
           /* Appointments */
           const appts = data.appointments || [];
@@ -2282,7 +2411,6 @@ if (typeof showToast === 'undefined') {
 
       function closeClientHistory() {
         document.getElementById("clientHistoryOverlay").style.display = "none";
-        _histClientConvId = null;
         _histClientId     = null;
         _histClientName   = "";
       }
@@ -2295,17 +2423,6 @@ if (typeof showToast === 'undefined') {
         document.getElementById("histTabTransactions").style.display = tab === "transactions"  ? "" : "none";
       }
 
-      function openHistChat() {
-        if (!_histClientConvId) {
-          showToast("No active conversation found for this client.", "warning");
-          return;
-        }
-        closeClientHistory();
-        showAdminSection("chats");
-        setTimeout(() => {
-          if (typeof selectConversation === "function") selectConversation(_histClientConvId);
-        }, 80);
-      }
 
 
         //  SCHEDULE FORECAST — sfOpenDrawer
@@ -2422,45 +2539,6 @@ if (typeof showToast === 'undefined') {
       }
 
 
-      /*  Unread Messages Badge  */
-
-      async function fetchAdminUnreadCount() {
-        try {
-          const res   = await fetch(`${BASE_URL}/api/chat/getActiveConversations`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          });
-          const convs = await res.json();
-          const total = convs.reduce((s, c) => s + (c.unread_count || 0), 0);
-          _updateAdminMsgBadge(total);
-        } catch (e) { /* silent */ }
-      }
-
-      function _updateAdminMsgBadge(count) {
-        const badge = document.getElementById("unreadMsgBadge");
-        if (!badge) return;
-        if (count > 0) {
-          badge.textContent    = count > 99 ? "99+" : count;
-          badge.style.display  = "inline-flex";
-        } else {
-          badge.style.display  = "none";
-        }
-        if (typeof updateChatFabBadge === "function") updateChatFabBadge(count);
-      }
-
-      function showChatPanel() {
-        const panel = document.getElementById("panel-chats");
-        panel.style.display = "flex";
-      }
-
-      function hideChatPanel() {
-        const panel = document.getElementById("panel-chats");
-        panel.style.display = "none";
-      }
-
-      function toggleChatPanel() {
-        const panel = document.getElementById("panel-chats");
-        panel.style.display = panel.style.display === "flex" ? "none" : "flex";
-      }
 
 
       /* ── Theme ─────────────────────────────────────────────────── */
@@ -2661,7 +2739,6 @@ if (typeof showToast === 'undefined') {
         transactions: "Transactions",
         services:     "Services",
         users:        "Client Accounts",
-        chats:        "Messages",
         schedule:     "Schedule Forecast",
       };
 
@@ -2725,18 +2802,6 @@ if (typeof showToast === 'undefined') {
           await fetchScheduleForecast();
         }
 
-        if (name === "chats") {
-          if (typeof initializeMessages === "function") {
-            if (!socket || !socket.connected) {
-              await initializeMessages();
-            } else {
-              if (typeof loadActiveConversations === "function") {
-                await loadActiveConversations();
-              }
-            }
-          }
-          _updateAdminMsgBadge(0);
-        }
       }
 
       function showDashboardSection(area) {
@@ -2855,11 +2920,6 @@ if (typeof showToast === 'undefined') {
 
           case "services":
             showAdminSection("services");
-            break;
-
-          case "chats":
-          case "chat":
-            showAdminSection("chats");
             break;
 
           case "walkin":
@@ -3573,10 +3633,6 @@ if (typeof showToast === 'undefined') {
                 <button class="btn-outline-sm btn-indigo"
                   onclick="openClientHistory(${u.id}, '${(u.full_name || "").replace(/'/g, "\\'")}', '${u.email}')"
                   title="View History"><i class="bi bi-eye"></i></button>
-                <button class="btn-outline-sm btn-teal"
-                  onclick="goToClientChat(${u.id}, '${(u.full_name || "").replace(/'/g, "\\'")}', '${u.email}')"
-                  title="Open Chat"><i class="bi bi-chat-dots"></i></button>
-                
               </td>
             </tr>`;
         }).join("");
@@ -3600,10 +3656,6 @@ if (typeof showToast === 'undefined') {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
           const data = await res.json();
-          _histClientConvId = data.conversationId;
-
-          const histChatBtn = document.getElementById("histChatBtn");
-          if (histChatBtn) histChatBtn.style.display = data.conversationId ? "" : "none";
 
           /* Appointments */
           const appts = data.appointments || [];
@@ -3675,67 +3727,6 @@ if (typeof showToast === 'undefined') {
         });
       }
 
-      async function goToClientChat(userId, clientName, clientEmail) {
-        try {
-          const res = await fetch(`${BASE_URL}/api/admin/clients/${userId}/history`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-          });
-          if (!res.ok) throw new Error('Failed to fetch client history.');
-
-          const data           = await res.json();
-          let   conversationId = data.conversationId;
-
-          if (!conversationId) {
-            const createRes = await fetch(
-              `${BASE_URL}/api/chat/${userId}/createConversation`,
-              {
-                method:  'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization:  `Bearer ${localStorage.getItem('token')}`,
-                },
-              }
-            );
-
-            if (!createRes.ok) throw new Error('Failed to create conversation.');
-            const createData = await createRes.json();
-            conversationId   = createData.conversation_id;
-          }
-
-          showChatPanel()
-
-          await new Promise(resolve => requestAnimationFrame(resolve));
-
-          if (typeof loadActiveConversations === 'function') {
-            await loadActiveConversations();
-          }
-          if (typeof selectConversation === 'function') {
-            await selectConversation(conversationId);
-          }
-
-          document
-            .querySelectorAll('.conversation-item')
-            .forEach(el => el.classList.remove('active'));
-
-          const match = document.querySelector(
-            `.conversation-item[onclick*="${conversationId}"]`
-          );
-          if (match) {
-            match.classList.add('active');
-            match.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
-
-          const input = document.getElementById('messageInput');
-          if (input) input.focus();
-
-        } catch (err) {
-          console.error('goToClientChat error:', err);
-          showNotificationMessage(
-            err.message || 'Could not open conversation. Please try again.',
-            'error'
-          );
-        }
-      }
 
       async function changePassword() {
         const cp = document.getElementById("currentPassword").value;
@@ -5068,7 +5059,280 @@ function _esc(str) {
             year: "numeric",
           });
       });
-    
+
+
+    /* ═══════════════════════════════════════════════════════════
+       GUEST BOOKINGS
+    ═══════════════════════════════════════════════════════════ */
+
+    let _guestFilter   = 'all';
+    let _guestSearch   = '';
+    let _guestDetailModal = null;
+
+    function getGuestDetailModal() {
+      if (!_guestDetailModal) {
+        _guestDetailModal = new bootstrap.Modal(document.getElementById('guestDetailModal'));
+      }
+      return _guestDetailModal;
+    }
+
+    function switchApptSubTab(tab, btn) {
+      document.querySelectorAll('.appt-subtab').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+
+      const showScheduled = tab === 'scheduled';
+      document.getElementById('appt-pane-scheduled').style.display = showScheduled ? '' : 'none';
+      document.getElementById('appt-pane-guest').style.display     = showScheduled ? 'none' : '';
+
+      if (tab === 'guest') fetchGuestBookings();
+    }
+
+    async function fetchGuestBookings() {
+      const list  = document.getElementById('guestBookingsList');
+      const token = localStorage.getItem('token');
+      list.innerHTML = '<div style="padding:1.5rem;color:var(--text-muted);font-size:.875rem;"><i class="bi bi-arrow-repeat" style="animation:spin .8s linear infinite;display:inline-block;margin-right:.4rem;"></i> Loading…</div>';
+
+      try {
+        const qs  = new URLSearchParams({ status: _guestFilter, limit: 50 });
+        const res = await fetch(`${BASE_URL}/api/admin/guest-bookings?${qs}`, {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        const data = await res.json();
+
+        if (!res.ok) { renderGuestError(data.message || 'Failed to load.'); return; }
+
+        const bookings = data.bookings || [];
+
+        const badge = document.getElementById('appt-guest-badge');
+        if (badge) {
+          const pending = bookings.filter(b => b.status === 'pending').length;
+          badge.textContent = pending;
+          badge.style.display = pending ? '' : 'none';
+        }
+
+        const q = _guestSearch.toLowerCase();
+        const filtered = q
+          ? bookings.filter(b =>
+              (b.first_name + ' ' + b.last_name).toLowerCase().includes(q) ||
+              b.email.toLowerCase().includes(q))
+          : bookings;
+
+        if (!filtered.length) {
+          list.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);"><i class="bi bi-calendar-x" style="font-size:2rem;opacity:.4;"></i><p style="margin-top:.75rem;font-size:.875rem;">No guest bookings found.</p></div>';
+          return;
+        }
+
+        list.innerHTML = filtered.map(b => renderGuestCard(b)).join('');
+      } catch {
+        renderGuestError('Network error. Please try again.');
+      }
+    }
+
+    const _guestStatusCfg = {
+      pending:   { label: 'Pending',   color: '#f59e0b', bg: 'rgba(245,158,11,.15)' },
+      approved:  { label: 'Approved',  color: '#3b82f6', bg: 'rgba(59,130,246,.15)' },
+      completed: { label: 'Completed', color: '#22c55e', bg: 'rgba(34,197,94,.15)'  },
+      cancelled: { label: 'Cancelled', color: '#ef4444', bg: 'rgba(239,68,68,.15)'  },
+      lapsed:    { label: 'Lapsed',    color: '#6b7280', bg: 'rgba(107,114,128,.15)'},
+    };
+
+    function renderGuestCard(b) {
+      const cfg  = _guestStatusCfg[b.status] || _guestStatusCfg.pending;
+      const date = b.appointment_date ? new Date(b.appointment_date + 'T00:00:00').toLocaleDateString('en-PH', { weekday: 'short', month: 'short', day: 'numeric' }) : '—';
+      const time = b.appointment_time ? _gAdminFmt12h(b.appointment_time) : '—';
+      const svcs = (b.services || []).map(s =>
+        `<span class="guest-svc-tag">${_gEsc(s.service_name || s.serviceName || '')}</span>`
+      ).join('');
+
+      return `<div class="guest-card">
+        <div class="guest-card-header">
+          <div>
+            <div class="guest-card-name">${_gEsc(b.first_name + ' ' + b.last_name)}</div>
+            <div class="guest-card-email">${_gEsc(b.email)}</div>
+          </div>
+          <span class="guest-status-pill" style="color:${cfg.color};background:${cfg.bg};">${cfg.label}</span>
+        </div>
+        <div class="guest-card-meta">
+          <span><i class="bi bi-calendar3"></i>${date}</span>
+          <span><i class="bi bi-clock"></i>${time}</span>
+          ${b.phone ? `<span><i class="bi bi-telephone"></i>${_gEsc(b.phone)}</span>` : ''}
+        </div>
+        ${svcs ? `<div class="guest-card-services">${svcs}</div>` : ''}
+        <div class="guest-card-actions">
+          <button class="btn-primary-rnc" onclick='openGuestDetail(${JSON.stringify(b)})' style="font-size:.8rem;padding:.4rem .875rem;">
+            <i class="bi bi-pencil-square"></i> View / Update
+          </button>
+        </div>
+      </div>`;
+    }
+
+    function openGuestDetail(b) {
+      document.getElementById('guestDetailId').value      = b.id;
+      document.getElementById('guestDetailRef').textContent = 'Ref #' + String(b.tracking_token || b.id).slice(-8).toUpperCase();
+      document.getElementById('guestStatusSelect').value  = b.status || 'pending';
+      document.getElementById('guestRemarksInput').value  = b.remarks || '';
+
+      const cfg  = _guestStatusCfg[b.status] || _guestStatusCfg.pending;
+      const date = b.appointment_date ? new Date(b.appointment_date + 'T00:00:00').toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : '—';
+      const time = b.appointment_time ? _gAdminFmt12h(b.appointment_time) : '—';
+      const svcs = (b.services || []).map(s => s.service_name || s.serviceName || '').filter(Boolean).join(', ') || '—';
+
+      document.getElementById('guestDetailInfo').innerHTML = `
+        <div class="appt-detail-row"><span>Name</span><strong>${_gEsc(b.first_name + ' ' + b.last_name)}</strong></div>
+        <div class="appt-detail-row"><span>Email</span><strong>${_gEsc(b.email)}</strong></div>
+        ${b.phone ? `<div class="appt-detail-row"><span>Phone</span><strong>${_gEsc(b.phone)}</strong></div>` : ''}
+        <div class="appt-detail-row"><span>Date</span><strong>${date}</strong></div>
+        <div class="appt-detail-row"><span>Time</span><strong>${time}</strong></div>
+        <div class="appt-detail-row"><span>Services</span><strong>${_gEsc(svcs)}</strong></div>
+        ${b.notes ? `<div class="appt-detail-row"><span>Notes</span><strong>${_gEsc(b.notes)}</strong></div>` : ''}
+        <div class="appt-detail-row"><span>Submitted</span><strong>${b.created_at ? new Date(b.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</strong></div>
+      `;
+
+      getGuestDetailModal().show();
+    }
+
+    async function saveGuestStatus() {
+      const id      = document.getElementById('guestDetailId').value;
+      const status  = document.getElementById('guestStatusSelect').value;
+      const remarks = document.getElementById('guestRemarksInput').value.trim();
+      const token   = localStorage.getItem('token');
+
+      try {
+        const res = await fetch(`${BASE_URL}/api/admin/guest-bookings/${id}/status`, {
+          method:  'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+          body:    JSON.stringify({ status, remarks: remarks || undefined })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          getGuestDetailModal().hide();
+          showNotificationMessage('Booking status updated.', 'success');
+          fetchGuestBookings();
+        } else {
+          showNotificationMessage(data.message || 'Failed to update.', 'error');
+        }
+      } catch {
+        showNotificationMessage('Network error. Please try again.', 'error');
+      }
+    }
+
+    function filterGuestBookings(status, btn) {
+      _guestFilter = status;
+      document.querySelectorAll('#appt-pane-guest .filter-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      fetchGuestBookings();
+    }
+
+    function searchGuestBookings() {
+      _guestSearch = document.getElementById('guestSearch')?.value.trim() || '';
+      fetchGuestBookings();
+    }
+
+    function renderGuestError(msg) {
+      document.getElementById('guestBookingsList').innerHTML =
+        `<div style="padding:1.5rem;color:var(--danger,#f43f5e);font-size:.875rem;"><i class="bi bi-exclamation-circle"></i> ${_gEsc(msg)}</div>`;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SLOT CAPACITY
+    ═══════════════════════════════════════════════════════════ */
+
+    function apptToggleCapacity() {
+      const panel = document.getElementById('appt-capacity-panel');
+      const btn   = document.getElementById('appt-capacity-btn');
+      const isOpen = panel.style.display !== 'none';
+      panel.style.display = isOpen ? 'none' : '';
+      btn.setAttribute('aria-expanded', String(!isOpen));
+      if (!isOpen) {
+        const dateInput = document.getElementById('cap-date-input');
+        if (dateInput) dateInput.min = new Date().toISOString().split('T')[0];
+      }
+    }
+
+    async function loadCapacitySlots(date) {
+      const list  = document.getElementById('cap-slots-list');
+      const token = localStorage.getItem('token');
+      list.innerHTML = '<p class="cap-empty"><i class="bi bi-arrow-repeat" style="animation:spin .8s linear infinite;display:inline-block;margin-right:.3rem;"></i> Loading slots…</p>';
+
+      try {
+        const res  = await fetch(`${BASE_URL}/api/admin/slots?date=${date}`, {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        const data = await res.json();
+
+        if (!res.ok) { list.innerHTML = `<p class="cap-empty" style="color:var(--danger)">${_gEsc(data.message || 'Error')}</p>`; return; }
+
+        const slots = data.slots || [];
+        if (!slots.length) { list.innerHTML = '<p class="cap-empty">No slots exist for this date yet. Slots are created when appointments are booked.</p>'; return; }
+
+        list.innerHTML = slots.map(s => {
+          const time    = _gAdminFmt12h(s.time);
+          const booked  = s.currentBookings || 0;
+          const cap     = s.maxCapacity    || 3;
+          const isFull  = booked >= cap;
+          return `<div class="cap-slot-row">
+            <span class="cap-slot-time">${time}</span>
+            <span class="cap-slot-info">${booked} booked${isFull ? ' <span class="cap-full">· FULL</span>' : ` of ${cap}`}</span>
+            <div class="cap-slot-edit">
+              <input type="number" class="cap-input" id="cap-input-${s.slotId}"
+                value="${cap}" min="1" max="20" aria-label="Capacity for ${time}" />
+              <button class="cap-save-btn" onclick="saveSlotCapacity(${s.slotId}, '${s.time}')">Save</button>
+            </div>
+          </div>`;
+        }).join('');
+      } catch {
+        list.innerHTML = '<p class="cap-empty" style="color:var(--danger)">Network error. Please try again.</p>';
+      }
+    }
+
+    async function saveSlotCapacity(slotId, time) {
+      const inputEl = document.getElementById('cap-input-' + slotId);
+      const val     = parseInt(inputEl?.value, 10);
+      const token   = localStorage.getItem('token');
+
+      if (!val || val < 1 || val > 20) {
+        showNotificationMessage('Capacity must be between 1 and 20.', 'warning');
+        return;
+      }
+
+      try {
+        const res  = await fetch(`${BASE_URL}/api/admin/slots/${slotId}`, {
+          method:  'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+          body:    JSON.stringify({ maxCapacity: val })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          showNotificationMessage(`Slot ${_gAdminFmt12h(time)} capacity updated to ${val}.`, 'success');
+          const dateInput = document.getElementById('cap-date-input');
+          if (dateInput?.value) loadCapacitySlots(dateInput.value);
+        } else {
+          showNotificationMessage(data.message || 'Failed to save.', 'error');
+        }
+      } catch {
+        showNotificationMessage('Network error. Please try again.', 'error');
+      }
+    }
+
+    /* ─── Shared helpers ─────────────────────────────────────────── */
+    function _gAdminFmt12h(time) {
+      if (!time) return '—';
+      const parts = String(time).split(':');
+      const h = parseInt(parts[0], 10);
+      const m = parseInt(parts[1] || '0', 10);
+      if (isNaN(h)) return time;
+      return `${h % 12 || 12}:${m.toString().padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'}`;
+    }
+
+    function _gEsc(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
 
     </script>
   </body>
